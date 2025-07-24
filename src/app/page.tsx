@@ -1,8 +1,8 @@
 'use client'
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Clock, DollarSign, Mail, Shield, TrendingUp } from "lucide-react";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle, Clock, DollarSign, Mail, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -123,7 +123,7 @@ export default function HomePage() {
               </div>
               <CardTitle>3. Get Paid</CardTitle>
               <CardDescription>
-                Automatic thank you & reminder stoppage when payment received
+                Automatic thank you &amp; reminder stoppage when payment received
               </CardDescription>
             </CardHeader>
           </Card>
@@ -137,7 +137,7 @@ export default function HomePage() {
             Built for Freelancers, By Freelancers
           </h2>
           <p className="text-xl text-muted-foreground">
-            Join thousands of freelancers who've eliminated payment anxiety
+            Join thousands of freelancers who&apos;ve eliminated payment anxiety
           </p>
         </div>
         
@@ -164,7 +164,7 @@ export default function HomePage() {
             Ready to Never Chase Payments Again?
           </h2>
           <p className="text-xl mb-8 opacity-90">
-            Join thousands of freelancers who've eliminated payment stress
+            Join thousands of freelancers who&apos;ve eliminated payment stress
           </p>
           <Link href="/auth">
             <Button variant="secondary" size="lg">

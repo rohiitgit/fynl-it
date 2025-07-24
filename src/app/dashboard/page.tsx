@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,16 +20,38 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/lib/hooks/use-toast";
 import { Tables } from "@/types/supabase";
+import type { User } from "@supabase/supabase-js";
 
 // Use the proper Supabase type
 type Invoice = Tables<'invoices'>;
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { toast } = useToast();
+
+  const fetchInvoices = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching invoices:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch invoices",
+        });
+      } else {
+        setInvoices(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching invoices:', error);
+    }
+  }, [toast]);
 
   useEffect(() => {
     const getSession = async () => {
@@ -56,28 +78,7 @@ export default function DashboardPage() {
     );
 
     return () => subscription.unsubscribe();
-  }, [router]);
-
-  const fetchInvoices = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching invoices:', error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch invoices",
-        });
-      } else {
-        setInvoices(data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching invoices:', error);
-    }
-  };
+  }, [router, fetchInvoices]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();

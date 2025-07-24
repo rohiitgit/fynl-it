@@ -57,7 +57,8 @@ export default function AuthPage() {
           description: "Please check your email for the confirmation link",
         });
       }
-    } catch (error) {
+    } catch (err) {
+      console.error('Sign up error:', err);
       setMessage({ type: "error", text: "An unexpected error occurred" });
     } finally {
       setLoading(false);
@@ -88,7 +89,8 @@ export default function AuthPage() {
         });
         router.push("/dashboard");
       }
-    } catch (error) {
+    } catch (err) {
+      console.error('Sign in error:', err);
       setMessage({ type: "error", text: "An unexpected error occurred" });
     } finally {
       setLoading(false);
