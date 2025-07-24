@@ -65,7 +65,7 @@ export default function HomePage() {
           </div>
           <div className="relative">
             <Image
-              src="/hero-image.jpg"
+              src="/hero-image.png"
               alt="Freelancer managing invoices"
               width={600}
               height={400}
