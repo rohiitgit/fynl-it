@@ -21,6 +21,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/lib/hooks/use-toast";
 import { Tables } from "@/types/supabase";
 import type { User } from "@supabase/supabase-js";
+import NewInvoiceModal from "@/components/NewInvoiceModal";
 
 // Use the proper Supabase type
 type Invoice = Tables<'invoices'>;
@@ -239,10 +240,7 @@ export default function DashboardPage() {
               <TabsTrigger value="follow-ups">Follow-ups</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              New Invoice
-            </Button>
+            <NewInvoiceModal onSuccess={fetchInvoices} />
           </div>
 
           <TabsContent value="invoices" className="space-y-4">
