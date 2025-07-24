@@ -107,7 +107,7 @@ export default function AuthPage() {
             <span className="text-2xl font-bold text-foreground">Nudgr</span>
           </div>
           <p className="text-muted-foreground">
-            Join thousands of freelancers who never chase payments again
+            Join thousands of freelancers who will never chase payments again.
           </p>
         </div>
 

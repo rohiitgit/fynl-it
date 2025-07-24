@@ -32,11 +32,11 @@ export default function HomePage() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h1 className="text-5xl font-bold text-foreground leading-tight">
-              Get Paid Without the
-              <span className="text-primary"> Awkward Chase</span>
+              Get Paid Without Being
+              <span className="text-primary"> That Freelancer</span>
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Automated follow-up messages that get progressively more assertive (but always professional) until your invoice is paid. Focus on your work, not chasing payments.
+              We handle the awkward nudges so you can focus on your work.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/auth">
@@ -50,15 +50,15 @@ export default function HomePage() {
             </div>
             <div className="flex items-center space-x-6 text-sm text-muted-foreground">
               <div className="flex items-center space-x-1">
-                <CheckCircle className="h-4 w-4 text-success" />
+                <CheckCircle className="h-4 w-4 text-success text-green-600 " />
                 <span>No setup fees</span>
               </div>
               <div className="flex items-center space-x-1">
-                <CheckCircle className="h-4 w-4 text-success" />
+                <CheckCircle className="h-4 w-4 text-success text-green-600" />
                 <span>Free for 30 days</span>
               </div>
               <div className="flex items-center space-x-1">
-                <CheckCircle className="h-4 w-4 text-success" />
+                <CheckCircle className="h-4 w-4 text-success text-green-600" />
                 <span>Cancel anytime</span>
               </div>
             </div>

@@ -5,8 +5,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'ChaselessCash - Get Paid Without the Awkward Chase',
-  description: 'Automated follow-up messages that get progressively more assertive until your invoice is paid. Focus on your work, not chasing payments.',
+  title: 'Nudgr - Get Paid Without the Awkward Chase',
+  description: 'We handle the awkward nudges so you can focus on your work.',
 }
 
 export default function RootLayout({
