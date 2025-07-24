@@ -2,7 +2,25 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['localhost'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'localhost',
+        pathname: '/**',
+      },
+      // Add other domains you might need for external images
+      // {
+      //   protocol: 'https',
+      //   hostname: 'example.com',
+      //   pathname: '/**',
+      // },
+    ],
     unoptimized: false,
   },
 }

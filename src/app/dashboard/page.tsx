@@ -19,23 +19,10 @@ import {
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/lib/hooks/use-toast";
+import { Tables } from "@/types/supabase";
 
-interface Invoice {
-  id: string;
-  client_name: string;
-  client_email: string;
-  invoice_number: string;
-  amount: number;
-  currency: string;
-  due_date: string;
-  status: string;
-  created_at: string;
-  description?: string;
-  payment_link?: string;
-  paid_at?: string;
-  user_id: string;
-  updated_at: string;
-}
+// Use the proper Supabase type
+type Invoice = Tables<'invoices'>;
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
@@ -170,7 +157,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <DollarSign className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold text-foreground">ChaselessCash</span>
+              <span className="text-2xl font-bold text-foreground">Nudgr</span>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-muted-foreground">
