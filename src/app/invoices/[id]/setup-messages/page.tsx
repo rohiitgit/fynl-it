@@ -1,12 +1,18 @@
 'use client'
 
+import { use } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Mail } from "lucide-react";
 
-export default function SetupMessagesPage({ params }: { params: { id: string } }) {
+export default function SetupMessagesPage({
+    params
+}: {
+    params: Promise<{ id: string }>
+}) {
     const router = useRouter();
+    const { id } = use(params);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-background to-secondary">
@@ -31,7 +37,7 @@ export default function SetupMessagesPage({ params }: { params: { id: string } }
                         <Mail className="h-12 w-12 text-primary mx-auto mb-4" />
                         <CardTitle>Message Setup Coming Soon!</CardTitle>
                         <CardDescription>
-                            Invoice {params.id} created successfully. The message generation feature will be implemented next.
+                            Invoice {id} created successfully. The message generation feature will be implemented next.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="text-center">

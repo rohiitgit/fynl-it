@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 
-// Initialize Gemini AI
+// Initialize the Gemini API with the API key
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
 export async function POST(request: NextRequest) {
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       For the due date, convert to YYYY-MM-DD format.
     `;
 
-        // Generate content with image
+        // Generate content with image using the correct API format
         const response = await ai.models.generateContent({
             model: "gemini-2.0-flash-exp",
             contents: [
@@ -64,7 +64,15 @@ export async function POST(request: NextRequest) {
             ]
         });
 
+        // Get the text from the response
         const text = response.text;
+
+        if (!text) {
+            return NextResponse.json(
+                { error: 'No response from AI model' },
+                { status: 500 }
+            );
+        }
 
         // Extract JSON from the response
         let invoiceData;
@@ -78,6 +86,7 @@ export async function POST(request: NextRequest) {
             }
         } catch (parseError) {
             console.error('Failed to parse Gemini response:', text);
+            console.error('Parse error:', parseError);
             return NextResponse.json(
                 { error: 'Failed to parse invoice data' },
                 { status: 500 }

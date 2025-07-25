@@ -95,6 +95,7 @@ export default function NewInvoiceModal({ onSuccess }: NewInvoiceModalProps) {
             return;
         }
 
+        // Set loading state immediately when file is selected
         setUploadLoading(true);
 
         try {
@@ -102,45 +103,58 @@ export default function NewInvoiceModal({ onSuccess }: NewInvoiceModalProps) {
             reader.onloadend = async () => {
                 const base64 = reader.result as string;
 
-                const response = await fetch('/api/process-invoice', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        file: base64,
-                        mimeType: file.type
-                    })
-                });
+                try {
+                    const response = await fetch('/api/process-invoice', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            file: base64,
+                            mimeType: file.type
+                        })
+                    });
 
-                if (!response.ok) throw new Error('Failed to process invoice');
+                    if (!response.ok) throw new Error('Failed to process invoice');
 
-                const data = await response.json();
+                    const data = await response.json();
 
-                setFormData({
-                    clientName: data.clientName || "",
-                    clientEmail: data.clientEmail || "",
-                    invoiceNumber: data.invoiceNumber || "",
-                    amount: data.amount || "",
-                    currency: data.currency || "USD",
-                    dueDate: data.dueDate || "",
-                    paymentLink: data.paymentLink || "",
-                    description: data.description || ""
-                });
+                    setFormData({
+                        clientName: data.clientName || "",
+                        clientEmail: data.clientEmail || "",
+                        invoiceNumber: data.invoiceNumber || "",
+                        amount: data.amount || "",
+                        currency: data.currency || "USD",
+                        dueDate: data.dueDate || "",
+                        paymentLink: data.paymentLink || "",
+                        description: data.description || ""
+                    });
 
-                toast({
-                    title: "Invoice processed!",
-                    description: "Please review and confirm the extracted details",
-                });
+                    toast({
+                        title: "Invoice processed!",
+                        description: "Please review and confirm the extracted details",
+                    });
+
+                    // Small delay to ensure smooth transition
+                    setTimeout(() => {
+                        setUploadLoading(false);
+                    }, 500);
+                } catch (error) {
+                    console.error('Error processing invoice:', error);
+                    toast({
+                        title: "Processing failed",
+                        description: "Could not extract invoice details. Please fill manually.",
+                    });
+                    setUploadLoading(false);
+                }
             };
 
             reader.readAsDataURL(file);
         } catch (error) {
-            console.error('Error processing invoice:', error);
-            toast({
-                title: "Processing failed",
-                description: "Could not extract invoice details. Please fill manually.",
-            });
-        } finally {
+            console.error('Error reading file:', error);
             setUploadLoading(false);
+            toast({
+                title: "Error reading file",
+                description: "Could not read the file. Please try again.",
+            });
         }
     };
 
@@ -214,33 +228,48 @@ export default function NewInvoiceModal({ onSuccess }: NewInvoiceModalProps) {
                 <ScrollArea className="max-h-[calc(90vh-8rem)] px-6">
                     <div className="space-y-6 pb-6">
                         {/* Upload Section */}
-                        <div className="border rounded-lg p-4 bg-card">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Sparkles className="h-4 w-4 text-primary" />
-                                <h3 className="font-medium">AI Invoice Scanner</h3>
-                            </div>
-                            <p className="text-sm text-muted-foreground mb-4">
-                                Upload your invoice and let AI extract the details automatically
-                            </p>
-                            <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors">
-                                <input
-                                    type="file"
-                                    id="modal-invoice-upload"
-                                    className="hidden"
-                                    accept=".pdf,.png,.jpg,.jpeg"
-                                    onChange={handleFileUpload}
-                                    disabled={uploadLoading}
-                                />
-                                <label
-                                    htmlFor="modal-invoice-upload"
-                                    className="cursor-pointer"
-                                >
-                                    {uploadLoading ? (
-                                        <div className="flex flex-col items-center">
-                                            <Loader2 className="h-10 w-10 text-muted-foreground animate-spin mb-2" />
-                                            <p className="text-sm text-muted-foreground">Processing invoice...</p>
+                        {uploadLoading ? (
+                            <div className="border rounded-lg p-8 bg-card">
+                                <div className="flex flex-col items-center justify-center space-y-4">
+                                    <div className="relative">
+                                        <Loader2 className="h-12 w-12 text-primary animate-spin" />
+                                        <Sparkles className="h-6 w-6 text-primary absolute -top-1 -right-1 animate-pulse" />
+                                    </div>
+                                    <div className="text-center space-y-2">
+                                        <h3 className="font-medium text-lg">Processing Invoice with AI</h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            Extracting invoice details... This may take a few seconds.
+                                        </p>
+                                        <div className="flex items-center justify-center space-x-1 pt-2">
+                                            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+                                            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
                                         </div>
-                                    ) : (
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="border rounded-lg p-4 bg-card">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Sparkles className="h-4 w-4 text-primary" />
+                                    <h3 className="font-medium">AI Invoice Scanner</h3>
+                                </div>
+                                <p className="text-sm text-muted-foreground mb-4">
+                                    Upload your invoice and let AI extract the details automatically
+                                </p>
+                                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors">
+                                    <input
+                                        type="file"
+                                        id="modal-invoice-upload"
+                                        className="hidden"
+                                        accept=".pdf,.png,.jpg,.jpeg"
+                                        onChange={handleFileUpload}
+                                        disabled={uploadLoading}
+                                    />
+                                    <label
+                                        htmlFor="modal-invoice-upload"
+                                        className="cursor-pointer"
+                                    >
                                         <div className="flex flex-col items-center">
                                             <Upload className="h-10 w-10 text-muted-foreground mb-2" />
                                             <p className="text-sm font-medium mb-1">
@@ -250,10 +279,10 @@ export default function NewInvoiceModal({ onSuccess }: NewInvoiceModalProps) {
                                                 PDF, PNG, JPG up to 10MB
                                             </p>
                                         </div>
-                                    )}
-                                </label>
+                                    </label>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Manual Form */}
                         <form onSubmit={handleSubmit} className="space-y-4">
