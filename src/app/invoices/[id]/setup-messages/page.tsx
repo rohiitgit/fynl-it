@@ -106,7 +106,7 @@ export default function SetupMessagesPage({
   const router = useRouter();
   const { toast } = useToast();
   const { id } = use(params);
-  const { enhanceMessageWithAI, loading: aiLoading } = useMessageGeneration();
+  const { enhanceMessageWithAI, error: aiError } = useMessageGeneration();
 
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -267,8 +267,8 @@ export default function SetupMessagesPage({
           amount: invoice.amount,
           currency: invoice.currency,
           dueDate: invoice.due_date,
-          paymentLink: invoice.payment_link,
-          description: invoice.description,
+          paymentLink: invoice.payment_link || undefined,
+          description: invoice.description || undefined,
         },
       );
 
@@ -284,7 +284,8 @@ export default function SetupMessagesPage({
         title: "Message enhanced!",
         description: "AI has improved your message",
       });
-    } catch (error) {
+    } catch (err) {
+      console.error("Enhancement failed:", err);
       toast({
         title: "Enhancement failed",
         description: "Could not enhance message with AI",
@@ -787,6 +788,14 @@ export default function SetupMessagesPage({
                     Disable unnecessary messages to avoid over-communication
                   </p>
                 </div>
+                {aiError && (
+                  <div className="flex gap-2 mt-4 p-2 bg-red-50 dark:bg-red-950/20 rounded border border-red-200">
+                    <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                    <p className="text-red-800 dark:text-red-200 text-xs">
+                      AI Enhancement Error: {aiError}
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
