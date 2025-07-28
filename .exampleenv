@@ -12,3 +12,10 @@ RESEND_REPLY_TO=your-email@yourdomain.com
 
 # Optional: Custom domain for emails (if you have a custom domain set up in Resend)
 # RESEND_FROM_EMAIL=noreply@nudgr.yourdomain.com
+
+# Add these to your existing .env.local
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+SCHEDULER_API_KEY=scheduler_secret_key_123
+
+# Add this line to your existing .env.local
+RAZORPAY_WEBHOOK_SECRET=temp_secret_for_now

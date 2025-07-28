@@ -135,119 +135,147 @@ class EmailService {
   /**
    * Send a follow-up email based on database record
    */
-  async sendFollowUpEmail(followUpId: string): Promise<EmailResult> {
-    try {
-      // Get follow-up details from database
-      const { data: followUp, error: followUpError } = await supabase
-        .from('follow_ups')
-        .select(`
-          *,
-          invoices (
-            id,
-            client_name,
-            client_email,
-            invoice_number,
-            amount,
-            currency,
-            due_date,
-            payment_link,
-            description
-          )
-        `)
-        .eq('id', followUpId)
-        .eq('status', 'scheduled')
-        .single();
+  /**
+ * Send a follow-up email based on database record
+ */
+async sendFollowUpEmail(followUpId: string): Promise<EmailResult> {
+  try {
+    // Get follow-up details from database
+    const { data: followUp, error: followUpError } = await supabase
+      .from('follow_ups')
+      .select(`
+        *,
+        invoices (
+          id,
+          client_name,
+          client_email,
+          invoice_number,
+          amount,
+          currency,
+          due_date,
+          payment_link,
+          description,
+          status
+        )
+      `)
+      .eq('id', followUpId)
+      .eq('status', 'scheduled')
+      .single();
 
-      if (followUpError || !followUp) {
-        return {
-          success: false,
-          error: 'Follow-up not found or already processed',
-        };
-      }
-
-      // Get user profile using user_id (not id) - only select existing columns
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('first_name, last_name, business_name, email')
-        .eq('user_id', followUp.user_id)
-        .single();
-
-      const invoice = followUp.invoices;
-
-      if (profileError || !profile) {
-        return {
-          success: false,
-          error: 'User profile not found',
-        };
-      }
-
-      if (!invoice) {
-        return {
-          success: false,
-          error: 'Invoice data not found',
-        };
-      }
-
-      // Calculate days overdue
-      const dueDate = new Date(invoice.due_date);
-      const today = new Date();
-      const diffTime = today.getTime() - dueDate.getTime();
-      const daysOverdue = Math.max(0, Math.floor(diffTime / MILLISECONDS_PER_DAY));
-
-      // Currency symbol mapping
-      const currencySymbol = invoice.currency === 'USD' ? '$' : invoice.currency;
-      const formattedAmount = `${currencySymbol}${invoice.amount.toFixed(2)}`;
-
-      // Format user name
-      const userName = `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim();
-
-      // Prepare template props
-      const templateProps: EmailTemplateProps = {
-        clientName: invoice.client_name,
-        invoiceNumber: invoice.invoice_number,
-        amount: formattedAmount,
-        dueDate: dueDate.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        }),
-        daysOverdue,
-        paymentLink: invoice.payment_link ?? undefined,
-        userName,
-        businessName: profile.business_name ?? undefined,
-        customMessage: undefined, // Message content stored elsewhere or generated dynamically
-      };
-
-      // Send the email
-      const result = await this.sendInvoiceReminder({
-        to: invoice.client_email,
-        subject: followUp.subject,
-        invoiceId: invoice.id,
-        userId: followUp.user_id,
-        emailType: 'reminder',
-        templateProps,
-        replyTo: profile.email ?? undefined,
-      });
-
-      // Update follow-up status in database
-      const updateData = result.success 
-        ? { status: 'sent', sent_at: new Date().toISOString() }
-        : { status: 'failed' };
-
-      await supabase
-        .from('follow_ups')
-        .update(updateData)
-        .eq('id', followUpId);
-
-      return result;
-    } catch (error) {
-      console.error('Error sending follow-up email:', error);
+    if (followUpError || !followUp) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Follow-up not found or already processed',
       };
     }
+
+    // Handle the case where invoices might be an array or single object
+    const invoice = Array.isArray(followUp.invoices) 
+      ? followUp.invoices[0] 
+      : followUp.invoices;
+
+    if (!invoice) {
+      return {
+        success: false,
+        error: 'Invoice data not found',
+      };
+    }
+
+    // Check if invoice is still unpaid
+    if (invoice.status !== 'pending') {
+      // Update follow-up status to cancelled since invoice is no longer pending
+      await supabase
+        .from('follow_ups')
+        .update({ status: 'cancelled' })
+        .eq('id', followUpId);
+        
+      return {
+        success: false,
+        error: 'Invoice is no longer pending - follow-up cancelled',
+      };
+    }
+
+    // Get user profile
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('first_name, last_name, business_name, email')
+      .eq('user_id', followUp.user_id)
+      .single();
+
+    if (profileError || !profile) {
+      return {
+        success: false,
+        error: 'User profile not found',
+      };
+    }
+
+    // Calculate days overdue
+    const dueDate = new Date(invoice.due_date);
+    const today = new Date();
+    const diffTime = today.getTime() - dueDate.getTime();
+    const daysOverdue = Math.max(0, Math.floor(diffTime / MILLISECONDS_PER_DAY));
+
+    // Currency symbol mapping
+    const currencySymbol = invoice.currency === 'USD' ? '$' : invoice.currency;
+    const formattedAmount = `${currencySymbol}${invoice.amount.toFixed(2)}`;
+
+    // Format user name
+    const userName = `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim();
+
+    // Prepare template props
+    const templateProps: EmailTemplateProps = {
+      clientName: invoice.client_name,
+      invoiceNumber: invoice.invoice_number,
+      amount: formattedAmount,
+      dueDate: dueDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }),
+      daysOverdue,
+      paymentLink: invoice.payment_link ?? undefined,
+      userName,
+      businessName: profile.business_name ?? undefined,
+      customMessage: followUp.content, // Use the stored message content
+    };
+
+    // Send the email
+    const result = await this.sendInvoiceReminder({
+      to: invoice.client_email,
+      subject: followUp.subject,
+      invoiceId: invoice.id,
+      userId: followUp.user_id,
+      emailType: 'reminder',
+      templateProps,
+      replyTo: profile.email ?? undefined,
+    });
+
+    // Update follow-up status in database
+    if (result.success) {
+      await supabase
+        .from('follow_ups')
+        .update({ 
+          status: 'sent', 
+          sent_at: new Date().toISOString(),
+          message_id: result.messageId || null
+        })
+        .eq('id', followUpId);
+    } else {
+      await supabase
+        .from('follow_ups')
+        .update({ status: 'failed' })
+        .eq('id', followUpId);
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Error sending follow-up email:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
   }
+}
 
   /**
    * Test email configuration

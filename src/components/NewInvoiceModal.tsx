@@ -41,6 +41,7 @@ interface InvoiceFormData {
     dueDate: string;
     paymentLink: string;
     description: string;
+    paymentProvider: string;
 }
 
 interface NewInvoiceModalProps {
@@ -73,7 +74,9 @@ export default function NewInvoiceModal({ onSuccess }: NewInvoiceModalProps) {
             currency: "USD",
             dueDate: "",
             paymentLink: "",
-            description: ""
+            description: "",
+            paymentProvider: "",
+
         });
     };
 
@@ -125,7 +128,8 @@ export default function NewInvoiceModal({ onSuccess }: NewInvoiceModalProps) {
                         currency: data.currency || "USD",
                         dueDate: data.dueDate || "",
                         paymentLink: data.paymentLink || "",
-                        description: data.description || ""
+                        description: data.description || "",
+                        paymentProvider: ""
                     });
 
                     toast({
@@ -178,7 +182,8 @@ export default function NewInvoiceModal({ onSuccess }: NewInvoiceModalProps) {
                     due_date: formData.dueDate,
                     payment_link: formData.paymentLink,
                     description: formData.description,
-                    status: 'pending'
+                    status: 'pending',
+                    payment_provider: formData.paymentProvider || null
                 })
                 .select()
                 .single();
@@ -404,6 +409,30 @@ export default function NewInvoiceModal({ onSuccess }: NewInvoiceModalProps) {
                                     placeholder="https://paypal.me/yourname"
                                 />
                             </div>
+                            {/* Payment Provider Field - ADD THIS */}
+<div className="space-y-2">
+    <Label htmlFor="modal-paymentProvider">
+        <Link className="h-4 w-4 inline mr-1" />
+        Payment Provider (Optional)
+    </Label>
+    <select
+        id="modal-paymentProvider"
+        name="paymentProvider"
+        value={formData.paymentProvider}
+        onChange={(e) => setFormData(prev => ({ ...prev, paymentProvider: e.target.value }))}
+        className="w-full h-9 px-3 rounded-md border border-input bg-transparent text-sm"
+    >
+        <option value="">Select Provider</option>
+        <option value="razorpay">Razorpay</option>
+        <option value="stripe">Stripe</option>
+        <option value="paypal">PayPal</option>
+        <option value="upi">UPI</option>
+        <option value="other">Other</option>
+    </select>
+    <p className="text-sm text-muted-foreground">
+        Helps us auto-detect payments from this provider
+    </p>
+</div>
 
                             {/* Description */}
                             <div className="space-y-2">
