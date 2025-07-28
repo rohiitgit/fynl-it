@@ -62,7 +62,8 @@ export default function NewInvoiceModal({ onSuccess }: NewInvoiceModalProps) {
         currency: "USD",
         dueDate: "",
         paymentLink: "",
-        description: ""
+        description: "",
+        paymentProvider: ""
     });
 
     const resetForm = () => {
