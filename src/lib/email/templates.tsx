@@ -1,3 +1,4 @@
+// src/lib/email/templates.tsx - Complete UPI-Enhanced Version
 import React from 'react';
 import {
   Html,
@@ -8,6 +9,7 @@ import {
   Text,
   Button,
   Hr,
+  Img,
 } from '@react-email/components';
 
 // Design system colors (matching your Tailwind theme)
@@ -21,6 +23,9 @@ const colors = {
   success: '#16a34a',     // green-600
   destructive: '#dc2626', // red-600
   warning: '#ea580c',     // orange-600
+  upiGreen: '#00D09C',    // UPI brand color
+  upiBackground: '#dcfce7', // green-100
+  upiBorder: '#16a34a',   // green-600
 } as const;
 
 // Email template props interface
@@ -31,6 +36,8 @@ export interface EmailTemplateProps {
   dueDate: string;
   daysOverdue?: number;
   paymentLink?: string;
+  upiLink?: string;
+  qrCode?: string;
   userName: string;
   businessName?: string;
   customMessage?: string;
@@ -63,7 +70,7 @@ const EmailLayout: React.FC<{
   </Html>
 );
 
-// Invoice reminder email template
+// UPI-Enhanced Invoice Reminder Email
 export const InvoiceReminderEmail: React.FC<EmailTemplateProps> = ({
   clientName,
   invoiceNumber,
@@ -71,6 +78,8 @@ export const InvoiceReminderEmail: React.FC<EmailTemplateProps> = ({
   dueDate,
   daysOverdue = 0,
   paymentLink,
+  upiLink,
+  qrCode,
   userName,
   businessName,
   customMessage,
@@ -88,10 +97,20 @@ export const InvoiceReminderEmail: React.FC<EmailTemplateProps> = ({
               I hope this email finds you well! I wanted to send a quick reminder that 
               invoice <strong>{invoiceNumber}</strong> for <strong>{amount}</strong> is due today ({dueDate}).
             </Text>
-          ) : (
+          ) : daysOverdue <= 3 ? (
             <Text style={styles.paragraph}>
               I&apos;m writing to follow up on invoice <strong>{invoiceNumber}</strong> for <strong>{amount}</strong>, 
               which was due on {dueDate} and is now <strong>{daysOverdue} days overdue</strong>.
+            </Text>
+          ) : daysOverdue <= 7 ? (
+            <Text style={styles.paragraph}>
+              This is an important notice regarding invoice <strong>{invoiceNumber}</strong> for <strong>{amount}</strong>, 
+              which is now <strong>{daysOverdue} days overdue</strong> (due date: {dueDate}).
+            </Text>
+          ) : (
+            <Text style={styles.paragraph}>
+              <strong>URGENT:</strong> Invoice <strong>{invoiceNumber}</strong> for <strong>{amount}</strong> 
+              is severely overdue by <strong>{daysOverdue} days</strong>. Original due date: {dueDate}.
             </Text>
           )}
         </>
@@ -110,27 +129,129 @@ export const InvoiceReminderEmail: React.FC<EmailTemplateProps> = ({
           <strong>Due Date:</strong> {dueDate}
         </Text>
         {daysOverdue > 0 && (
-          <Text style={{...styles.invoiceDetail, color: colors.destructive}}>
+          <Text style={{
+            ...styles.invoiceDetail, 
+            color: daysOverdue <= 3 ? colors.warning : colors.destructive,
+            fontWeight: 'bold'
+          }}>
             <strong>Days Overdue:</strong> {daysOverdue}
           </Text>
         )}
       </Section>
 
-      {paymentLink && (
-        <Section style={styles.buttonSection}>
-          <Button style={styles.button} href={paymentLink}>
-            Pay Invoice Now
-          </Button>
+      {/* Payment Section */}
+      {(upiLink || paymentLink) && (
+        <Section style={styles.paymentSection}>
+          <Text style={styles.paymentSectionTitle}>
+            {daysOverdue <= 3 ? '💳 Quick Payment Options' : 
+             daysOverdue <= 7 ? '⚡ Immediate Payment Required' :
+             '🚨 URGENT: Pay Now to Avoid Escalation'}
+          </Text>
+          
+          {/* UPI Priority Section */}
+          {(upiLink || paymentLink) && (
+            <Section style={{
+              ...styles.upiSection,
+              backgroundColor: daysOverdue > 7 ? '#fef2f2' : styles.upiSection.backgroundColor,
+              borderColor: daysOverdue > 7 ? colors.destructive : colors.upiBorder
+            }}>
+              <Text style={{
+                ...styles.upiTitle,
+                color: daysOverdue > 7 ? colors.destructive : colors.success
+              }}>
+                📱 <strong>Pay instantly with UPI</strong> 
+                {daysOverdue === 0 && ' (Recommended)'}
+                {daysOverdue > 7 && ' - IMMEDIATE ACTION REQUIRED'}
+              </Text>
+              <Text style={styles.upiSubtitle}>
+                {daysOverdue <= 3 
+                  ? 'Works with PhonePe, Google Pay, Paytm, BHIM, or any banking app'
+                  : 'Instant payment - takes only 30 seconds!'
+                }
+              </Text>
+              
+              <Section style={styles.upiOptions}>
+                <div style={styles.upiOption}>
+                  <Text style={styles.upiOptionTitle}>📱 On Mobile:</Text>
+                  <Button 
+                    style={{
+                      ...styles.upiButton,
+                      backgroundColor: daysOverdue > 7 ? colors.destructive : colors.upiGreen
+                    }} 
+                    href={upiLink || paymentLink}
+                  >
+                    {daysOverdue > 7 ? `PAY ${amount} NOW` : `Pay ${amount} via UPI`}
+                  </Button>
+                </div>
+                
+                {qrCode && (
+                  <div style={styles.upiOption}>
+                    <Text style={styles.upiOptionTitle}>💻 On Desktop:</Text>
+                    <Text style={styles.upiOptionSubtitle}>Scan QR code with your phone</Text>
+                    <Img 
+                      src={qrCode} 
+                      width="150" 
+                      height="150" 
+                      alt="UPI QR Code for instant payment"
+                      style={{
+                        ...styles.qrCode,
+                        borderColor: daysOverdue > 7 ? colors.destructive : colors.upiBorder
+                      }}
+                    />
+                  </div>
+                )}
+              </Section>
+              
+              <Text style={{
+                ...styles.upiInstructions,
+                backgroundColor: daysOverdue > 7 ? '#fef2f2' : 'white'
+              }}>
+                💡 <strong>How it works:</strong> Tap the UPI link → Your UPI app opens → 
+                Amount is pre-filled → Enter your UPI PIN → Payment complete in 30 seconds!
+              </Text>
+            </Section>
+          )}
+          
+          {/* Alternative Payment Methods */}
+          {paymentLink && paymentLink !== upiLink && (
+            <Section style={styles.alternativeSection}>
+              <Hr style={styles.paymentSeparator} />
+              <Text style={styles.alternativeTitle}>
+                💳 Alternative: Pay with Card/Net Banking
+              </Text>
+              <Button style={styles.secondaryButton} href={paymentLink}>
+                Pay with Card/Net Banking
+              </Button>
+            </Section>
+          )}
         </Section>
       )}
 
-      <Text style={styles.paragraph}>
-        If you&apos;ve already sent the payment, please disregard this message. 
-        Otherwise, I&apos;d appreciate if you could process it at your earliest convenience.
-      </Text>
+      {/* Context-aware closing message */}
+      {daysOverdue === 0 ? (
+        <Text style={styles.paragraph}>
+          If you&apos;ve already sent the payment, please disregard this message. 
+          Otherwise, I&apos;d appreciate if you could process it at your earliest convenience.
+        </Text>
+      ) : daysOverdue <= 3 ? (
+        <Text style={styles.paragraph}>
+          I understand things can get busy. If you&apos;ve already processed this payment, 
+          please ignore this reminder. Otherwise, a quick payment would be greatly appreciated.
+        </Text>
+      ) : daysOverdue <= 7 ? (
+        <Text style={styles.paragraph}>
+          Please treat this matter with priority. If there are any issues with the invoice 
+          or if you need alternative payment arrangements, please let me know immediately.
+        </Text>
+      ) : (
+        <Text style={styles.paragraph}>
+          <strong>This requires immediate attention.</strong> Please process payment within 24 hours 
+          to avoid further collection activities. If there are any disputes, contact me immediately.
+        </Text>
+      )}
 
       <Text style={styles.signature}>
-        Best regards,<br />
+        {daysOverdue <= 3 ? 'Best regards' : daysOverdue <= 7 ? 'Regards' : 'Sincerely'},<br />
         {userName}
         {businessName && (
           <>
@@ -143,7 +264,7 @@ export const InvoiceReminderEmail: React.FC<EmailTemplateProps> = ({
   </EmailLayout>
 );
 
-// Thank you email template
+// Thank you email template (enhanced)
 export const ThankYouEmail: React.FC<EmailTemplateProps> = ({
   clientName,
   invoiceNumber,
@@ -156,24 +277,30 @@ export const ThankYouEmail: React.FC<EmailTemplateProps> = ({
       <Text style={styles.greeting}>Hi {clientName},</Text>
       
       <Text style={styles.paragraph}>
-        Great news! I&apos;ve received your payment of <strong>{amount}</strong> for 
+        Wonderful news! I&apos;ve received your payment of <strong>{amount}</strong> for 
         invoice <strong>{invoiceNumber}</strong>. Thank you so much!
       </Text>
 
+      {/* Payment Confirmation Card */}
       <Section style={styles.successCard}>
         <Text style={styles.successIcon}>✅</Text>
         <Text style={styles.successText}>Payment Confirmed</Text>
-        <Text style={styles.invoiceDetail}>
+        <Text style={styles.successDetail}>
           Invoice {invoiceNumber} - {amount}
+        </Text>
+        <Text style={styles.successNote}>
+          Payment processed successfully via UPI
         </Text>
       </Section>
 
       <Text style={styles.paragraph}>
-        I really appreciate your business and look forward to working with you again.
+        I really appreciate your business and look forward to working with you again. 
+        Your prompt payment helps me focus on delivering great work!
       </Text>
 
       <Text style={styles.paragraph}>
-        If you need anything else, please don&apos;t hesitate to reach out.
+        If you need anything else or have any questions about future projects, 
+        please don&apos;t hesitate to reach out.
       </Text>
 
       <Text style={styles.signature}>
@@ -190,7 +317,7 @@ export const ThankYouEmail: React.FC<EmailTemplateProps> = ({
   </EmailLayout>
 );
 
-// Styles object using design system colors
+// Comprehensive styles with UPI enhancements
 const styles = {
   main: {
     backgroundColor: colors.muted,
@@ -249,6 +376,122 @@ const styles = {
     marginBottom: '8px',
     color: colors.mutedForeground,
   },
+  
+  // Payment section styles
+  paymentSection: {
+    backgroundColor: '#f8fafc',
+    border: `2px solid ${colors.border}`,
+    borderRadius: '12px',
+    padding: '24px',
+    margin: '32px 0',
+  },
+  paymentSectionTitle: {
+    fontSize: '18px',
+    fontWeight: 'bold',
+    color: colors.foreground,
+    marginBottom: '16px',
+    textAlign: 'center' as const,
+  },
+  
+  // UPI section styles
+  upiSection: {
+    backgroundColor: colors.upiBackground,
+    border: `2px solid ${colors.upiBorder}`,
+    borderRadius: '8px',
+    padding: '20px',
+    marginBottom: '16px',
+  },
+  upiTitle: {
+    fontSize: '16px',
+    fontWeight: 'bold',
+    color: colors.success,
+    marginBottom: '8px',
+    textAlign: 'center' as const,
+  },
+  upiSubtitle: {
+    fontSize: '14px',
+    color: '#166534',
+    textAlign: 'center' as const,
+    marginBottom: '16px',
+  },
+  upiOptions: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    flexWrap: 'wrap' as const,
+    gap: '16px',
+    marginBottom: '16px',
+  },
+  upiOption: {
+    textAlign: 'center' as const,
+    flex: '1',
+    minWidth: '200px',
+  },
+  upiOptionTitle: {
+    fontSize: '14px',
+    fontWeight: 'bold',
+    color: colors.success,
+    marginBottom: '8px',
+  },
+  upiOptionSubtitle: {
+    fontSize: '12px',
+    color: '#166534',
+    marginBottom: '8px',
+  },
+  upiButton: {
+    backgroundColor: colors.upiGreen,
+    borderRadius: '6px',
+    color: colors.background,
+    fontSize: '16px',
+    fontWeight: 'bold',
+    textDecoration: 'none',
+    textAlign: 'center' as const,
+    display: 'inline-block',
+    padding: '12px 24px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+  },
+  qrCode: {
+    border: `2px solid ${colors.upiBorder}`,
+    borderRadius: '8px',
+    padding: '8px',
+    backgroundColor: 'white',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+  },
+  upiInstructions: {
+    fontSize: '12px',
+    color: '#166534',
+    backgroundColor: 'white',
+    padding: '12px',
+    borderRadius: '6px',
+    border: `1px solid ${colors.upiBorder}`,
+    lineHeight: '16px',
+  },
+  
+  // Alternative payment section
+  alternativeSection: {
+    textAlign: 'center' as const,
+  },
+  alternativeTitle: {
+    fontSize: '14px',
+    color: colors.mutedForeground,
+    marginBottom: '12px',
+  },
+  secondaryButton: {
+    backgroundColor: colors.mutedForeground,
+    borderRadius: '6px',
+    color: colors.background,
+    fontSize: '14px',
+    fontWeight: 'normal',
+    textDecoration: 'none',
+    textAlign: 'center' as const,
+    display: 'inline-block',
+    padding: '10px 20px',
+  },
+  paymentSeparator: {
+    borderColor: colors.border,
+    margin: '16px 0',
+  },
+  
+  // Success card styles (for thank you email)
   successCard: {
     backgroundColor: '#f0fdf4', // green-50
     border: '1px solid #bbf7d0', // green-200
@@ -267,21 +510,18 @@ const styles = {
     color: colors.success,
     marginBottom: '8px',
   },
-  buttonSection: {
-    textAlign: 'center' as const,
-    margin: '32px 0',
-  },
-  button: {
-    backgroundColor: colors.primary,
-    borderRadius: '6px',
-    color: colors.background,
+  successDetail: {
     fontSize: '16px',
-    fontWeight: 'bold',
-    textDecoration: 'none',
-    textAlign: 'center' as const,
-    display: 'inline-block',
-    padding: '12px 24px',
+    color: colors.foreground,
+    marginBottom: '4px',
   },
+  successNote: {
+    fontSize: '12px',
+    color: colors.success,
+    fontStyle: 'italic',
+  },
+  
+  // Common elements
   signature: {
     fontSize: '16px',
     lineHeight: '24px',
