@@ -17,7 +17,7 @@ async function testResendOwnEmail() {
         
         const { data, error } = await resend.emails.send({
             from: 'onboarding@resend.dev', // Resend's verified domain
-            to: ['rohitcodes03@gmail.com'], // Your registered email
+            to: ['vermarohit3875@gmail.com'], // Your registered email
             subject: '🎉 Resend Works! Time to Add Domain - Nudgr',
             html: `
                 <html>

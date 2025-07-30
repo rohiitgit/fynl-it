@@ -26,7 +26,7 @@ async function testResendConnection() {
     // This won't send an email, just tests API key validity
     const { data, error } = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL,
-      to: 'rohitcodes03@gmail.com', // This won't actually send
+      to: 'vermarohit3875@gmail.com', // This won't actually send
       subject: 'Test Connection',
       html: '<p>Test</p>',
     });

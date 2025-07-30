@@ -585,15 +585,14 @@ export default function Dashboard() {
         </Tabs>
       </div>
 
-      {/* Edit Invoice Modal */}
-      {editingInvoiceId && (
-        <NewInvoiceModal
-          mode="edit"
-          invoiceId={editingInvoiceId}
-          onSuccess={handleEditSuccess}
-          onClose={() => setEditingInvoiceId(null)}
-        />
-      )}
+      {/* Edit Invoice Modal - Always render but control with open prop */}
+      <NewInvoiceModal
+        mode="edit"
+        invoiceId={editingInvoiceId || undefined}
+        open={!!editingInvoiceId}
+        onSuccess={handleEditSuccess}
+        onClose={() => setEditingInvoiceId(null)}
+      />
     </div>
   );
 }
