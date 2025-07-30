@@ -1,4 +1,4 @@
-// src/app/dashboard/page.tsx - Complete fixed version
+// src/app/dashboard/page.tsx - Complete updated version with edit functionality
 'use client'
 
 import { 
@@ -13,6 +13,7 @@ import {
   Heart as ThankYou,
   TrendingUp,
   FileText,
+  Edit,
 } from "lucide-react";
 
 import { useEffect, useState, useCallback } from "react";
@@ -36,17 +37,19 @@ import NewInvoiceModal from "@/components/NewInvoiceModal";
 
 type Invoice = Tables<"invoices">;
 
-// Invoice Actions Dropdown Component
+// Invoice Actions Dropdown Component - Updated with Edit functionality
 const InvoiceActionsDropdown = ({ 
   invoice, 
   onMarkPaid, 
   onSendReminder, 
-  onSendThankYou 
+  onSendThankYou,
+  onEditInvoice,
 }: {
   invoice: Invoice;
   onMarkPaid: (id: string) => void;
   onSendReminder: (id: string) => void;
   onSendThankYou: (id: string) => void;
+  onEditInvoice: (id: string) => void;
 }) => {
   return (
     <DropdownMenu>
@@ -56,6 +59,10 @@ const InvoiceActionsDropdown = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => onEditInvoice(invoice.id)}>
+          <Edit className="h-4 w-4 mr-2" />
+          Edit Invoice
+        </DropdownMenuItem>
         {invoice.status !== 'paid' && (
           <>
             <DropdownMenuItem onClick={() => onSendReminder(invoice.id)}>
@@ -83,6 +90,7 @@ export default function Dashboard() {
   const [user, setUser] = useState<{ user_metadata?: { first_name?: string }; email?: string } | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
   const { error, success } = useToast();
   const { sendReminder, sendThankYou } = useEmail();
   const router = useRouter();
@@ -113,13 +121,14 @@ export default function Dashboard() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.push('/auth');
+        router.replace('/auth'); // Use replace instead of push to avoid back button issues
         return;
       }
       setUser(user);
       await fetchInvoices();
     } catch (err) {
       console.error('Error checking user:', err);
+      // Don't redirect on error, might be network issue
     } finally {
       setLoading(false);
     }
@@ -188,6 +197,17 @@ export default function Dashboard() {
 
   const handleSendThankYou = async (invoiceId: string) => {
     await sendThankYou(invoiceId);
+  };
+
+  // New function to handle invoice editing
+  const handleEditInvoice = (invoiceId: string) => {
+    setEditingInvoiceId(invoiceId);
+  };
+
+  // Function to close edit modal and refresh invoices
+  const handleEditSuccess = () => {
+    setEditingInvoiceId(null);
+    fetchInvoices();
   };
 
   const getStatusColor = (status: string) => {
@@ -270,13 +290,6 @@ export default function Dashboard() {
               <span className="text-sm text-muted-foreground">
                 Welcome back, {user?.user_metadata?.first_name}!
               </span>
-              {/* <Button 
-                onClick={() => router.push('/invoices/new')}
-                className="gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                New Invoice
-              </Button> */}
               <NewInvoiceModal onSuccess={fetchInvoices} />
             </div>
           </div>
@@ -359,10 +372,7 @@ export default function Dashboard() {
                     <p className="text-muted-foreground mb-4">
                       Create your first invoice to start getting paid faster
                     </p>
-                    <Button onClick={() => router.push('/invoices/new')}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Invoice
-                    </Button>
+                    <NewInvoiceModal onSuccess={fetchInvoices} />
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -389,6 +399,7 @@ export default function Dashboard() {
                             onMarkPaid={(id) => updateInvoiceStatus(id, 'paid')}
                             onSendReminder={handleSendReminder}
                             onSendThankYou={handleSendThankYou}
+                            onEditInvoice={handleEditInvoice}
                           />
                         </div>
                       </div>
@@ -415,10 +426,7 @@ export default function Dashboard() {
                     <p className="text-muted-foreground mb-4">
                       Create your first invoice to start getting paid faster
                     </p>
-                    <Button onClick={() => router.push('/invoices/new')}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Invoice
-                    </Button>
+                    <NewInvoiceModal onSuccess={fetchInvoices} />
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -445,6 +453,7 @@ export default function Dashboard() {
                             onMarkPaid={(id) => updateInvoiceStatus(id, 'paid')}
                             onSendReminder={handleSendReminder}
                             onSendThankYou={handleSendThankYou}
+                            onEditInvoice={handleEditInvoice}
                           />
                         </div>
                       </div>
@@ -531,6 +540,16 @@ export default function Dashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Edit Invoice Modal */}
+      {editingInvoiceId && (
+        <NewInvoiceModal
+          mode="edit"
+          invoiceId={editingInvoiceId}
+          onSuccess={handleEditSuccess}
+          onClose={() => setEditingInvoiceId(null)}
+        />
+      )}
     </div>
   );
 }

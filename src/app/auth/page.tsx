@@ -1,12 +1,13 @@
+// src/app/auth/page.tsx - Session-aware auth page with auto-redirect
 'use client'
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, AlertCircle, CheckCircle } from "lucide-react";
+import { DollarSign, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,6 +16,7 @@ import { useToast } from "@/lib/hooks/use-toast";
 
 export default function AuthPage() {
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -22,6 +24,26 @@ export default function AuthPage() {
   const [message, setMessage] = useState({ type: "", text: "" });
   const { toast } = useToast();
   const router = useRouter();
+
+  // Check if user is already logged in
+  useEffect(() => {
+    checkExistingSession();
+  }, []);
+
+  const checkExistingSession = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // User is already logged in, redirect to dashboard
+        router.replace('/dashboard');
+        return;
+      }
+    } catch (error) {
+      console.error('Error checking session:', error);
+    } finally {
+      setCheckingSession(false);
+    }
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +118,26 @@ export default function AuthPage() {
       setLoading(false);
     }
   };
+
+  // Show loading spinner while checking session
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="relative">
+            <Loader2 className="h-12 w-12 text-primary animate-spin mx-auto" />
+            <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg">Checking your session...</h3>
+            <p className="text-muted-foreground">
+              Please wait while we check if you're already signed in
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center p-4">

@@ -49,7 +49,10 @@ interface InvoiceFormData {
 }
 
 interface NewInvoiceModalProps {
-    onSuccess?: () => void;
+  mode?: 'create' | 'edit';
+  invoiceId?: string;
+  onSuccess?: () => void;
+  onClose?: () => void;
 }
 
 export default function NewInvoiceModal({ onSuccess }: NewInvoiceModalProps) {

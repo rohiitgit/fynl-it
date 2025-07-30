@@ -1,21 +1,103 @@
+// src/app/page.tsx - Session-aware homepage
 'use client'
 
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Clock, DollarSign, Mail, TrendingUp } from "lucide-react";
+import { CheckCircle, Clock, DollarSign, Mail, TrendingUp, LogOut, BarChart3 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
+
+interface User {
+  id: string;
+  email?: string;
+  user_metadata?: {
+    first_name?: string;
+    last_name?: string;
+  };
+}
 
 export default function HomePage() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary">
-      {/* Navigation */}
-      <nav className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <DollarSign className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-foreground">Nudgr</span>
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  // Check for existing session on component mount
+  useEffect(() => {
+    checkSession();
+  }, []);
+
+  const checkSession = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    } catch (error) {
+      console.error('Error checking session:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      // Optional: Show success message
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  const getUserDisplayName = () => {
+    if (user?.user_metadata?.first_name) {
+      return user.user_metadata.first_name;
+    }
+    if (user?.email) {
+      return user.email.split('@')[0];
+    }
+    return 'User';
+  };
+
+  // Navigation component based on auth status
+  const Navigation = () => (
+    <nav className="container mx-auto px-4 py-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <DollarSign className="h-8 w-8 text-primary" />
+          <span className="text-2xl font-bold text-foreground">Nudgr</span>
+        </div>
+        
+        {loading ? (
+          // Loading state
+          <div className="flex items-center space-x-4">
+            <div className="h-9 w-16 bg-muted animate-pulse rounded"></div>
+            <div className="h-9 w-24 bg-muted animate-pulse rounded"></div>
           </div>
+        ) : user ? (
+          // Logged in state
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-muted-foreground">
+              Welcome back, {getUserDisplayName()}!
+            </span>
+            <Link href="/dashboard">
+              <Button variant="default" className="gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Go to Dashboard
+              </Button>
+            </Link>
+            <Button 
+              variant="outline" 
+              onClick={handleSignOut}
+              className="gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
+        ) : (
+          // Logged out state
           <div className="flex items-center space-x-4">
             <Link href="/auth">
               <Button variant="secondary">Sign In</Button>
@@ -24,8 +106,54 @@ export default function HomePage() {
               <Button variant="default">Get Started</Button>
             </Link>
           </div>
-        </div>
-      </nav>
+        )}
+      </div>
+    </nav>
+  );
+
+  // CTA Section based on auth status
+  const CTASection = () => (
+    <section className="container mx-auto px-4 py-20">
+      <div className="bg-gradient-to-r from-primary to-primary-glow rounded-2xl p-12 text-center text-primary-foreground">
+        {user ? (
+          // Logged in CTA
+          <>
+            <h2 className="text-3xl font-bold mb-4">
+              Ready to Manage Your Invoices?
+            </h2>
+            <p className="text-xl mb-8 opacity-90">
+              Your dashboard is waiting - check your invoices and payment status
+            </p>
+            <Link href="/dashboard">
+              <Button variant="secondary" size="lg" className="gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Open Dashboard
+              </Button>
+            </Link>
+          </>
+        ) : (
+          // Logged out CTA
+          <>
+            <h2 className="text-3xl font-bold mb-4">
+              Ready to Never Chase Payments Again?
+            </h2>
+            <p className="text-xl mb-8 opacity-90">
+              Join thousands of freelancers who&apos;ve eliminated payment stress
+            </p>
+            <Link href="/auth">
+              <Button variant="secondary" size="lg">
+                Start Your Free Trial
+              </Button>
+            </Link>
+          </>
+        )}
+      </div>
+    </section>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary">
+      <Navigation />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20">
@@ -38,16 +166,34 @@ export default function HomePage() {
             <p className="text-xl text-muted-foreground leading-relaxed">
               We handle the awkward nudges so you can focus on your work.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/auth">
-                <Button variant="default" size="lg" className="w-full sm:w-auto">
-                  Start Free Trial
+            
+            {user ? (
+              // Logged in hero CTA
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link href="/dashboard">
+                  <Button variant="default" size="lg" className="w-full sm:w-auto gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    View Dashboard
+                  </Button>
+                </Link>
+                <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                  Watch Demo
                 </Button>
-              </Link>
-              <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                Watch Demo
-              </Button>
-            </div>
+              </div>
+            ) : (
+              // Logged out hero CTA
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link href="/auth">
+                  <Button variant="default" size="lg" className="w-full sm:w-auto">
+                    Start Free Trial
+                  </Button>
+                </Link>
+                <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                  Watch Demo
+                </Button>
+              </div>
+            )}
+            
             <div className="flex items-center space-x-6 text-sm text-muted-foreground">
               <div className="flex items-center space-x-1">
                 <CheckCircle className="h-4 w-4 text-success text-green-600 " />
@@ -157,22 +303,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="bg-gradient-to-r from-primary to-primary-glow rounded-2xl p-12 text-center text-primary-foreground">
-          <h2 className="text-3xl font-bold mb-4">
-            Ready to Never Chase Payments Again?
-          </h2>
-          <p className="text-xl mb-8 opacity-90">
-            Join thousands of freelancers who&apos;ve eliminated payment stress
-          </p>
-          <Link href="/auth">
-            <Button variant="secondary" size="lg">
-              Start Your Free Trial
-            </Button>
-          </Link>
-        </div>
-      </section>
+      <CTASection />
 
       {/* Footer */}
       <footer className="border-t border-border bg-card">
