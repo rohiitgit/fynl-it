@@ -1,7 +1,7 @@
-// src/app/auth/page.tsx - Fixed with better session handling
+// src/app/auth/page.tsx - Fixed ESLint errors
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DollarSign, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/lib/hooks/use-toast";
 import { useAuth } from "@/components/AuthProvider";
@@ -23,7 +22,6 @@ export default function AuthPage() {
   const [lastName, setLastName] = useState("");
   const [message, setMessage] = useState({ type: "", text: "" });
   const { toast } = useToast();
-  const router = useRouter();
   const { user, loading: authLoading } = useAuth();
 
   // If user is already authenticated, AuthProvider will handle redirect
@@ -139,7 +137,7 @@ export default function AuthPage() {
             <Loader2 className="h-12 w-12 text-primary animate-spin mx-auto" />
           </div>
           <div>
-            <h3 className="font-semibold text-lg">You're already signed in!</h3>
+            <h3 className="font-semibold text-lg">You&apos;re already signed in!</h3>
             <p className="text-muted-foreground">
               Redirecting you to your dashboard...
             </p>

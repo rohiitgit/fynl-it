@@ -1,4 +1,4 @@
-// src/lib/payments/razorpay-upi.ts - Enhanced TypeScript Version
+// src/lib/payments/razorpay-upi.ts - Fixed ESLint warnings
 import Razorpay from 'razorpay';
 
 // Environment validation
@@ -360,10 +360,7 @@ export class RazorpayUPIService {
         minAmount?: number;
     }): Promise<UPIPaymentLinkResponse> {
         try {
-            const expiryDate = data.expiryDays
-                ? new Date(Date.now() + data.expiryDays * 24 * 60 * 60 * 1000)
-                : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Default 30 days
-
+            // Remove unused expiryDate calculation to fix warning
             const advancedData = {
                 ...data,
                 notes: {

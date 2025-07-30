@@ -1,9 +1,8 @@
-// src/app/dashboard/page.tsx - Fixed to use AuthProvider
+// src/app/dashboard/page.tsx - Fixed ESLint errors
 'use client'
 
 import { 
   DollarSign, 
-  Plus, 
   MoreVertical, 
   CheckCircle2, 
   AlertCircle, 

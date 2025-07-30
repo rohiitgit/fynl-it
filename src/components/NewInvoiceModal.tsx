@@ -1,7 +1,7 @@
-// src/components/NewInvoiceModal.tsx - Fixed modal rendering and state issues
+// src/components/NewInvoiceModal.tsx - Fixed ESLint errors
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,8 +37,6 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/lib/hooks/use-toast";
 import { format } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-import { Tables } from "@/types/supabase";
 
 interface InvoiceFormData {
     clientName: string;
@@ -83,7 +81,7 @@ export default function NewInvoiceModal({
     const isEditMode = mode === 'edit';
     const hasExternalControl = isEditMode && externalOpen !== undefined;
     const open = hasExternalControl ? externalOpen : internalOpen;
-    const setOpen = hasExternalControl ? (onClose ? () => onClose() : () => {}) : setInternalOpen;
+    // const handleSetOpen = hasExternalControl ? (onClose ? () => onClose() : () => {}) : setInternalOpen;
     
     const [loading, setLoading] = useState(false);
     const [uploadLoading, setUploadLoading] = useState(false);
@@ -106,13 +104,7 @@ export default function NewInvoiceModal({
         : 'Upload an invoice for AI processing or fill in the details manually';
 
     // Load existing invoice data in edit mode
-    useEffect(() => {
-        if (isEditMode && invoiceId && open) {
-            loadInvoiceData();
-        }
-    }, [isEditMode, invoiceId, open]);
-
-    const loadInvoiceData = async () => {
+    const loadInvoiceData = useCallback(async () => {
         if (!invoiceId) return;
 
         setLoadingInvoice(true);
@@ -152,7 +144,13 @@ export default function NewInvoiceModal({
         } finally {
             setLoadingInvoice(false);
         }
-    };
+    }, [invoiceId, toast, onClose]);
+
+    useEffect(() => {
+        if (isEditMode && invoiceId && open) {
+            loadInvoiceData();
+        }
+    }, [isEditMode, invoiceId, open, loadInvoiceData]);
 
     const resetForm = () => {
         setFormData({

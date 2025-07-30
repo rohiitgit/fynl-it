@@ -1,10 +1,10 @@
-// src/middleware.ts - Minimal middleware for better auth persistence
+// src/middleware.ts - Fixed ESLint errors
 import { createServerClient, CookieOptions } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
-    let supabaseResponse = NextResponse.next({
+    const supabaseResponse = NextResponse.next({
         request,
     })
 
@@ -59,4 +59,4 @@ export const config = {
          */
         '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
-} as const
+}

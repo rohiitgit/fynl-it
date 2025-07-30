@@ -1,8 +1,7 @@
-// src/lib/hooks/use-email.ts - Complete rewrite with proper TypeScript and error handling
+// src/lib/hooks/use-email.ts - Fixed ESLint errors
 import { useState, useCallback } from 'react';
 import { useToast } from '@/lib/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-import type { Tables } from '@/types/supabase';
 
 // Constants
 const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;

@@ -1,4 +1,4 @@
-// src/lib/auth-utils.ts - Session persistence utilities
+// src/lib/auth-utils.ts - Fixed TypeScript errors
 import { supabase } from '@/lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 
@@ -6,6 +6,10 @@ interface AuthState {
     user: User | null;
     session: Session | null;
     loading: boolean;
+}
+
+interface WindowWithTimer extends Window {
+    nudgrAuthTimer?: NodeJS.Timeout;
 }
 
 // Custom event for auth state changes across tabs
@@ -122,7 +126,7 @@ export const authUtils = {
 
             // Store timeout ID for cleanup
             if (typeof window !== 'undefined') {
-                (window as any).nudgrAuthTimer = timeoutId;
+                (window as WindowWithTimer).nudgrAuthTimer = timeoutId;
             }
         }
     },
@@ -131,9 +135,12 @@ export const authUtils = {
      * Clear auth-related timers
      */
     clearAuthTimers(): void {
-        if (typeof window !== 'undefined' && (window as any).nudgrAuthTimer) {
-            clearTimeout((window as any).nudgrAuthTimer);
-            delete (window as any).nudgrAuthTimer;
+        if (typeof window !== 'undefined') {
+            const windowWithTimer = window as WindowWithTimer;
+            if (windowWithTimer.nudgrAuthTimer) {
+                clearTimeout(windowWithTimer.nudgrAuthTimer);
+                delete windowWithTimer.nudgrAuthTimer;
+            }
         }
     },
 
@@ -175,18 +182,19 @@ export const authUtils = {
             }
         };
 
-        const handleCustomEvent = (e: CustomEvent) => {
-            const { event, session, user } = e.detail;
+        const handleCustomEvent = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            const { event, session, user } = customEvent.detail;
             callback(event, session, user);
         };
 
         window.addEventListener('storage', handleStorageChange);
-        window.addEventListener(AUTH_STATE_CHANGE_EVENT, handleCustomEvent as EventListener);
+        window.addEventListener(AUTH_STATE_CHANGE_EVENT, handleCustomEvent);
 
         // Return cleanup function
         return () => {
             window.removeEventListener('storage', handleStorageChange);
-            window.removeEventListener(AUTH_STATE_CHANGE_EVENT, handleCustomEvent as EventListener);
+            window.removeEventListener(AUTH_STATE_CHANGE_EVENT, handleCustomEvent);
         };
     },
 
@@ -267,18 +275,18 @@ export const authUtils = {
     /**
      * Get auth state for debugging
      */
-    getAuthDebugInfo(): Record<string, any> {
+    getAuthDebugInfo(): Record<string, unknown> {
         if (typeof window === 'undefined') return {};
 
         const storageKeys = Object.keys(localStorage).filter(key =>
             key.includes('auth') || key.includes('supabase') || key.includes('nudgr')
         );
 
-        const debugInfo: Record<string, any> = {
+        const debugInfo: Record<string, unknown> = {
             timestamp: new Date().toISOString(),
             userAgent: navigator.userAgent,
             storageKeys,
-            hasAuthTimer: !!(window as any).nudgrAuthTimer,
+            hasAuthTimer: !!(window as WindowWithTimer).nudgrAuthTimer,
         };
 
         storageKeys.forEach(key => {
