@@ -1,54 +1,15 @@
-// src/app/page.tsx - Session-aware homepage
+// src/app/page.tsx - Using AuthProvider instead of direct supabase calls
 'use client'
 
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Clock, DollarSign, Mail, TrendingUp, LogOut, BarChart3 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
-
-interface User {
-  id: string;
-  email?: string;
-  user_metadata?: {
-    first_name?: string;
-    last_name?: string;
-  };
-}
+import { useAuth } from "@/components/AuthProvider";
 
 export default function HomePage() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-
-  // Check for existing session on component mount
-  useEffect(() => {
-    checkSession();
-  }, []);
-
-  const checkSession = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    } catch (error) {
-      console.error('Error checking session:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      setUser(null);
-      // Optional: Show success message
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
+  const { user, loading, signOut } = useAuth();
 
   const getUserDisplayName = () => {
     if (user?.user_metadata?.first_name) {
@@ -89,7 +50,7 @@ export default function HomePage() {
             </Link>
             <Button 
               variant="outline" 
-              onClick={handleSignOut}
+              onClick={signOut}
               className="gap-2"
             >
               <LogOut className="h-4 w-4" />

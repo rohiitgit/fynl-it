@@ -1,3 +1,4 @@
+// src/lib/supabase.ts - Enhanced client with better persistence
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
 
@@ -10,8 +11,31 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    storage: typeof window !== 'undefined' ? localStorage : undefined,
     persistSession: true,
     autoRefreshToken: true,
-  }
+    detectSessionInUrl: true,
+    flowType: 'pkce',
+    storageKey: 'nudgr_auth_token', // Custom storage key for your app
+    storage: typeof window !== 'undefined' ? {
+      getItem: (key: string) => {
+        return localStorage.getItem(key);
+      },
+      setItem: (key: string, value: string) => {
+        localStorage.setItem(key, value);
+      },
+      removeItem: (key: string) => {
+        localStorage.removeItem(key);
+      },
+    } : undefined,
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'nudgr-app',
+    },
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10,
+    },
+  },
 });

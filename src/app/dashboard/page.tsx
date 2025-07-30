@@ -1,4 +1,4 @@
-// src/app/dashboard/page.tsx - Complete updated version with edit functionality
+// src/app/dashboard/page.tsx - Fixed to use AuthProvider
 'use client'
 
 import { 
@@ -14,6 +14,7 @@ import {
   TrendingUp,
   FileText,
   Edit,
+  LogOut,
 } from "lucide-react";
 
 import { useEffect, useState, useCallback } from "react";
@@ -31,13 +32,13 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/lib/hooks/use-toast";
 import { useEmail } from "@/lib/hooks/use-email";
 import { Tables } from "@/types/supabase";
-import { useRouter } from "next/navigation";
 import EmailSettings from "@/components/EmailSettings";
 import NewInvoiceModal from "@/components/NewInvoiceModal";
+import { useAuth } from "@/components/AuthProvider";
 
 type Invoice = Tables<"invoices">;
 
-// Invoice Actions Dropdown Component - Updated with Edit functionality
+// Invoice Actions Dropdown Component
 const InvoiceActionsDropdown = ({ 
   invoice, 
   onMarkPaid, 
@@ -87,19 +88,34 @@ const InvoiceActionsDropdown = ({
 };
 
 export default function Dashboard() {
-  const [user, setUser] = useState<{ user_metadata?: { first_name?: string }; email?: string } | null>(null);
+  const { user, session, signOut, loading: authLoading } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
   const { error, success } = useToast();
   const { sendReminder, sendThankYou } = useEmail();
-  const router = useRouter();
 
-  // Single fetchInvoices function
-  const fetchInvoices = useCallback(async () => {
+  // Get user display name
+  const getUserDisplayName = () => {
+    if (user?.user_metadata?.first_name) {
+      return user.user_metadata.first_name;
+    }
+    if (user?.email) {
+      return user.email.split('@')[0];
+    }
+    return 'User';
+  };
+
+  // Single fetchInvoices function with session validation
+  const fetchInvoices = useCallback(async (retryCount = 0) => {
+    if (!user || !session) return;
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      // Wait a bit for session to be fully ready on first load
+      if (retryCount === 0 && authLoading) {
+        setTimeout(() => fetchInvoices(1), 100);
+        return;
+      }
 
       const { data, error } = await supabase
         .from('invoices')
@@ -107,36 +123,39 @@ export default function Dashboard() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        // If it's a network/auth error and we haven't retried, try once more
+        if ((error.message.includes('NetworkError') || error.message.includes('JWT')) && retryCount < 2) {
+          console.log('Retrying invoice fetch after auth/network error...');
+          setTimeout(() => fetchInvoices(retryCount + 1), 500);
+          return;
+        }
+        throw error;
+      }
+      
       setInvoices(data || []);
     } catch (err) {
       console.error('Error fetching invoices:', err);
-      error("Error", "Failed to load invoices");
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // checkUser function with proper dependencies
-  const checkUser = useCallback(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.replace('/auth'); // Use replace instead of push to avoid back button issues
-        return;
+      // Only show error toast if it's not a retry and we've tried multiple times
+      if (retryCount >= 1) {
+        error("Error", "Failed to load invoices");
       }
-      setUser(user);
-      await fetchInvoices();
-    } catch (err) {
-      console.error('Error checking user:', err);
-      // Don't redirect on error, might be network issue
     } finally {
       setLoading(false);
     }
-  }, [router, fetchInvoices]);
+  }, [user, session, authLoading, error]);
 
+  // Load invoices when user and session are both available and auth is not loading
   useEffect(() => {
-    checkUser();
-  }, [checkUser]);
+    if (user && session && !authLoading) {
+      // Small delay to ensure session is fully established
+      const timer = setTimeout(() => {
+        fetchInvoices();
+      }, 50);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [user, session, authLoading, fetchInvoices]);
 
   const updateInvoiceStatus = async (invoiceId: string, newStatus: string) => {
     try {
@@ -199,12 +218,10 @@ export default function Dashboard() {
     await sendThankYou(invoiceId);
   };
 
-  // New function to handle invoice editing
   const handleEditInvoice = (invoiceId: string) => {
     setEditingInvoiceId(invoiceId);
   };
 
-  // Function to close edit modal and refresh invoices
   const handleEditSuccess = () => {
     setEditingInvoiceId(null);
     fetchInvoices();
@@ -228,7 +245,6 @@ export default function Dashboard() {
     }
   };
 
-  // Enhanced status badge with email indicator
   const getStatusBadgeWithEmail = (invoice: Invoice) => {
     const baseStatusElement = (
       <Badge
@@ -265,12 +281,28 @@ export default function Dashboard() {
     paidAmount: invoices.filter(i => i.status === 'paid').reduce((sum, invoice) => sum + invoice.amount, 0),
   };
 
-  if (loading) {
+  // Show loading while auth is being checked
+  if (authLoading || (loading && !user)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // This should not happen due to middleware, but just in case
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Authentication Required</h2>
+          <p className="text-muted-foreground mb-4">Please sign in to access your dashboard</p>
+          <Button onClick={() => window.location.href = '/auth'}>
+            Go to Sign In
+          </Button>
         </div>
       </div>
     );
@@ -288,9 +320,18 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-muted-foreground">
-                Welcome back, {user?.user_metadata?.first_name}!
+                Welcome back, {getUserDisplayName()}!
               </span>
               <NewInvoiceModal onSuccess={fetchInvoices} />
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={signOut}
+                className="gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </Button>
             </div>
           </div>
         </div>
@@ -499,6 +540,9 @@ export default function Dashboard() {
                     <h4 className="font-medium mb-2">Account Details</h4>
                     <p className="text-sm text-muted-foreground">
                       Email: {user?.email}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Name: {getUserDisplayName()}
                     </p>
                   </div>
                   <div>

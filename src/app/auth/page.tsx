@@ -1,4 +1,4 @@
-// src/app/auth/page.tsx - Session-aware auth page with auto-redirect
+// src/app/auth/page.tsx - Fixed with better session handling
 'use client'
 
 import { useState, useEffect } from "react";
@@ -13,10 +13,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/lib/hooks/use-toast";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function AuthPage() {
   const [loading, setLoading] = useState(false);
-  const [checkingSession, setCheckingSession] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -24,26 +24,10 @@ export default function AuthPage() {
   const [message, setMessage] = useState({ type: "", text: "" });
   const { toast } = useToast();
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
 
-  // Check if user is already logged in
-  useEffect(() => {
-    checkExistingSession();
-  }, []);
-
-  const checkExistingSession = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        // User is already logged in, redirect to dashboard
-        router.replace('/dashboard');
-        return;
-      }
-    } catch (error) {
-      console.error('Error checking session:', error);
-    } finally {
-      setCheckingSession(false);
-    }
-  };
+  // If user is already authenticated, AuthProvider will handle redirect
+  // No need for manual redirect here to avoid conflicts
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +35,7 @@ export default function AuthPage() {
     setMessage({ type: "", text: "" });
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -69,7 +53,7 @@ export default function AuthPage() {
           title: "Sign up failed",
           description: error.message,
         });
-      } else {
+      } else if (data.user && !data.user.email_confirmed_at) {
         setMessage({ 
           type: "success", 
           text: "Please check your email for the confirmation link!" 
@@ -78,6 +62,13 @@ export default function AuthPage() {
           title: "Sign up successful",
           description: "Please check your email for the confirmation link",
         });
+      } else if (data.user && data.user.email_confirmed_at) {
+        // User is already confirmed and logged in
+        toast({
+          title: "Welcome to Nudgr!",
+          description: "Your account has been created successfully",
+        });
+        // AuthProvider will handle redirect
       }
     } catch (err) {
       console.error('Sign up error:', err);
@@ -109,7 +100,7 @@ export default function AuthPage() {
           title: "Welcome back!",
           description: "You've been signed in successfully",
         });
-        router.push("/dashboard");
+        // AuthProvider will handle redirect to dashboard
       }
     } catch (err) {
       console.error('Sign in error:', err);
@@ -119,8 +110,8 @@ export default function AuthPage() {
     }
   };
 
-  // Show loading spinner while checking session
-  if (checkingSession) {
+  // Show loading spinner while auth is being checked
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -131,7 +122,26 @@ export default function AuthPage() {
           <div>
             <h3 className="font-semibold text-lg">Checking your session...</h3>
             <p className="text-muted-foreground">
-              Please wait while we check if you're already signed in
+              Please wait while we verify your authentication
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is already authenticated, show loading (AuthProvider will redirect)
+  if (user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="relative">
+            <Loader2 className="h-12 w-12 text-primary animate-spin mx-auto" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg">You're already signed in!</h3>
+            <p className="text-muted-foreground">
+              Redirecting you to your dashboard...
             </p>
           </div>
         </div>
@@ -179,6 +189,7 @@ export default function AuthPage() {
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         required
+                        disabled={loading}
                       />
                     </div>
                     <div className="space-y-2">
@@ -189,6 +200,7 @@ export default function AuthPage() {
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         required
+                        disabled={loading}
                       />
                     </div>
                   </div>
@@ -200,6 +212,7 @@ export default function AuthPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
+                      disabled={loading}
                     />
                   </div>
                   <div className="space-y-2">
@@ -210,10 +223,19 @@ export default function AuthPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      disabled={loading}
+                      minLength={6}
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Creating Account..." : "Create Account"}
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Creating Account...
+                      </>
+                    ) : (
+                      "Create Account"
+                    )}
                   </Button>
                 </form>
               </TabsContent>
@@ -228,6 +250,7 @@ export default function AuthPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
+                      disabled={loading}
                     />
                   </div>
                   <div className="space-y-2">
@@ -238,10 +261,18 @@ export default function AuthPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      disabled={loading}
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Signing In..." : "Sign In"}
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Signing In...
+                      </>
+                    ) : (
+                      "Sign In"
+                    )}
                   </Button>
                 </form>
               </TabsContent>
