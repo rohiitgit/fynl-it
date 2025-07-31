@@ -488,7 +488,7 @@ export default function NewInvoiceModal({
                     <p className="text-sm text-muted-foreground mb-4">
                         Upload your invoice and let AI extract the details automatically
                     </p>
-                    <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors">
+                    {/* <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors">
                         <input
                             type="file"
                             id="modal-invoice-upload"
@@ -511,6 +511,33 @@ export default function NewInvoiceModal({
                                 </p>
                             </div>
                         </label>
+                    </div> */}
+                    {/* // Find the AI upload section and enhance it: */}
+                    <div className="border-2 border-dashed border-primary/30 rounded-xl p-8 bg-gradient-to-br from-primary/5 to-primary/10 hover:border-primary/50 transition-all duration-300">
+                    <input
+                        type="file"
+                        id="modal-invoice-upload"
+                        className="hidden"
+                        accept=".pdf,.png,.jpg,.jpeg"
+                        onChange={handleFileUpload}
+                        disabled={uploadLoading}
+                    />
+                    <label
+                        htmlFor="modal-invoice-upload"
+                        className="cursor-pointer"
+                    >
+                        <div className="flex flex-col items-center">
+                        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 border-2 border-primary/20">
+                            <Upload className="h-8 w-8 text-primary" />
+                        </div>
+                        <p className="text-lg font-semibold mb-2 text-primary">
+                            Click to upload or drag and drop
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                            PDF, PNG, JPG up to 10MB
+                        </p>
+                        </div>
+                    </label>
                     </div>
                 </div>
             )}

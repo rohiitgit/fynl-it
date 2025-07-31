@@ -1,4 +1,4 @@
-// src/app/auth/page.tsx - Fixed ESLint errors
+// src/app/auth/page.tsx - Fixed signup/signin switching
 'use client'
 
 import { useState } from "react";
@@ -23,9 +23,6 @@ export default function AuthPage() {
   const [message, setMessage] = useState({ type: "", text: "" });
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
-
-  // If user is already authenticated, AuthProvider will handle redirect
-  // No need for manual redirect here to avoid conflicts
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,12 +58,10 @@ export default function AuthPage() {
           description: "Please check your email for the confirmation link",
         });
       } else if (data.user && data.user.email_confirmed_at) {
-        // User is already confirmed and logged in
         toast({
           title: "Welcome to Nudgr!",
           description: "Your account has been created successfully",
         });
-        // AuthProvider will handle redirect
       }
     } catch (err) {
       console.error('Sign up error:', err);
@@ -98,7 +93,6 @@ export default function AuthPage() {
           title: "Welcome back!",
           description: "You've been signed in successfully",
         });
-        // AuthProvider will handle redirect to dashboard
       }
     } catch (err) {
       console.error('Sign in error:', err);
@@ -148,165 +142,228 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary flex items-center justify-center p-4 relative">
+      {/* Background pattern - fixed */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 0)`,
+          backgroundSize: '20px 20px'
+        }} />
+      </div>
+      
+      <div className="w-full max-w-md relative z-10">
+        {/* Enhanced Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <DollarSign className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-foreground">Nudgr</span>
+          <div className="flex items-center justify-center space-x-3 mb-4">
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
+              <DollarSign className="h-6 w-6 text-primary" />
+            </div>
+            <span className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              Nudgr
+            </span>
           </div>
-          <p className="text-muted-foreground">
-            Join thousands of freelancers who will never chase payments again.
-          </p>
+          <div className="space-y-2">
+            <h1 className="text-xl font-semibold text-foreground">Welcome to Nudgr</h1>
+            <p className="text-muted-foreground">
+              Join thousands of freelancers who will never chase payments again.
+            </p>
+          </div>
         </div>
 
-        {/* Auth Form */}
-        <Card className="shadow-lg">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">Get Started</CardTitle>
-            <CardDescription className="text-center">
-              Create your account or sign in to continue
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="signup" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                <TabsTrigger value="signin">Sign In</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="signup" className="space-y-4">
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+        {/* Enhanced Auth Form */}
+        <Card className="shadow-2xl border-0 bg-card/80 backdrop-blur-lg relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-lg" />
+          <div className="relative">
+            <CardHeader className="space-y-1 text-center">
+              <CardTitle className="text-2xl">Get Started</CardTitle>
+              <CardDescription>
+                Create your account or sign in to continue
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="signup" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsTrigger value="signup" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                    Sign Up
+                  </TabsTrigger>
+                  <TabsTrigger value="signin" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                    Sign In
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="signup" className="space-y-4 mt-0">
+                  <form onSubmit={handleSignUp} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName" className="text-sm font-medium">
+                          First Name
+                        </Label>
+                        <Input
+                          id="firstName"
+                          type="text"
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          required
+                          disabled={loading}
+                          className="transition-all focus:ring-2 focus:ring-primary/20"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName" className="text-sm font-medium">
+                          Last Name
+                        </Label>
+                        <Input
+                          id="lastName"
+                          type="text"
+                          value={lastName}
+                          onChange={(e) => setLastName(e.target.value)}
+                          required
+                          disabled={loading}
+                          className="transition-all focus:ring-2 focus:ring-primary/20"
+                        />
+                      </div>
+                    </div>
                     <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
+                      <Label htmlFor="email" className="text-sm font-medium">
+                        Email
+                      </Label>
                       <Input
-                        id="firstName"
-                        type="text"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                         disabled={loading}
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
+                      <Label htmlFor="password" className="text-sm font-medium">
+                        Password
+                      </Label>
                       <Input
-                        id="lastName"
-                        type="text"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         required
                         disabled={loading}
+                        minLength={6}
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Minimum 6 characters
+                      </p>
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full h-11 font-medium shadow-lg hover:shadow-xl transition-all duration-300" 
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Creating Account...
+                        </>
+                      ) : (
+                        "Create Account"
+                      )}
+                    </Button>
+                  </form>
+                </TabsContent>
+                
+                <TabsContent value="signin" className="space-y-4 mt-0">
+                  <form onSubmit={handleSignIn} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-email" className="text-sm font-medium">
+                        Email
+                      </Label>
+                      <Input
+                        id="signin-email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        disabled={loading}
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-password" className="text-sm font-medium">
+                        Password
+                      </Label>
+                      <Input
+                        id="signin-password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        disabled={loading}
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full h-11 font-medium shadow-lg hover:shadow-xl transition-all duration-300" 
                       disabled={loading}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      disabled={loading}
-                      minLength={6}
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Creating Account...
-                      </>
-                    ) : (
-                      "Create Account"
-                    )}
-                  </Button>
-                </form>
-              </TabsContent>
-              
-              <TabsContent value="signin" className="space-y-4">
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
-                    <Input
-                      id="signin-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      disabled={loading}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-password">Password</Label>
-                    <Input
-                      id="signin-password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      disabled={loading}
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Signing In...
-                      </>
-                    ) : (
-                      "Sign In"
-                    )}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Signing In...
+                        </>
+                      ) : (
+                        "Sign In"
+                      )}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
 
-            {/* Message Display */}
-            {message.text && (
-              <Alert className={`mt-4 ${message.type === "error" ? "border-red-500 text-red-700" : "border-green-500 text-green-700"}`}>
-                {message.type === "error" ? (
-                  <AlertCircle className="h-4 w-4" />
-                ) : (
-                  <CheckCircle className="h-4 w-4" />
-                )}
-                <AlertDescription>{message.text}</AlertDescription>
-              </Alert>
-            )}
+              {/* Enhanced Message Display */}
+              {message.text && (
+                <Alert className={`mt-6 border-2 ${
+                  message.type === "error" 
+                    ? "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20" 
+                    : "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20"
+                }`}>
+                  {message.type === "error" ? (
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                  ) : (
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  )}
+                  <AlertDescription className={`${
+                    message.type === "error" ? "text-red-800 dark:text-red-200" : "text-green-800 dark:text-green-200"
+                  }`}>
+                    {message.text}
+                  </AlertDescription>
+                </Alert>
+              )}
 
-            {/* Footer */}
-            <div className="mt-6 text-center text-sm text-muted-foreground">
-              <Link href="/" className="hover:text-primary transition-colors">
-                ← Back to Home
-              </Link>
-            </div>
-          </CardContent>
+              {/* Footer */}
+              <div className="mt-6 text-center">
+                <Link 
+                  href="/" 
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
+                >
+                  ← Back to Home
+                </Link>
+              </div>
+            </CardContent>
+          </div>
         </Card>
 
-        {/* Benefits */}
-        <div className="mt-6 text-center text-sm text-muted-foreground">
-          <div className="flex items-center justify-center space-x-4">
-            <div className="flex items-center space-x-1">
+        {/* Enhanced Benefits */}
+        <div className="mt-8 text-center">
+          <div className="inline-flex items-center justify-center space-x-6 px-4 py-3 bg-card/50 backdrop-blur-sm border border-border/50 rounded-full">
+            <div className="flex items-center space-x-2">
               <CheckCircle className="h-4 w-4 text-green-600" />
-              <span>30-day free trial</span>
+              <span className="text-sm font-medium">30-day free trial</span>
             </div>
-            <div className="flex items-center space-x-1">
+            <div className="w-px h-4 bg-border" />
+            <div className="flex items-center space-x-2">
               <CheckCircle className="h-4 w-4 text-green-600" />
-              <span>No credit card required</span>
+              <span className="text-sm font-medium">No credit card required</span>
             </div>
           </div>
         </div>

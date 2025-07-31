@@ -14,6 +14,7 @@ import {
   FileText,
   Edit,
   LogOut,
+  User
 } from "lucide-react";
 
 import { useEffect, useState, useCallback } from "react";
@@ -227,12 +228,16 @@ export default function Dashboard() {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid': return 'bg-green-100 text-green-800 hover:bg-green-100';
-      case 'overdue': return 'bg-red-100 text-red-800 hover:bg-red-100';
-      case 'pending': return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100';
-      default: return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
-    }
+  switch (status) {
+    case 'paid': 
+      return 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-950/20 dark:text-green-400 dark:border-green-800';
+    case 'overdue': 
+      return 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-800';
+    case 'pending': 
+      return 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 dark:bg-orange-950/20 dark:text-orange-400 dark:border-orange-800';
+    default: 
+      return 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 dark:bg-gray-950/20 dark:text-gray-400 dark:border-gray-800';
+  }
   };
 
   const getStatusIcon = (status: string) => {
@@ -310,20 +315,23 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary">
       {/* Header */}
-      <nav className="border-b border-border bg-card/50 backdrop-blur-sm">
+      <nav className="border-b border-border bg-card/50 backdrop-blur-lg sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
+            {/* Logo */}
             <div className="flex items-center space-x-2">
               <DollarSign className="h-8 w-8 text-primary" />
               <span className="text-2xl font-bold text-foreground">Nudgr</span>
             </div>
+            
+            {/* Right side - User info and actions */}
             <div className="flex items-center space-x-4">
               <span className="text-sm text-muted-foreground">
                 Welcome back, {getUserDisplayName()}!
               </span>
               <NewInvoiceModal onSuccess={fetchInvoices} />
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 size="sm"
                 onClick={signOut}
                 className="gap-2"
@@ -348,53 +356,76 @@ export default function Dashboard() {
 
           <TabsContent value="overview">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Invoices</CardTitle>
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.total}</div>
-                </CardContent>
-              </Card>
+            {/* Stats Cards */}
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/50 hover:shadow-xl transition-all duration-300 group">
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium">Total Invoices</CardTitle>
+      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+        <FileText className="h-5 w-5 text-primary" />
+      </div>
+    </CardHeader>
+    <CardContent>
+      <div className="text-3xl font-bold">{stats.total}</div>
+      <div className="flex items-center gap-1 mt-1">
+        <div className="w-2 h-2 bg-primary rounded-full" />
+        <p className="text-xs text-muted-foreground">All invoices</p>
+      </div>
+    </CardContent>
+  </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">${stats.totalAmount.toFixed(2)}</div>
-                </CardContent>
-              </Card>
+  <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/50 hover:shadow-xl transition-all duration-300 group">
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
+      <div className="w-10 h-10 bg-blue-500/10 rounded-full flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
+        <DollarSign className="h-5 w-5 text-blue-600" />
+      </div>
+    </CardHeader>
+    <CardContent>
+      <div className="text-3xl font-bold">${stats.totalAmount.toFixed(2)}</div>
+      <div className="flex items-center gap-1 mt-1">
+        <div className="w-2 h-2 bg-blue-500 rounded-full" />
+        <p className="text-xs text-muted-foreground">Invoice value</p>
+      </div>
+    </CardContent>
+  </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Paid</CardTitle>
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">${stats.paidAmount.toFixed(2)}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {stats.paid} invoices
-                  </p>
-                </CardContent>
-              </Card>
+  <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/50 hover:shadow-xl transition-all duration-300 group">
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium">Paid</CardTitle>
+      <div className="w-10 h-10 bg-green-500/10 rounded-full flex items-center justify-center group-hover:bg-green-500/20 transition-colors">
+        <CheckCircle2 className="h-5 w-5 text-green-600" />
+      </div>
+    </CardHeader>
+    <CardContent>
+      <div className="text-3xl font-bold text-green-600">${stats.paidAmount.toFixed(2)}</div>
+      <div className="flex items-center gap-2 mt-1">
+        <div className="w-2 h-2 bg-green-500 rounded-full" />
+        <p className="text-xs text-muted-foreground">
+          {stats.paid} invoice{stats.paid !== 1 ? 's' : ''} collected
+        </p>
+      </div>
+    </CardContent>
+  </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Pending</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-yellow-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">${(stats.totalAmount - stats.paidAmount).toFixed(2)}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {stats.pending + stats.overdue} invoices
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+  <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/50 hover:shadow-xl transition-all duration-300 group">
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium">Pending</CardTitle>
+      <div className="w-10 h-10 bg-orange-500/10 rounded-full flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
+        <TrendingUp className="h-5 w-5 text-orange-600" />
+      </div>
+    </CardHeader>
+    <CardContent>
+      <div className="text-3xl font-bold text-orange-600">${(stats.totalAmount - stats.paidAmount).toFixed(2)}</div>
+      <div className="flex items-center gap-2 mt-1">
+        <div className="w-2 h-2 bg-orange-500 rounded-full" />
+        <p className="text-xs text-muted-foreground">
+          {stats.pending + stats.overdue} invoice{(stats.pending + stats.overdue) !== 1 ? 's' : ''} awaiting
+        </p>
+      </div>
+    </CardContent>
+  </Card>
+</div>
 
             {/* Recent Invoices */}
             <Card>
@@ -416,34 +447,43 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {invoices.slice(0, 5).map((invoice) => (
-                      <div key={invoice.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center space-x-4">
-                          <div>
-                            <p className="font-medium">{invoice.client_name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Invoice #{invoice.invoice_number}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                          <div className="text-right">
-                            <p className="font-medium">${invoice.amount.toFixed(2)}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Due: {new Date(invoice.due_date).toLocaleDateString()}
-                            </p>
-                          </div>
-                          {getStatusBadgeWithEmail(invoice)}
-                          <InvoiceActionsDropdown
-                            invoice={invoice}
-                            onMarkPaid={(id) => updateInvoiceStatus(id, 'paid')}
-                            onSendReminder={handleSendReminder}
-                            onSendThankYou={handleSendThankYou}
-                            onEditInvoice={handleEditInvoice}
-                          />
-                        </div>
-                      </div>
-                    ))}
+{invoices.slice(0, 5).map((invoice) => (
+  <div key={invoice.id} className="group relative rounded-xl border transition-all duration-300 bg-card hover:shadow-md border-border/50 hover:border-border">
+    <div className="p-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+            <User className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <p className="font-semibold text-lg">{invoice.client_name}</p>
+            <p className="text-sm text-muted-foreground">
+              {invoice.client_email} • Invoice #{invoice.invoice_number}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-6">
+          <div className="text-right">
+            <p className="text-xl font-bold">${invoice.amount.toFixed(2)}</p>
+            <p className="text-sm text-muted-foreground">
+              Due: {new Date(invoice.due_date).toLocaleDateString()}
+            </p>
+          </div>
+          {getStatusBadgeWithEmail(invoice)}
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <InvoiceActionsDropdown
+              invoice={invoice}
+              onMarkPaid={(id) => updateInvoiceStatus(id, 'paid')}
+              onSendReminder={handleSendReminder}
+              onSendThankYou={handleSendThankYou}
+              onEditInvoice={handleEditInvoice}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+))}
                   </div>
                 )}
               </CardContent>

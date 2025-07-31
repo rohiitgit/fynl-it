@@ -118,15 +118,21 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="space-y-8">
           <div className="space-y-6">
-            <h1 className="text-5xl font-bold text-foreground leading-tight">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full">
+              <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+              <span className="text-sm font-medium text-primary">AI-Powered Payment Recovery</span>
+            </div>
+            <h1 className="text-6xl font-bold text-foreground leading-tight">
               Get Paid Without Being
-              <span className="text-primary"> That Freelancer</span>
+              <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent"> That Freelancer</span>
             </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed">
-              We handle the awkward nudges so you can focus on your work.
+            <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
+              We handle the awkward nudges so you can focus on your work. Smart automation meets professional communication.
             </p>
+          </div>
             
             {user ? (
               // Logged in hero CTA
