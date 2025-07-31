@@ -27,7 +27,7 @@ export default function HomePage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <DollarSign className="h-8 w-8 text-primary" />
-          <span className="text-2xl font-bold text-foreground">Nudgr</span>
+          <span className="text-2xl font-bold text-foreground">Fynl-It</span>
         </div>
         
         {loading ? (
@@ -278,7 +278,7 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
               <DollarSign className="h-6 w-6 text-primary" />
-              <span className="text-lg font-bold text-foreground">Nudgr</span>
+              <span className="text-lg font-bold text-foreground">Fynl-It</span>
             </div>
             <div className="flex items-center space-x-6 text-sm text-muted-foreground">
               <a href="#" className="hover:text-primary transition-colors">Privacy</a>

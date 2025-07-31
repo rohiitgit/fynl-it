@@ -59,7 +59,7 @@ export default function AuthPage() {
         });
       } else if (data.user && data.user.email_confirmed_at) {
         toast({
-          title: "Welcome to Nudgr!",
+          title: "Welcome to Fynl-It!",
           description: "Your account has been created successfully",
         });
       }
@@ -159,11 +159,11 @@ export default function AuthPage() {
               <DollarSign className="h-6 w-6 text-primary" />
             </div>
             <span className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-              Nudgr
+              Fynl-It
             </span>
           </div>
           <div className="space-y-2">
-            <h1 className="text-xl font-semibold text-foreground">Welcome to Nudgr</h1>
+            <h1 className="text-xl font-semibold text-foreground">Welcome to Fynl-It</h1>
             <p className="text-muted-foreground">
               Join thousands of freelancers who will never chase payments again.
             </p>
