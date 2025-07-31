@@ -33,28 +33,36 @@ function AuthCallbackContent() {
                         type: type as EmailOtpType,
                     })
 
+                    console.log('Verification response:', { data, error })
+
                     if (error) {
                         console.error('❌ Verification error:', error)
                         setStatus('error')
                         setMessage(error.message || 'Email verification failed')
-                    } else if (data.user) {
-                        console.log('✅ Email verified successfully for:', data.user.email)
+                    } else {
+                        // Email verification was successful
+                        console.log('✅ Email verified successfully!')
 
-                        // Check if this device already has the user session
-                        const { data: { session } } = await supabase.auth.getSession()
-
-                        if (session && session.user.id === data.user.id) {
-                            // Same device - user is already signed in
+                        // Check if we have session data
+                        if (data.session && data.user) {
+                            // User is now signed in on this device
+                            console.log('🔑 User signed in on this device:', data.user.email)
                             setStatus('success')
                             setMessage('Email verified successfully! Redirecting to your dashboard...')
 
                             setTimeout(() => {
                                 router.push(next)
                             }, 2000)
-                        } else {
-                            // Cross-device verification - show success but don't redirect
+                        } else if (data.user) {
+                            // Email verified but no session (cross-device)
+                            console.log('📱 Cross-device verification for:', data.user.email)
                             setStatus('cross-device')
                             setMessage('Email verified successfully! You can now sign in on your original device.')
+                        } else {
+                            // Verification successful but no user data
+                            console.log('✅ Verification successful (minimal response)')
+                            setStatus('cross-device')
+                            setMessage('Email verified successfully! You can now sign in with your credentials.')
                         }
                     }
                 } else {
@@ -76,8 +84,22 @@ function AuthCallbackContent() {
                 }
             } catch (error) {
                 console.error('💥 Callback processing error:', error)
+
+                // Check if user can actually sign in (verification might have worked)
+                try {
+                    const { data: { session } } = await supabase.auth.getSession()
+                    if (session?.user?.email_confirmed_at) {
+                        console.log('🎯 Verification actually succeeded! User is confirmed.')
+                        setStatus('cross-device')
+                        setMessage('Email verified successfully! You can now sign in with your credentials.')
+                        return
+                    }
+                } catch (sessionError) {
+                    console.error('Session check failed:', sessionError)
+                }
+
                 setStatus('error')
-                setMessage('Something went wrong during verification. Please try again.')
+                setMessage('Something went wrong during verification. Please try signing in - your email might already be verified.')
             }
         }
 
