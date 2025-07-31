@@ -1,7 +1,7 @@
-// src/components/NewInvoiceModal.tsx - Fixed ESLint errors
+// src/components/NewInvoiceModal.tsx - Fixed race conditions
 'use client'
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,8 +31,17 @@ import {
     CheckCircle2,
     QrCode,
     Edit,
-    Save
+    Save,
+    Settings,
+    ChevronDown,
 } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/lib/hooks/use-toast";
 import { format } from "date-fns";
@@ -63,6 +72,8 @@ interface NewInvoiceModalProps {
   trigger?: React.ReactNode;
 }
 
+type SaveAction = 'save-only' | 'save-and-edit-followups';
+
 export default function NewInvoiceModal({ 
   mode = 'create', 
   invoiceId, 
@@ -81,11 +92,16 @@ export default function NewInvoiceModal({
     const isEditMode = mode === 'edit';
     const hasExternalControl = isEditMode && externalOpen !== undefined;
     const open = hasExternalControl ? externalOpen : internalOpen;
-    // const handleSetOpen = hasExternalControl ? (onClose ? () => onClose() : () => {}) : setInternalOpen;
     
-    const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [uploadLoading, setUploadLoading] = useState(false);
     const [loadingInvoice, setLoadingInvoice] = useState(false);
+    const [hasExistingFollowups, setHasExistingFollowups] = useState(false);
+    
+    // Use useRef to prevent unnecessary re-renders
+    const loadedInvoiceId = useRef<string | null>(null);
+    const isInitialLoad = useRef(true);
+    
     const [formData, setFormData] = useState<InvoiceFormData>({
         clientName: "",
         clientEmail: "",
@@ -100,12 +116,42 @@ export default function NewInvoiceModal({
 
     const modalTitle = isEditMode ? 'Edit Invoice' : 'Create New Invoice';
     const modalDescription = isEditMode 
-        ? 'Update your invoice details' 
+        ? 'Update your invoice details and optionally edit follow-up messages' 
         : 'Upload an invoice for AI processing or fill in the details manually';
 
-    // Load existing invoice data in edit mode
-    const loadInvoiceData = useCallback(async () => {
-        if (!invoiceId) return;
+    // Stable function to check existing follow-ups - doesn't depend on any state
+    const checkExistingFollowups = useCallback(async (currentInvoiceId: string) => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return false;
+
+            const { data: followUps, error } = await supabase
+                .from('follow_ups')
+                .select('id')
+                .eq('invoice_id', currentInvoiceId)
+                .eq('user_id', user.id)
+                .limit(1);
+
+            if (error) {
+                console.error('Error checking follow-ups:', error);
+                return false;
+            }
+
+            const hasFollowups = (followUps?.length || 0) > 0;
+            setHasExistingFollowups(hasFollowups);
+            return hasFollowups;
+        } catch (error) {
+            console.error('Error checking follow-ups:', error);
+            return false;
+        }
+    }, []); // No dependencies - this function is stable
+
+    // Load existing invoice data in edit mode - memoized to prevent unnecessary calls
+    const loadInvoiceData = useCallback(async (currentInvoiceId: string) => {
+        // Prevent loading the same invoice multiple times
+        if (loadedInvoiceId.current === currentInvoiceId && !isInitialLoad.current) {
+            return;
+        }
 
         setLoadingInvoice(true);
         try {
@@ -115,7 +161,7 @@ export default function NewInvoiceModal({
             const { data: invoice, error } = await supabase
                 .from('invoices')
                 .select('*')
-                .eq('id', invoiceId)
+                .eq('id', currentInvoiceId)
                 .eq('user_id', user.id)
                 .single();
 
@@ -133,6 +179,13 @@ export default function NewInvoiceModal({
                     description: invoice.description || "",
                     paymentProvider: invoice.payment_link ? "" : "razorpay"
                 });
+
+                // Check for existing follow-ups
+                await checkExistingFollowups(currentInvoiceId);
+                
+                // Mark as loaded
+                loadedInvoiceId.current = currentInvoiceId;
+                isInitialLoad.current = false;
             }
         } catch (error) {
             console.error('Error loading invoice:', error);
@@ -144,15 +197,26 @@ export default function NewInvoiceModal({
         } finally {
             setLoadingInvoice(false);
         }
-    }, [invoiceId, toast, onClose]);
+    }, [toast, onClose, checkExistingFollowups]);
 
+    // Effect to load invoice data when modal opens in edit mode
     useEffect(() => {
         if (isEditMode && invoiceId && open) {
-            loadInvoiceData();
+            // Only load if we haven't loaded this invoice yet or if it's a different invoice
+            if (loadedInvoiceId.current !== invoiceId) {
+                loadInvoiceData(invoiceId);
+            }
+        }
+        
+        // Reset when modal closes
+        if (!open && isEditMode) {
+            loadedInvoiceId.current = null;
+            isInitialLoad.current = true;
+            setHasExistingFollowups(false);
         }
     }, [isEditMode, invoiceId, open, loadInvoiceData]);
 
-    const resetForm = () => {
+    const resetForm = useCallback(() => {
         setFormData({
             clientName: "",
             clientEmail: "",
@@ -164,7 +228,10 @@ export default function NewInvoiceModal({
             description: "",
             paymentProvider: "razorpay",
         });
-    };
+        setHasExistingFollowups(false);
+        loadedInvoiceId.current = null;
+        isInitialLoad.current = true;
+    }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -249,9 +316,8 @@ export default function NewInvoiceModal({
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
+    const handleSaveAction = async (action: SaveAction) => {
+        setSaving(true);
 
         try {
             const { data: { user } } = await supabase.auth.getUser();
@@ -278,13 +344,26 @@ export default function NewInvoiceModal({
 
                 if (error) throw error;
 
-                toast({
-                    title: "Invoice updated successfully!",
-                    description: "Your changes have been saved",
-                });
+                if (action === 'save-only') {
+                    toast({
+                        title: "Invoice updated successfully!",
+                        description: "Your changes have been saved",
+                    });
 
-                if (onClose) onClose();
-                if (onSuccess) onSuccess();
+                    if (onClose) onClose();
+                    if (onSuccess) onSuccess();
+                } else if (action === 'save-and-edit-followups') {
+                    toast({
+                        title: "Invoice updated!",
+                        description: "Now let's review your follow-up messages",
+                    });
+
+                    if (onClose) onClose();
+                    if (onSuccess) onSuccess();
+                    
+                    // Navigate to setup-messages page
+                    router.push(`/invoices/${invoiceId}/setup-messages`);
+                }
 
             } else {
                 // Create new invoice
@@ -350,8 +429,15 @@ export default function NewInvoiceModal({
                 description: `Failed to ${isEditMode ? 'update' : 'create'} invoice. Please try again.`,
             });
         } finally {
-            setLoading(false);
+            setSaving(false);
         }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        // For create mode, always go to setup-messages
+        // For edit mode, this shouldn't be called (we use the dropdown buttons instead)
+        await handleSaveAction('save-and-edit-followups');
     };
 
     const handleOpenChange = (newOpen: boolean) => {
@@ -361,11 +447,413 @@ export default function NewInvoiceModal({
             }
         } else {
             setInternalOpen(newOpen);
-            if (!newOpen) {
-                resetForm();
-            }
+        }
+        
+        // Always reset form when closing, regardless of control mode
+        if (!newOpen) {
+            resetForm();
         }
     };
+
+    // Create mode form content
+    const createModeContent = (
+        <>
+            {/* AI Upload Section */}
+            {uploadLoading ? (
+                <div className="border rounded-lg p-8 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+                    <div className="flex flex-col items-center justify-center space-y-4">
+                        <div className="relative">
+                            <Loader2 className="h-12 w-12 text-primary animate-spin" />
+                            <Sparkles className="h-6 w-6 text-primary absolute -top-1 -right-1 animate-pulse" />
+                        </div>
+                        <div className="text-center space-y-2">
+                            <h3 className="font-medium text-lg">Processing Invoice with AI</h3>
+                            <p className="text-sm text-muted-foreground">
+                                Extracting invoice details... This may take a few seconds.
+                            </p>
+                            <div className="flex items-center justify-center space-x-1 pt-2">
+                                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+                                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="border rounded-lg p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+                    <div className="flex items-center gap-2 mb-2">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        <h3 className="font-medium">AI Invoice Scanner</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                        Upload your invoice and let AI extract the details automatically
+                    </p>
+                    <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors">
+                        <input
+                            type="file"
+                            id="modal-invoice-upload"
+                            className="hidden"
+                            accept=".pdf,.png,.jpg,.jpeg"
+                            onChange={handleFileUpload}
+                            disabled={uploadLoading}
+                        />
+                        <label
+                            htmlFor="modal-invoice-upload"
+                            className="cursor-pointer"
+                        >
+                            <div className="flex flex-col items-center">
+                                <Upload className="h-10 w-10 text-muted-foreground mb-2" />
+                                <p className="text-sm font-medium mb-1">
+                                    Click to upload or drag and drop
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    PDF, PNG, JPG up to 10MB
+                                </p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+
+    // Form fields component (shared between create and edit)
+    const formFields = (
+        <>
+            {/* Client Information */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b">
+                    <User className="h-5 w-5 text-primary" />
+                    <h3 className="font-semibold text-lg">Client Information</h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="modal-clientName">
+                            <User className="h-4 w-4 inline mr-1" />
+                            Client Name *
+                        </Label>
+                        <Input
+                            id="modal-clientName"
+                            name="clientName"
+                            value={formData.clientName}
+                            onChange={handleInputChange}
+                            required
+                            placeholder="John Doe"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="modal-clientEmail">
+                            <Mail className="h-4 w-4 inline mr-1" />
+                            Client Email *
+                        </Label>
+                        <Input
+                            id="modal-clientEmail"
+                            name="clientEmail"
+                            type="email"
+                            value={formData.clientEmail}
+                            onChange={handleInputChange}
+                            required
+                            placeholder="john@company.com"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Invoice Details */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b">
+                    <FileText className="h-5 w-5 text-primary" />
+                    <h3 className="font-semibold text-lg">Invoice Details</h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="modal-invoiceNumber">
+                            <Hash className="h-4 w-4 inline mr-1" />
+                            Invoice Number *
+                        </Label>
+                        <Input
+                            id="modal-invoiceNumber"
+                            name="invoiceNumber"
+                            value={formData.invoiceNumber}
+                            onChange={handleInputChange}
+                            required
+                            placeholder="INV-001"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="modal-dueDate">
+                            <Calendar className="h-4 w-4 inline mr-1" />
+                            Due Date *
+                        </Label>
+                        <Input
+                            id="modal-dueDate"
+                            name="dueDate"
+                            type="date"
+                            value={formData.dueDate}
+                            onChange={handleInputChange}
+                            required
+                            min={isEditMode ? undefined : format(new Date(), 'yyyy-MM-dd')}
+                        />
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="modal-amount">
+                            <DollarSign className="h-4 w-4 inline mr-1" />
+                            Amount *
+                        </Label>
+                        <Input
+                            id="modal-amount"
+                            name="amount"
+                            type="number"
+                            step="0.01"
+                            value={formData.amount}
+                            onChange={handleInputChange}
+                            required
+                            placeholder="10000.00"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="modal-currency">Currency</Label>
+                        <select
+                            id="modal-currency"
+                            name="currency"
+                            value={formData.currency}
+                            onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value }))}
+                            className="w-full h-9 px-3 rounded-md border border-input bg-transparent text-sm"
+                        >
+                            <option value="INR">₹ INR</option>
+                            <option value="USD">$ USD</option>
+                            <option value="EUR">€ EUR</option>
+                            <option value="GBP">£ GBP</option>
+                            <option value="CAD">$ CAD</option>
+                            <option value="AUD">$ AUD</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="modal-description">
+                        <FileText className="h-4 w-4 inline mr-1" />
+                        Description (Optional)
+                    </Label>
+                    <Textarea
+                        id="modal-description"
+                        name="description"
+                        value={formData.description}
+                        onChange={handleInputChange}
+                        placeholder="Web development services for Project X..."
+                        rows={3}
+                    />
+                </div>
+            </div>
+
+            {/* Payment Method Selection */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b">
+                    <Smartphone className="h-5 w-5 text-primary" />
+                    <h3 className="font-semibold text-lg">Payment Method</h3>
+                </div>
+                
+                <div className="space-y-4">
+                    {/* UPI + Razorpay Option */}
+                    <div className="p-4 border-2 border-green-200 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                        <div className="flex items-start space-x-3">
+                            <input
+                                type="radio"
+                                id={`upi-razorpay-${mode}`}
+                                name="paymentMethod"
+                                value="razorpay"
+                                checked={formData.paymentProvider === 'razorpay'}
+                                onChange={(e) => setFormData(prev => ({ 
+                                    ...prev, 
+                                    paymentProvider: e.target.value 
+                                }))}
+                                className="w-4 h-4 text-green-600 mt-1"
+                            />
+                            <div className="flex-1">
+                                <Label htmlFor={`upi-razorpay-${mode}`} className="flex items-center gap-2 cursor-pointer">
+                                    <div className="flex items-center gap-2">
+                                        <QrCode className="h-4 w-4 text-green-600" />
+                                        <span className="font-semibold text-green-800">UPI + Cards via Razorpay</span>
+                                        <span className="text-xs bg-green-200 text-green-800 px-2 py-0.5 rounded-full font-medium">
+                                            Recommended
+                                        </span>
+                                    </div>
+                                </Label>
+                                <div className="mt-2 space-y-1">
+                                    <div className="flex items-center gap-2 text-sm text-green-700">
+                                        <CheckCircle2 className="h-4 w-4" />
+                                        <span>Instant UPI payments (PhonePe, GPay, Paytm)</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-green-700">
+                                        <CheckCircle2 className="h-4 w-4" />
+                                        <span>Auto-detection when client pays</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-green-700">
+                                        <CheckCircle2 className="h-4 w-4" />
+                                        <span>QR code + UPI link in emails</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-green-700">
+                                        <CheckCircle2 className="h-4 w-4" />
+                                        <span>Cards & net banking backup</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Manual Payment Option */}
+                    <div className="p-4 border rounded-lg">
+                        <div className="flex items-start space-x-3">
+                            <input
+                                type="radio"
+                                id={`manual-payment-${mode}`}
+                                name="paymentMethod"
+                                value=""
+                                checked={formData.paymentProvider === ''}
+                                onChange={(e) => setFormData(prev => ({ 
+                                    ...prev, 
+                                    paymentProvider: e.target.value 
+                                }))}
+                                className="w-4 h-4 text-primary mt-1"
+                            />
+                            <div className="flex-1">
+                                <Label htmlFor={`manual-payment-${mode}`} className="flex items-center gap-2 cursor-pointer">
+                                    <Link className="h-4 w-4" />
+                                    <span className="font-medium">Manual Payment Link</span>
+                                </Label>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                    Add your own UPI ID, bank details, or payment link. 
+                                    You&apos;ll need to manually confirm payments.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Manual Payment Link Field */}
+                {formData.paymentProvider === '' && (
+                    <div className="space-y-2">
+                        <Label htmlFor={`modal-paymentLink-${mode}`}>
+                            <Link className="h-4 w-4 inline mr-1" />
+                            Payment Link or UPI ID
+                        </Label>
+                        <Input
+                            id={`modal-paymentLink-${mode}`}
+                            name="paymentLink"
+                            type="text"
+                            value={formData.paymentLink}
+                            onChange={handleInputChange}
+                            placeholder="yourname@paytm OR https://paypal.me/yourname"
+                        />
+                        <p className="text-sm text-muted-foreground">
+                            Enter your UPI ID (like yourname@paytm) or payment link
+                        </p>
+                    </div>
+                )}
+            </div>
+        </>
+    );
+
+    // Edit mode action buttons with dropdown
+    const editModeActions = (
+        <div className="flex justify-end space-x-3 pt-6 border-t">
+            <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleOpenChange(false)}
+                disabled={saving}
+                className="px-6"
+            >
+                Cancel
+            </Button>
+
+            {/* Save Options Dropdown */}
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button disabled={saving} className="px-6">
+                        {saving ? (
+                            <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Saving...
+                            </>
+                        ) : (
+                            <>
+                                <Save className="h-4 w-4 mr-2" />
+                                Save Changes
+                                <ChevronDown className="h-4 w-4 ml-2" />
+                            </>
+                        )}
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem
+                        onClick={() => handleSaveAction('save-only')}
+                        disabled={saving}
+                        className="cursor-pointer"
+                    >
+                        <Save className="h-4 w-4 mr-2" />
+                        <div className="flex flex-col">
+                            <span className="font-medium">Save Changes</span>
+                            <span className="text-xs text-muted-foreground">Stay on dashboard</span>
+                        </div>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuSeparator />
+                    
+                    <DropdownMenuItem
+                        onClick={() => handleSaveAction('save-and-edit-followups')}
+                        disabled={saving}
+                        className="cursor-pointer"
+                    >
+                        <Settings className="h-4 w-4 mr-2" />
+                        <div className="flex flex-col">
+                            <span className="font-medium">Save & Edit Follow-ups</span>
+                            <span className="text-xs text-muted-foreground">
+                                {hasExistingFollowups ? 'Modify existing messages' : 'Set up new messages'}
+                            </span>
+                        </div>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
+    );
+
+    // Create mode action buttons
+    const createModeActions = (
+        <div className="flex justify-end space-x-3 pt-6 border-t">
+            <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleOpenChange(false)}
+                disabled={saving}
+                className="px-6"
+            >
+                Cancel
+            </Button>
+            <Button 
+                type="submit" 
+                disabled={saving}
+                className="px-6"
+            >
+                {saving ? (
+                    <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Creating...
+                    </>
+                ) : (
+                    <>
+                        <FileText className="h-4 w-4 mr-2" />
+                        Create Invoice
+                    </>
+                )}
+            </Button>
+        </div>
+    );
 
     // For edit mode, render without trigger or with custom trigger
     if (isEditMode) {
@@ -399,272 +887,26 @@ export default function NewInvoiceModal({
                                 </div>
                             ) : (
                                 <form onSubmit={handleSubmit} className="space-y-6">
-                                    {/* Client Information */}
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-2 pb-2 border-b">
-                                            <User className="h-5 w-5 text-primary" />
-                                            <h3 className="font-semibold text-lg">Client Information</h3>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="modal-clientName">
-                                                    <User className="h-4 w-4 inline mr-1" />
-                                                    Client Name *
-                                                </Label>
-                                                <Input
-                                                    id="modal-clientName"
-                                                    name="clientName"
-                                                    value={formData.clientName}
-                                                    onChange={handleInputChange}
-                                                    required
-                                                    placeholder="John Doe"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="modal-clientEmail">
-                                                    <Mail className="h-4 w-4 inline mr-1" />
-                                                    Client Email *
-                                                </Label>
-                                                <Input
-                                                    id="modal-clientEmail"
-                                                    name="clientEmail"
-                                                    type="email"
-                                                    value={formData.clientEmail}
-                                                    onChange={handleInputChange}
-                                                    required
-                                                    placeholder="john@company.com"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Invoice Details */}
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-2 pb-2 border-b">
-                                            <FileText className="h-5 w-5 text-primary" />
-                                            <h3 className="font-semibold text-lg">Invoice Details</h3>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="modal-invoiceNumber">
-                                                    <Hash className="h-4 w-4 inline mr-1" />
-                                                    Invoice Number *
-                                                </Label>
-                                                <Input
-                                                    id="modal-invoiceNumber"
-                                                    name="invoiceNumber"
-                                                    value={formData.invoiceNumber}
-                                                    onChange={handleInputChange}
-                                                    required
-                                                    placeholder="INV-001"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="modal-dueDate">
-                                                    <Calendar className="h-4 w-4 inline mr-1" />
-                                                    Due Date *
-                                                </Label>
-                                                <Input
-                                                    id="modal-dueDate"
-                                                    name="dueDate"
-                                                    type="date"
-                                                    value={formData.dueDate}
-                                                    onChange={handleInputChange}
-                                                    required
-                                                    min={isEditMode ? undefined : format(new Date(), 'yyyy-MM-dd')}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            <div className="space-y-2 md:col-span-2">
-                                                <Label htmlFor="modal-amount">
-                                                    <DollarSign className="h-4 w-4 inline mr-1" />
-                                                    Amount *
-                                                </Label>
-                                                <Input
-                                                    id="modal-amount"
-                                                    name="amount"
-                                                    type="number"
-                                                    step="0.01"
-                                                    value={formData.amount}
-                                                    onChange={handleInputChange}
-                                                    required
-                                                    placeholder="10000.00"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="modal-currency">Currency</Label>
-                                                <select
-                                                    id="modal-currency"
-                                                    name="currency"
-                                                    value={formData.currency}
-                                                    onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value }))}
-                                                    className="w-full h-9 px-3 rounded-md border border-input bg-transparent text-sm"
-                                                >
-                                                    <option value="INR">₹ INR</option>
-                                                    <option value="USD">$ USD</option>
-                                                    <option value="EUR">€ EUR</option>
-                                                    <option value="GBP">£ GBP</option>
-                                                    <option value="CAD">$ CAD</option>
-                                                    <option value="AUD">$ AUD</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label htmlFor="modal-description">
-                                                <FileText className="h-4 w-4 inline mr-1" />
-                                                Description (Optional)
-                                            </Label>
-                                            <Textarea
-                                                id="modal-description"
-                                                name="description"
-                                                value={formData.description}
-                                                onChange={handleInputChange}
-                                                placeholder="Web development services for Project X..."
-                                                rows={3}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Payment Method Selection */}
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-2 pb-2 border-b">
-                                            <Smartphone className="h-5 w-5 text-primary" />
-                                            <h3 className="font-semibold text-lg">Payment Method</h3>
-                                        </div>
-                                        
-                                        <div className="space-y-4">
-                                            {/* UPI + Razorpay Option */}
-                                            <div className="p-4 border-2 border-green-200 bg-green-50 dark:bg-green-950/20 rounded-lg">
-                                                <div className="flex items-start space-x-3">
-                                                    <input
-                                                        type="radio"
-                                                        id="upi-razorpay"
-                                                        name="paymentMethod"
-                                                        value="razorpay"
-                                                        checked={formData.paymentProvider === 'razorpay'}
-                                                        onChange={(e) => setFormData(prev => ({ 
-                                                            ...prev, 
-                                                            paymentProvider: e.target.value 
-                                                        }))}
-                                                        className="w-4 h-4 text-green-600 mt-1"
-                                                    />
-                                                    <div className="flex-1">
-                                                        <Label htmlFor="upi-razorpay" className="flex items-center gap-2 cursor-pointer">
-                                                            <div className="flex items-center gap-2">
-                                                                <QrCode className="h-4 w-4 text-green-600" />
-                                                                <span className="font-semibold text-green-800">UPI + Cards via Razorpay</span>
-                                                                <span className="text-xs bg-green-200 text-green-800 px-2 py-0.5 rounded-full font-medium">
-                                                                    Recommended
-                                                                </span>
-                                                            </div>
-                                                        </Label>
-                                                        <div className="mt-2 space-y-1">
-                                                            <div className="flex items-center gap-2 text-sm text-green-700">
-                                                                <CheckCircle2 className="h-4 w-4" />
-                                                                <span>Instant UPI payments (PhonePe, GPay, Paytm)</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-2 text-sm text-green-700">
-                                                                <CheckCircle2 className="h-4 w-4" />
-                                                                <span>Auto-detection when client pays</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-2 text-sm text-green-700">
-                                                                <CheckCircle2 className="h-4 w-4" />
-                                                                <span>QR code + UPI link in emails</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-2 text-sm text-green-700">
-                                                                <CheckCircle2 className="h-4 w-4" />
-                                                                <span>Cards & net banking backup</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            {/* Manual Payment Option */}
-                                            <div className="p-4 border rounded-lg">
-                                                <div className="flex items-start space-x-3">
-                                                    <input
-                                                        type="radio"
-                                                        id="manual-payment"
-                                                        name="paymentMethod"
-                                                        value=""
-                                                        checked={formData.paymentProvider === ''}
-                                                        onChange={(e) => setFormData(prev => ({ 
-                                                            ...prev, 
-                                                            paymentProvider: e.target.value 
-                                                        }))}
-                                                        className="w-4 h-4 text-primary mt-1"
-                                                    />
-                                                    <div className="flex-1">
-                                                        <Label htmlFor="manual-payment" className="flex items-center gap-2 cursor-pointer">
-                                                            <Link className="h-4 w-4" />
-                                                            <span className="font-medium">Manual Payment Link</span>
-                                                        </Label>
-                                                        <p className="text-sm text-muted-foreground mt-1">
-                                                            Add your own UPI ID, bank details, or payment link. 
-                                                            You&apos;ll need to manually confirm payments.
-                                                        </p>
-                                                    </div>
+                                    {/* Show follow-up status banner if applicable */}
+                                    {hasExistingFollowups && (
+                                        <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                                            <div className="flex items-start gap-3">
+                                                <Settings className="h-5 w-5 text-blue-600 mt-0.5" />
+                                                <div>
+                                                    <h4 className="font-medium text-blue-900 dark:text-blue-100">
+                                                        Follow-up Messages Active
+                                                    </h4>
+                                                    <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">
+                                                        This invoice has automated follow-up messages set up. 
+                                                        You can modify them after saving by choosing &quot;Save & Edit Follow-ups&quot;.
+                                                    </p>
                                                 </div>
                                             </div>
                                         </div>
-
-                                        {/* Manual Payment Link Field */}
-                                        {formData.paymentProvider === '' && (
-                                            <div className="space-y-2">
-                                                <Label htmlFor="modal-paymentLink">
-                                                    <Link className="h-4 w-4 inline mr-1" />
-                                                    Payment Link or UPI ID
-                                                </Label>
-                                                <Input
-                                                    id="modal-paymentLink"
-                                                    name="paymentLink"
-                                                    type="text"
-                                                    value={formData.paymentLink}
-                                                    onChange={handleInputChange}
-                                                    placeholder="yourname@paytm OR https://paypal.me/yourname"
-                                                />
-                                                <p className="text-sm text-muted-foreground">
-                                                    Enter your UPI ID (like yourname@paytm) or payment link
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Action Buttons */}
-                                    <div className="flex justify-end space-x-3 pt-6 border-t">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => handleOpenChange(false)}
-                                            disabled={loading}
-                                            className="px-6"
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button 
-                                            type="submit" 
-                                            disabled={loading}
-                                            className="px-6"
-                                        >
-                                            {loading ? (
-                                                <>
-                                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                                    Updating...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Save className="h-4 w-4 mr-2" />
-                                                    Update Invoice
-                                                </>
-                                            )}
-                                        </Button>
-                                    </div>
+                                    )}
+                                    
+                                    {formFields}
+                                    {editModeActions}
                                 </form>
                             )}
                         </div>
@@ -698,331 +940,13 @@ export default function NewInvoiceModal({
 
                 <ScrollArea className="max-h-[calc(90vh-8rem)] px-6">
                     <div className="space-y-6 pb-6">
-                        {/* AI Upload Section */}
-                        {uploadLoading ? (
-                            <div className="border rounded-lg p-8 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
-                                <div className="flex flex-col items-center justify-center space-y-4">
-                                    <div className="relative">
-                                        <Loader2 className="h-12 w-12 text-primary animate-spin" />
-                                        <Sparkles className="h-6 w-6 text-primary absolute -top-1 -right-1 animate-pulse" />
-                                    </div>
-                                    <div className="text-center space-y-2">
-                                        <h3 className="font-medium text-lg">Processing Invoice with AI</h3>
-                                        <p className="text-sm text-muted-foreground">
-                                            Extracting invoice details... This may take a few seconds.
-                                        </p>
-                                        <div className="flex items-center justify-center space-x-1 pt-2">
-                                            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-                                            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                                            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="border rounded-lg p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Sparkles className="h-4 w-4 text-primary" />
-                                    <h3 className="font-medium">AI Invoice Scanner</h3>
-                                </div>
-                                <p className="text-sm text-muted-foreground mb-4">
-                                    Upload your invoice and let AI extract the details automatically
-                                </p>
-                                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors">
-                                    <input
-                                        type="file"
-                                        id="modal-invoice-upload"
-                                        className="hidden"
-                                        accept=".pdf,.png,.jpg,.jpeg"
-                                        onChange={handleFileUpload}
-                                        disabled={uploadLoading}
-                                    />
-                                    <label
-                                        htmlFor="modal-invoice-upload"
-                                        className="cursor-pointer"
-                                    >
-                                        <div className="flex flex-col items-center">
-                                            <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-                                            <p className="text-sm font-medium mb-1">
-                                                Click to upload or drag and drop
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">
-                                                PDF, PNG, JPG up to 10MB
-                                            </p>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-                        )}
+                        {/* AI Upload Section for create mode */}
+                        {createModeContent}
 
                         {/* Manual Form */}
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            {/* Client Information */}
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2 pb-2 border-b">
-                                    <User className="h-5 w-5 text-primary" />
-                                    <h3 className="font-semibold text-lg">Client Information</h3>
-                                </div>
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="modal-clientName">
-                                            <User className="h-4 w-4 inline mr-1" />
-                                            Client Name *
-                                        </Label>
-                                        <Input
-                                            id="modal-clientName"
-                                            name="clientName"
-                                            value={formData.clientName}
-                                            onChange={handleInputChange}
-                                            required
-                                            placeholder="John Doe"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="modal-clientEmail">
-                                            <Mail className="h-4 w-4 inline mr-1" />
-                                            Client Email *
-                                        </Label>
-                                        <Input
-                                            id="modal-clientEmail"
-                                            name="clientEmail"
-                                            type="email"
-                                            value={formData.clientEmail}
-                                            onChange={handleInputChange}
-                                            required
-                                            placeholder="john@company.com"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Invoice Details */}
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2 pb-2 border-b">
-                                    <FileText className="h-5 w-5 text-primary" />
-                                    <h3 className="font-semibold text-lg">Invoice Details</h3>
-                                </div>
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="modal-invoiceNumber">
-                                            <Hash className="h-4 w-4 inline mr-1" />
-                                            Invoice Number *
-                                        </Label>
-                                        <Input
-                                            id="modal-invoiceNumber"
-                                            name="invoiceNumber"
-                                            value={formData.invoiceNumber}
-                                            onChange={handleInputChange}
-                                            required
-                                            placeholder="INV-001"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="modal-dueDate">
-                                            <Calendar className="h-4 w-4 inline mr-1" />
-                                            Due Date *
-                                        </Label>
-                                        <Input
-                                            id="modal-dueDate"
-                                            name="dueDate"
-                                            type="date"
-                                            value={formData.dueDate}
-                                            onChange={handleInputChange}
-                                            required
-                                            min={format(new Date(), 'yyyy-MM-dd')}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div className="space-y-2 md:col-span-2">
-                                        <Label htmlFor="modal-amount">
-                                            <DollarSign className="h-4 w-4 inline mr-1" />
-                                            Amount *
-                                        </Label>
-                                        <Input
-                                            id="modal-amount"
-                                            name="amount"
-                                            type="number"
-                                            step="0.01"
-                                            value={formData.amount}
-                                            onChange={handleInputChange}
-                                            required
-                                            placeholder="10000.00"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="modal-currency">Currency</Label>
-                                        <select
-                                            id="modal-currency"
-                                            name="currency"
-                                            value={formData.currency}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value }))}
-                                            className="w-full h-9 px-3 rounded-md border border-input bg-transparent text-sm"
-                                        >
-                                            <option value="INR">₹ INR</option>
-                                            <option value="USD">$ USD</option>
-                                            <option value="EUR">€ EUR</option>
-                                            <option value="GBP">£ GBP</option>
-                                            <option value="CAD">$ CAD</option>
-                                            <option value="AUD">$ AUD</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="modal-description">
-                                        <FileText className="h-4 w-4 inline mr-1" />
-                                        Description (Optional)
-                                    </Label>
-                                    <Textarea
-                                        id="modal-description"
-                                        name="description"
-                                        value={formData.description}
-                                        onChange={handleInputChange}
-                                        placeholder="Web development services for Project X..."
-                                        rows={3}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Payment Method Selection */}
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2 pb-2 border-b">
-                                    <Smartphone className="h-5 w-5 text-primary" />
-                                    <h3 className="font-semibold text-lg">Payment Method</h3>
-                                </div>
-                                
-                                <div className="space-y-4">
-                                    {/* UPI + Razorpay Option */}
-                                    <div className="p-4 border-2 border-green-200 bg-green-50 dark:bg-green-950/20 rounded-lg">
-                                        <div className="flex items-start space-x-3">
-                                            <input
-                                                type="radio"
-                                                id="upi-razorpay-create"
-                                                name="paymentMethod"
-                                                value="razorpay"
-                                                checked={formData.paymentProvider === 'razorpay'}
-                                                onChange={(e) => setFormData(prev => ({ 
-                                                    ...prev, 
-                                                    paymentProvider: e.target.value 
-                                                }))}
-                                                className="w-4 h-4 text-green-600 mt-1"
-                                            />
-                                            <div className="flex-1">
-                                                <Label htmlFor="upi-razorpay-create" className="flex items-center gap-2 cursor-pointer">
-                                                    <div className="flex items-center gap-2">
-                                                        <QrCode className="h-4 w-4 text-green-600" />
-                                                        <span className="font-semibold text-green-800">UPI + Cards via Razorpay</span>
-                                                        <span className="text-xs bg-green-200 text-green-800 px-2 py-0.5 rounded-full font-medium">
-                                                            Recommended
-                                                        </span>
-                                                    </div>
-                                                </Label>
-                                                <div className="mt-2 space-y-1">
-                                                    <div className="flex items-center gap-2 text-sm text-green-700">
-                                                        <CheckCircle2 className="h-4 w-4" />
-                                                        <span>Instant UPI payments (PhonePe, GPay, Paytm)</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-sm text-green-700">
-                                                        <CheckCircle2 className="h-4 w-4" />
-                                                        <span>Auto-detection when client pays</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-sm text-green-700">
-                                                        <CheckCircle2 className="h-4 w-4" />
-                                                        <span>QR code + UPI link in emails</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-sm text-green-700">
-                                                        <CheckCircle2 className="h-4 w-4" />
-                                                        <span>Cards & net banking backup</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    {/* Manual Payment Option */}
-                                    <div className="p-4 border rounded-lg">
-                                        <div className="flex items-start space-x-3">
-                                            <input
-                                                type="radio"
-                                                id="manual-payment-create"
-                                                name="paymentMethod"
-                                                value=""
-                                                checked={formData.paymentProvider === ''}
-                                                onChange={(e) => setFormData(prev => ({ 
-                                                    ...prev, 
-                                                    paymentProvider: e.target.value 
-                                                }))}
-                                                className="w-4 h-4 text-primary mt-1"
-                                            />
-                                            <div className="flex-1">
-                                                <Label htmlFor="manual-payment-create" className="flex items-center gap-2 cursor-pointer">
-                                                    <Link className="h-4 w-4" />
-                                                    <span className="font-medium">Manual Payment Link</span>
-                                                </Label>
-                                                <p className="text-sm text-muted-foreground mt-1">
-                                                    Add your own UPI ID, bank details, or payment link. 
-                                                    You&apos;ll need to manually confirm payments.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Manual Payment Link Field */}
-                                {formData.paymentProvider === '' && (
-                                    <div className="space-y-2">
-                                        <Label htmlFor="modal-paymentLink-create">
-                                            <Link className="h-4 w-4 inline mr-1" />
-                                            Payment Link or UPI ID
-                                        </Label>
-                                        <Input
-                                            id="modal-paymentLink-create"
-                                            name="paymentLink"
-                                            type="text"
-                                            value={formData.paymentLink}
-                                            onChange={handleInputChange}
-                                            placeholder="yourname@paytm OR https://paypal.me/yourname"
-                                        />
-                                        <p className="text-sm text-muted-foreground">
-                                            Enter your UPI ID (like yourname@paytm) or payment link
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex justify-end space-x-3 pt-6 border-t">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => handleOpenChange(false)}
-                                    disabled={loading}
-                                    className="px-6"
-                                >
-                                    Cancel
-                                </Button>
-                                <Button 
-                                    type="submit" 
-                                    disabled={loading}
-                                    className="px-6"
-                                >
-                                    {loading ? (
-                                        <>
-                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                            Creating...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <FileText className="h-4 w-4 mr-2" />
-                                            Create Invoice
-                                        </>
-                                    )}
-                                </Button>
-                            </div>
+                            {formFields}
+                            {createModeActions}
                         </form>
                     </div>
                 </ScrollArea>

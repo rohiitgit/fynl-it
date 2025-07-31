@@ -1,3 +1,4 @@
+// src/app/invoices/[id]/setup-messages/page.tsx - Enhanced with edit support
 "use client";
 
 import { use, useEffect, useState, useCallback } from "react";
@@ -38,6 +39,9 @@ import {
   MessageCircle,
   Timer,
   Target,
+  RefreshCw,
+  Trash2,
+  Save,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/lib/hooks/use-toast";
@@ -52,6 +56,7 @@ import { useMessageGeneration } from "@/lib/hooks/use-message-generation";
 import { format, addDays } from "date-fns";
 
 type Invoice = Tables<"invoices">;
+type FollowUp = Tables<"follow_ups">;
 
 interface GeneratedMessage {
   id: string;
@@ -62,6 +67,8 @@ interface GeneratedMessage {
   content: string;
   scheduledDate: Date;
   enabled: boolean;
+  existingFollowUpId?: string; // For tracking existing follow-ups
+  isModified?: boolean; // Track if message was changed
 }
 
 interface UserProfile {
@@ -111,17 +118,15 @@ export default function SetupMessagesPage({
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [messages, setMessages] = useState<GeneratedMessage[]>([]);
+  const [existingFollowUps, setExistingFollowUps] = useState<FollowUp[]>([]);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [editingMessage, setEditingMessage] = useState<GeneratedMessage | null>(
-    null,
-  );
-  const [previewMessage, setPreviewMessage] = useState<GeneratedMessage | null>(
-    null,
-  );
+  const [editingMessage, setEditingMessage] = useState<GeneratedMessage | null>(null);
+  const [previewMessage, setPreviewMessage] = useState<GeneratedMessage | null>(null);
   const [enhancingId, setEnhancingId] = useState<string | null>(null);
 
-  // Load invoice and user data
+  // Load invoice, user data, and existing follow-ups
   const loadData = useCallback(async () => {
     try {
       // Get current user
@@ -157,11 +162,32 @@ export default function SetupMessagesPage({
         .eq("user_id", user.id)
         .single();
 
+      // Check for existing follow-ups
+      const { data: existingData, error: existingError } = await supabase
+        .from("follow_ups")
+        .select("*")
+        .eq("invoice_id", id)
+        .eq("user_id", user.id)
+        .order("scheduled_for", { ascending: true });
+
+      if (existingError) {
+        console.error("Error loading existing follow-ups:", existingError);
+      }
+
       setInvoice(invoiceData);
       setUserProfile(profileData);
+      setExistingFollowUps(existingData || []);
 
-      // Generate initial messages
-      generateInitialMessages(invoiceData, profileData);
+      // Determine if we're in edit mode (has existing follow-ups)
+      const hasExisting = (existingData || []).length > 0;
+      setIsEditMode(hasExisting);
+
+      // Generate messages based on mode
+      if (hasExisting) {
+        generateMessagesFromExisting(invoiceData, profileData, existingData || []);
+      } else {
+        generateInitialMessages(invoiceData, profileData);
+      }
     } catch (error) {
       console.error("Error loading data:", error);
       toast({
@@ -173,6 +199,42 @@ export default function SetupMessagesPage({
     }
   }, [id, router, toast]);
 
+  // Generate messages from existing follow-ups (edit mode)
+  const generateMessagesFromExisting = (
+    invoiceData: Invoice,
+    profileData: UserProfile | null,
+    existingData: FollowUp[]
+  ) => {
+    const dueDate = new Date(invoiceData.due_date);
+
+    const existingMessages: GeneratedMessage[] = existingData.map((followUp, index) => {
+      const scheduledDate = new Date(followUp.scheduled_for);
+      const diffTime = scheduledDate.getTime() - dueDate.getTime();
+      const dayOffset = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+      // Try to match with default templates to get type and tone
+      const matchingTemplate = DEFAULT_TEMPLATES.find(
+        (template) => template.dayOffset === dayOffset
+      ) || DEFAULT_TEMPLATES[0];
+
+      return {
+        id: `existing-${index}`,
+        type: followUp.email_type,
+        tone: (matchingTemplate.tone || 'professional') as MessageTone,
+        dayOffset,
+        subject: followUp.subject,
+        content: followUp.content,
+        scheduledDate,
+        enabled: followUp.status === 'scheduled',
+        existingFollowUpId: followUp.id,
+        isModified: false,
+      };
+    });
+
+    setMessages(existingMessages);
+  };
+
+  // Generate initial messages from templates (create mode)
   const generateInitialMessages = (
     invoiceData: Invoice,
     profileData: UserProfile | null,
@@ -218,6 +280,7 @@ export default function SetupMessagesPage({
           ),
           scheduledDate,
           enabled: true,
+          isModified: false,
         };
       },
     );
@@ -225,19 +288,34 @@ export default function SetupMessagesPage({
     setMessages(generatedMessages);
   };
 
+  // Reset to default templates
+  const handleResetToDefaults = () => {
+    if (invoice && userProfile) {
+      generateInitialMessages(invoice, userProfile);
+      toast({
+        title: "Reset to defaults",
+        description: "Messages have been reset to default templates",
+      });
+    }
+  };
+
   useEffect(() => {
     loadData();
   }, [loadData]);
 
   const handleEditMessage = (message: GeneratedMessage) => {
-    setEditingMessage({ ...message });
+    setEditingMessage({ ...message, isModified: true });
   };
 
   const handleSaveEdit = () => {
     if (!editingMessage) return;
 
     setMessages((prev) =>
-      prev.map((msg) => (msg.id === editingMessage.id ? editingMessage : msg)),
+      prev.map((msg) => 
+        msg.id === editingMessage.id 
+          ? { ...editingMessage, isModified: true }
+          : msg
+      ),
     );
     setEditingMessage(null);
 
@@ -275,7 +353,12 @@ export default function SetupMessagesPage({
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === message.id
-            ? { ...msg, subject: enhanced.subject, content: enhanced.content }
+            ? { 
+                ...msg, 
+                subject: enhanced.subject, 
+                content: enhanced.content,
+                isModified: true 
+              }
             : msg,
         ),
       );
@@ -298,9 +381,19 @@ export default function SetupMessagesPage({
   const toggleMessageEnabled = (messageId: string) => {
     setMessages((prev) =>
       prev.map((msg) =>
-        msg.id === messageId ? { ...msg, enabled: !msg.enabled } : msg,
+        msg.id === messageId 
+          ? { ...msg, enabled: !msg.enabled, isModified: true }
+          : msg,
       ),
     );
+  };
+
+  const handleDeleteMessage = (messageId: string) => {
+    setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+    toast({
+      title: "Message deleted",
+      description: "The message has been removed from the sequence",
+    });
   };
 
   const handleActivateSequence = async () => {
@@ -313,34 +406,93 @@ export default function SetupMessagesPage({
       } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
-      // Save enabled messages to follow_ups table
       const enabledMessages = messages.filter((msg) => msg.enabled);
 
-      const followUps = enabledMessages.map((msg) => ({
-        invoice_id: invoice.id,
-        user_id: user.id,
-        email_type: msg.type,
-        subject: msg.subject,
-        content: msg.content,
-        scheduled_for: msg.scheduledDate.toISOString(),
-        status: "scheduled",
-      }));
+      if (isEditMode) {
+        // Update existing follow-ups
+        for (const message of enabledMessages) {
+          if (message.existingFollowUpId) {
+            // Update existing follow-up
+            const { error } = await supabase
+              .from("follow_ups")
+              .update({
+                subject: message.subject,
+                content: message.content,
+                scheduled_for: message.scheduledDate.toISOString(),
+                email_type: message.type,
+                status: message.enabled ? 'scheduled' : 'cancelled',
+              })
+              .eq("id", message.existingFollowUpId);
 
-      const { error } = await supabase.from("follow_ups").insert(followUps);
+            if (error) throw error;
+          } else {
+            // Create new follow-up (for added messages)
+            const { error } = await supabase
+              .from("follow_ups")
+              .insert({
+                invoice_id: invoice.id,
+                user_id: user.id,
+                email_type: message.type,
+                subject: message.subject,
+                content: message.content,
+                scheduled_for: message.scheduledDate.toISOString(),
+                status: "scheduled",
+              });
 
-      if (error) throw error;
+            if (error) throw error;
+          }
+        }
 
-      toast({
-        title: "Follow-up sequence activated!",
-        description: `${enabledMessages.length} messages scheduled`,
-      });
+        // Handle deleted messages (existing follow-ups not in current messages)
+        const currentExistingIds = enabledMessages
+          .map(msg => msg.existingFollowUpId)
+          .filter(Boolean);
+        
+        const deletedFollowUpIds = existingFollowUps
+          .filter(fu => !currentExistingIds.includes(fu.id))
+          .map(fu => fu.id);
+
+        if (deletedFollowUpIds.length > 0) {
+          const { error } = await supabase
+            .from("follow_ups")
+            .update({ status: 'cancelled' })
+            .in("id", deletedFollowUpIds);
+
+          if (error) throw error;
+        }
+
+        toast({
+          title: "Follow-up sequence updated!",
+          description: `${enabledMessages.length} messages updated`,
+        });
+      } else {
+        // Create new follow-ups
+        const followUps = enabledMessages.map((msg) => ({
+          invoice_id: invoice.id,
+          user_id: user.id,
+          email_type: msg.type,
+          subject: msg.subject,
+          content: msg.content,
+          scheduled_for: msg.scheduledDate.toISOString(),
+          status: "scheduled",
+        }));
+
+        const { error } = await supabase.from("follow_ups").insert(followUps);
+
+        if (error) throw error;
+
+        toast({
+          title: "Follow-up sequence activated!",
+          description: `${enabledMessages.length} messages scheduled`,
+        });
+      }
 
       router.push("/dashboard");
     } catch (error) {
       console.error("Error saving follow-ups:", error);
       toast({
         title: "Error",
-        description: "Failed to activate follow-up sequence",
+        description: `Failed to ${isEditMode ? 'update' : 'activate'} follow-up sequence`,
       });
     } finally {
       setSaving(false);
@@ -380,8 +532,7 @@ export default function SetupMessagesPage({
                   Invoice Not Found
                 </h3>
                 <p className="text-muted-foreground text-sm">
-                  The invoice you&apos;re looking for doesn&apos;t exist or you
-                  don&apos;t have access to it.
+                  The invoice you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.
                 </p>
               </div>
               <Button
@@ -399,6 +550,7 @@ export default function SetupMessagesPage({
   }
 
   const enabledCount = messages.filter((m) => m.enabled).length;
+  const modifiedCount = messages.filter((m) => m.isModified).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary">
@@ -416,7 +568,7 @@ export default function SetupMessagesPage({
               Back to Dashboard
             </Button>
             <div className="text-sm font-medium text-muted-foreground">
-              Setup Messages • Invoice {invoice.invoice_number}
+              {isEditMode ? 'Edit Messages' : 'Setup Messages'} • Invoice {invoice.invoice_number}
             </div>
           </div>
         </div>
@@ -434,14 +586,22 @@ export default function SetupMessagesPage({
                   </div>
                   <div>
                     <CardTitle className="text-xl">
-                      Setup Follow-up Messages
+                      {isEditMode ? 'Edit Follow-up Messages' : 'Setup Follow-up Messages'}
                     </CardTitle>
                     <CardDescription className="text-base">
-                      Configure automated reminders for{" "}
+                      {isEditMode ? 'Modify automated reminders for' : 'Configure automated reminders for'}{" "}
                       <span className="font-medium">{invoice.client_name}</span>
                     </CardDescription>
                   </div>
                 </div>
+                {isEditMode && (
+                  <div className="ml-13 mt-2">
+                    <Badge variant="secondary" className="gap-1">
+                      <Edit className="h-3 w-3" />
+                      Editing existing sequence
+                    </Badge>
+                  </div>
+                )}
               </div>
               <Badge
                 variant="outline"
@@ -513,11 +673,25 @@ export default function SetupMessagesPage({
                     </CardTitle>
                     <CardDescription>
                       {enabledCount} of {messages.length} messages enabled
+                      {modifiedCount > 0 && ` • ${modifiedCount} modified`}
                     </CardDescription>
                   </div>
-                  <Badge variant="secondary" className="px-3 py-1">
-                    {enabledCount} Active
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="px-3 py-1">
+                      {enabledCount} Active
+                    </Badge>
+                    {isEditMode && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleResetToDefaults}
+                        className="gap-2"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                        Reset to Defaults
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="pb-8">
@@ -534,8 +708,18 @@ export default function SetupMessagesPage({
                           message.enabled
                             ? "bg-card hover:shadow-md border-border/50"
                             : "bg-muted/30 border-muted hover:bg-muted/50"
+                        } ${
+                          message.isModified 
+                            ? "ring-2 ring-blue-200 dark:ring-blue-800" 
+                            : ""
                         }`}
                       >
+                        {message.isModified && (
+                          <div className="absolute -top-2 -right-2 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                            <div className="w-2 h-2 bg-white rounded-full" />
+                          </div>
+                        )}
+
                         <div className="p-6">
                           <div className="flex items-start gap-4">
                             {/* Timeline indicator */}
@@ -567,6 +751,11 @@ export default function SetupMessagesPage({
                                     >
                                       {message.tone}
                                     </Badge>
+                                    {message.existingFollowUpId && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        Existing
+                                      </Badge>
+                                    )}
                                   </div>
                                   <div className="text-sm text-muted-foreground space-y-1">
                                     <div className="flex items-center gap-2">
@@ -616,6 +805,16 @@ export default function SetupMessagesPage({
                                       <Sparkles className="h-4 w-4" />
                                     )}
                                   </Button>
+                                  {isEditMode && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleDeleteMessage(message.id)}
+                                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  )}
                                   <Button
                                     variant={
                                       message.enabled ? "default" : "outline"
@@ -673,7 +872,7 @@ export default function SetupMessagesPage({
               <CardHeader>
                 <CardTitle className="text-lg">Actions</CardTitle>
                 <CardDescription>
-                  Manage your follow-up sequence
+                  {isEditMode ? 'Update your follow-up sequence' : 'Manage your follow-up sequence'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -686,20 +885,36 @@ export default function SetupMessagesPage({
                   {saving ? (
                     <>
                       <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                      Activating...
+                      {isEditMode ? 'Updating...' : 'Activating...'}
                     </>
                   ) : (
                     <>
                       <Send className="h-5 w-5 mr-2" />
-                      Activate Sequence
+                      {isEditMode ? 'Update Sequence' : 'Activate Sequence'}
                     </>
                   )}
                 </Button>
 
                 {enabledCount === 0 && (
                   <p className="text-sm text-muted-foreground text-center">
-                    Enable at least one message to activate
+                    Enable at least one message to {isEditMode ? 'update' : 'activate'}
                   </p>
+                )}
+
+                {modifiedCount > 0 && (
+                  <div className="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <Edit className="h-4 w-4 text-blue-600 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                          {modifiedCount} message(s) modified
+                        </p>
+                        <p className="text-xs text-blue-800 dark:text-blue-200 mt-1">
+                          Don&apos;t forget to save your changes
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -736,6 +951,9 @@ export default function SetupMessagesPage({
                             <div>
                               <div className="text-sm font-medium capitalize">
                                 {message.type.replace("_", " ")}
+                                {message.isModified && (
+                                  <span className="text-xs text-blue-600 ml-2">•</span>
+                                )}
                               </div>
                               <div className="text-xs text-muted-foreground">
                                 {message.tone}
@@ -778,7 +996,7 @@ export default function SetupMessagesPage({
                 <div className="flex gap-2">
                   <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
                   <p>
-                    Preview messages before activating to ensure they sound
+                    Preview messages before {isEditMode ? 'updating' : 'activating'} to ensure they sound
                     right
                   </p>
                 </div>
@@ -788,6 +1006,14 @@ export default function SetupMessagesPage({
                     Disable unnecessary messages to avoid over-communication
                   </p>
                 </div>
+                {isEditMode && (
+                  <div className="flex gap-2">
+                    <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
+                    <p>
+                      Use &quot;Reset to Defaults&quot; to start fresh with template messages
+                    </p>
+                  </div>
+                )}
                 {aiError && (
                   <div className="flex gap-2 mt-4 p-2 bg-red-50 dark:bg-red-950/20 rounded border border-red-200">
                     <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
@@ -925,7 +1151,7 @@ export default function SetupMessagesPage({
                 Cancel
               </Button>
               <Button onClick={handleSaveEdit} className="px-6">
-                <CheckCircle className="h-4 w-4 mr-2" />
+                <Save className="h-4 w-4 mr-2" />
                 Save Changes
               </Button>
             </div>
@@ -1047,9 +1273,13 @@ export default function SetupMessagesPage({
                         </div>
                         <div className="font-medium">
                           {previewMessage.enabled ? "Enabled" : "Disabled"}
+                          {previewMessage.isModified && (
+                            <span className="text-blue-600 ml-1">•</span>
+                          )}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {previewMessage.enabled ? "Will be sent" : "Skipped"}
+                          {previewMessage.isModified && " • Modified"}
                         </div>
                       </div>
                     </CardContent>
