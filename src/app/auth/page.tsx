@@ -1,4 +1,4 @@
-// src/app/auth/page.tsx - Fixed signup/signin switching
+// src/app/auth/page.tsx - Fixed ESLint errors with escaped quotes
 'use client'
 
 import { useState } from "react";
@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { DollarSign, AlertCircle, CheckCircle, Loader2, Mail } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
@@ -21,6 +21,7 @@ export default function AuthPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [showEmailSent, setShowEmailSent] = useState(false);
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
 
@@ -34,7 +35,7 @@ export default function AuthPage() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             first_name: firstName,
             last_name: lastName,
@@ -49,17 +50,20 @@ export default function AuthPage() {
           description: error.message,
         });
       } else if (data.user && !data.user.email_confirmed_at) {
+        // Show success message for unconfirmed email
+        setShowEmailSent(true);
         setMessage({ 
           type: "success", 
-          text: "Please check your email for the confirmation link!" 
+          text: `Please check your email (${email}) and click the confirmation link to activate your account.` 
         });
         toast({
-          title: "Sign up successful",
-          description: "Please check your email for the confirmation link",
+          title: "Check your email!",
+          description: "We&apos;ve sent you a confirmation link",
         });
       } else if (data.user && data.user.email_confirmed_at) {
+        // Email was already confirmed (shouldn't happen on signup, but just in case)
         toast({
-          title: "Welcome to Fynl-It!",
+          title: "Welcome to Fynl-it!",
           description: "Your account has been created successfully",
         });
       }
@@ -83,20 +87,73 @@ export default function AuthPage() {
       });
 
       if (error) {
-        setMessage({ type: "error", text: error.message });
-        toast({
-          title: "Sign in failed",
-          description: error.message,
-        });
+        // Handle specific error cases
+        if (error.message === 'Email not confirmed') {
+          setMessage({ 
+            type: "error", 
+            text: "Please check your email and click the confirmation link before signing in." 
+          });
+          toast({
+            title: "Email not verified",
+            description: "Please confirm your email address first",
+          });
+        } else {
+          setMessage({ type: "error", text: error.message });
+          toast({
+            title: "Sign in failed",
+            description: error.message,
+          });
+        }
       } else if (data.user) {
         toast({
           title: "Welcome back!",
-          description: "You've been signed in successfully",
+          description: "You&apos;ve been signed in successfully",
         });
       }
     } catch (err) {
       console.error('Sign in error:', err);
       setMessage({ type: "error", text: "An unexpected error occurred" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!email) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Failed to resend",
+          description: error.message,
+        });
+      } else {
+        toast({
+          title: "Email sent!",
+          description: "Please check your inbox for the confirmation link",
+        });
+      }
+    } catch (err) {
+      console.error('Resend error:', err);
+      toast({
+        title: "Error",
+        description: "Failed to resend confirmation email",
+      });
     } finally {
       setLoading(false);
     }
@@ -141,9 +198,71 @@ export default function AuthPage() {
     );
   }
 
+  // Show email sent confirmation screen
+  if (showEmailSent) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <Card className="shadow-2xl border-0 bg-card/80 backdrop-blur-lg">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mail className="h-8 w-8 text-green-600" />
+              </div>
+              <CardTitle className="text-xl">Check Your Email</CardTitle>
+              <CardDescription>
+                We&apos;ve sent a confirmation link to <strong>{email}</strong>
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  Click the confirmation link in your email to activate your account and start using Fynl-it.
+                </p>
+              </div>
+              
+              <div className="text-center space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Didn&apos;t receive the email? Check your spam folder or
+                </p>
+                <Button 
+                  variant="outline" 
+                  onClick={handleResendConfirmation}
+                  disabled={loading}
+                  className="w-full"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    "Resend confirmation email"
+                  )}
+                </Button>
+              </div>
+
+              <div className="text-center pt-4 border-t">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => {
+                    setShowEmailSent(false);
+                    setMessage({ type: "", text: "" });
+                  }}
+                  className="text-sm"
+                >
+                  ← Back to sign in
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary flex items-center justify-center p-4 relative">
-      {/* Background pattern - fixed */}
+      {/* Background pattern */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute inset-0" style={{
           backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 0)`,
@@ -152,25 +271,25 @@ export default function AuthPage() {
       </div>
       
       <div className="w-full max-w-md relative z-10">
-        {/* Enhanced Header */}
+        {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-3 mb-4">
             <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
               <DollarSign className="h-6 w-6 text-primary" />
             </div>
             <span className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-              Fynl-It
+              Fynl-it
             </span>
           </div>
           <div className="space-y-2">
-            <h1 className="text-xl font-semibold text-foreground">Welcome to Fynl-It</h1>
+            <h1 className="text-xl font-semibold text-foreground">Welcome to Fynl-it</h1>
             <p className="text-muted-foreground">
               Join thousands of freelancers who will never chase payments again.
             </p>
           </div>
         </div>
 
-        {/* Enhanced Auth Form */}
+        {/* Auth Form */}
         <Card className="shadow-2xl border-0 bg-card/80 backdrop-blur-lg relative">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-lg" />
           <div className="relative">
@@ -225,7 +344,7 @@ export default function AuthPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email" className="text-sm font-medium">
-                        Email
+                        Email *
                       </Label>
                       <Input
                         id="email"
@@ -235,7 +354,11 @@ export default function AuthPage() {
                         required
                         disabled={loading}
                         className="transition-all focus:ring-2 focus:ring-primary/20"
+                        placeholder="your@email.com"
                       />
+                      <p className="text-xs text-muted-foreground">
+                        We&apos;ll send a confirmation link to this email
+                      </p>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="password" className="text-sm font-medium">
@@ -302,6 +425,23 @@ export default function AuthPage() {
                         className="transition-all focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
+
+                    {/* Email not confirmed message */}
+                    {message.type === "error" && message.text.includes("Email not confirmed") && (
+                      <div className="text-center">
+                        <Button 
+                          type="button"
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleResendConfirmation}
+                          disabled={loading}
+                          className="text-xs"
+                        >
+                          Resend confirmation email
+                        </Button>
+                      </div>
+                    )}
+
                     <Button 
                       type="submit" 
                       className="w-full h-11 font-medium shadow-lg hover:shadow-xl transition-all duration-300" 
@@ -320,7 +460,7 @@ export default function AuthPage() {
                 </TabsContent>
               </Tabs>
 
-              {/* Enhanced Message Display */}
+              {/* Message Display */}
               {message.text && (
                 <Alert className={`mt-6 border-2 ${
                   message.type === "error" 
@@ -353,7 +493,7 @@ export default function AuthPage() {
           </div>
         </Card>
 
-        {/* Enhanced Benefits */}
+        {/* Benefits */}
         <div className="mt-8 text-center">
           <div className="inline-flex items-center justify-center space-x-6 px-4 py-3 bg-card/50 backdrop-blur-sm border border-border/50 rounded-full">
             <div className="flex items-center space-x-2">
@@ -363,7 +503,7 @@ export default function AuthPage() {
             <div className="w-px h-4 bg-border" />
             <div className="flex items-center space-x-2">
               <CheckCircle className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-medium">No credit card required</span>
+              <span className="text-sm font-medium">Secure email verification</span>
             </div>
           </div>
         </div>
