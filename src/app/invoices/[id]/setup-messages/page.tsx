@@ -1,4 +1,4 @@
-// src/app/invoices/[id]/setup-messages/page.tsx - Enhanced with edit support
+// src/app/invoices/[id]/setup-messages/page.tsx - Enhanced with edit support and responsive design
 "use client";
 
 import { use, useEffect, useState, useCallback } from "react";
@@ -501,15 +501,15 @@ export default function SetupMessagesPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center">
-        <div className="text-center space-y-4">
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center p-4">
+        <div className="text-center space-y-4 max-w-sm w-full">
           <div className="relative">
             <Loader2 className="h-12 w-12 text-primary animate-spin mx-auto" />
             <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
           </div>
           <div>
             <h3 className="font-semibold text-lg">Loading invoice details</h3>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Preparing your message setup...
             </p>
           </div>
@@ -556,7 +556,7 @@ export default function SetupMessagesPage({
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary">
       {/* Header */}
       <nav className="border-b border-border bg-card/50 backdrop-blur-lg sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
@@ -565,38 +565,44 @@ export default function SetupMessagesPage({
               className="hover:bg-accent/50"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
+              <span className="hidden sm:inline">Back to Dashboard</span>
+              <span className="sm:hidden">Back</span>
             </Button>
-            <div className="text-sm font-medium text-muted-foreground">
-              {isEditMode ? 'Edit Messages' : 'Setup Messages'} • Invoice {invoice.invoice_number}
+            <div className="text-xs sm:text-sm font-medium text-muted-foreground text-right">
+              <div className="hidden sm:block">
+                {isEditMode ? 'Edit Messages' : 'Setup Messages'} • Invoice {invoice.invoice_number}
+              </div>
+              <div className="sm:hidden">
+                {isEditMode ? 'Edit' : 'Setup'} • {invoice.invoice_number}
+              </div>
             </div>
           </div>
         </div>
       </nav>
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
         {/* Invoice Summary */}
-        <Card className="mb-8 border-0 shadow-lg bg-gradient-to-r from-card to-card/50">
-          <CardHeader className="pb-4">
-            <div className="flex items-start justify-between">
+        <Card className="mb-6 sm:mb-8 border-0 shadow-lg bg-gradient-to-r from-card to-card/50">
+          <CardHeader className="pb-3 sm:pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                    <Mail className="h-5 w-5 text-primary" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl">
+                    <CardTitle className="text-lg sm:text-xl">
                       {isEditMode ? 'Edit Follow-up Messages' : 'Setup Follow-up Messages'}
                     </CardTitle>
-                    <CardDescription className="text-base">
+                    <CardDescription className="text-sm sm:text-base">
                       {isEditMode ? 'Modify automated reminders for' : 'Configure automated reminders for'}{" "}
                       <span className="font-medium">{invoice.client_name}</span>
                     </CardDescription>
                   </div>
                 </div>
                 {isEditMode && (
-                  <div className="ml-13 mt-2">
-                    <Badge variant="secondary" className="gap-1">
+                  <div className="ml-11 sm:ml-13 mt-2">
+                    <Badge variant="secondary" className="gap-1 text-xs">
                       <Edit className="h-3 w-3" />
                       Editing existing sequence
                     </Badge>
@@ -605,20 +611,20 @@ export default function SetupMessagesPage({
               </div>
               <Badge
                 variant="outline"
-                className="text-lg px-4 py-2 font-semibold"
+                className="text-base sm:text-lg px-3 sm:px-4 py-1 sm:py-2 font-semibold self-start"
               >
                 {invoice.currency} {invoice.amount.toFixed(2)}
               </Badge>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               <div className="space-y-1">
                 <div className="text-sm font-medium text-muted-foreground">
                   Client
                 </div>
-                <div className="font-semibold">{invoice.client_name}</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="font-semibold text-sm sm:text-base">{invoice.client_name}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground break-all">
                   {invoice.client_email}
                 </div>
               </div>
@@ -626,10 +632,10 @@ export default function SetupMessagesPage({
                 <div className="text-sm font-medium text-muted-foreground">
                   Due Date
                 </div>
-                <div className="font-semibold">
+                <div className="font-semibold text-sm sm:text-base">
                   {format(new Date(invoice.due_date), "MMMM d, yyyy")}
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   {format(new Date(invoice.due_date), "EEEE")}
                 </div>
               </div>
@@ -637,8 +643,8 @@ export default function SetupMessagesPage({
                 <div className="text-sm font-medium text-muted-foreground">
                   Invoice Number
                 </div>
-                <div className="font-semibold">{invoice.invoice_number}</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="font-semibold text-sm sm:text-base">{invoice.invoice_number}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   {invoice.description ? "With description" : "Basic invoice"}
                 </div>
               </div>
@@ -646,10 +652,10 @@ export default function SetupMessagesPage({
                 <div className="text-sm font-medium text-muted-foreground">
                   Payment Link
                 </div>
-                <div className="font-semibold">
+                <div className="font-semibold text-sm sm:text-base">
                   {invoice.payment_link ? "Included" : "Not provided"}
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   {invoice.payment_link
                     ? "Auto-included in messages"
                     : "Manual payment"}
@@ -660,24 +666,24 @@ export default function SetupMessagesPage({
         </Card>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-          {/* Message Timeline */}
-          <div className="xl:col-span-3">
+        <div className="flex flex-col xl:grid xl:grid-cols-4 gap-6 sm:gap-8">
+          {/* Message Timeline - Show first on mobile */}
+          <div className="order-1 xl:order-1 xl:col-span-3">
             <Card className="border-0 shadow-lg">
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Timer className="h-5 w-5 text-primary" />
+                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                      <Timer className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                       Follow-up Timeline
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-sm">
                       {enabledCount} of {messages.length} messages enabled
                       {modifiedCount > 0 && ` • ${modifiedCount} modified`}
                     </CardDescription>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="px-3 py-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="secondary" className="px-2 sm:px-3 py-1 text-xs">
                       {enabledCount} Active
                     </Badge>
                     {isEditMode && (
@@ -685,22 +691,23 @@ export default function SetupMessagesPage({
                         variant="outline"
                         size="sm"
                         onClick={handleResetToDefaults}
-                        className="gap-2"
+                        className="gap-2 text-xs sm:text-sm px-2 sm:px-3"
                       >
-                        <RefreshCw className="h-4 w-4" />
-                        Reset to Defaults
+                        <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline">Reset to Defaults</span>
+                        <span className="sm:hidden">Reset</span>
                       </Button>
                     )}
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="pb-8">
-                <div className="space-y-6">
+              <CardContent className="pb-6 sm:pb-8">
+                <div className="space-y-4 sm:space-y-6">
                   {messages.map((message, index) => (
                     <div key={message.id} className="relative">
                       {/* Timeline connector */}
                       {index < messages.length - 1 && (
-                        <div className="absolute left-8 top-20 w-0.5 h-12 bg-gradient-to-b from-border to-transparent" />
+                        <div className="absolute left-6 sm:left-8 top-16 sm:top-20 w-0.5 h-8 sm:h-12 bg-gradient-to-b from-border to-transparent" />
                       )}
 
                       <div
@@ -715,23 +722,23 @@ export default function SetupMessagesPage({
                         }`}
                       >
                         {message.isModified && (
-                          <div className="absolute -top-2 -right-2 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                            <div className="w-2 h-2 bg-white rounded-full" />
+                          <div className="absolute -top-2 -right-2 w-3 h-3 sm:w-4 sm:h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full" />
                           </div>
                         )}
 
-                        <div className="p-6">
-                          <div className="flex items-start gap-4">
+                        <div className="p-4 sm:p-6">
+                          <div className="flex items-start gap-3 sm:gap-4">
                             {/* Timeline indicator */}
                             <div
-                              className={`flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center border-2 transition-all ${
+                              className={`flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center border-2 transition-all ${
                                 message.enabled
                                   ? "bg-primary border-primary text-primary-foreground shadow-lg"
                                   : "bg-muted border-muted-foreground/30 text-muted-foreground"
                               }`}
                             >
                               {message.dayOffset === 0 ? (
-                                <Calendar className="h-6 w-6" />
+                                <Calendar className="h-4 w-4 sm:h-6 sm:w-6" />
                               ) : (
                                 getTypeIcon(message.type)
                               )}
@@ -739,10 +746,10 @@ export default function SetupMessagesPage({
 
                             {/* Message content */}
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between mb-3">
+                              <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-3 gap-2">
                                 <div className="space-y-2">
-                                  <div className="flex items-center gap-2">
-                                    <h3 className="font-semibold text-lg capitalize">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <h3 className="font-semibold text-base sm:text-lg capitalize">
                                       {message.type.replace("_", " ")}
                                     </h3>
                                     <Badge
@@ -759,50 +766,54 @@ export default function SetupMessagesPage({
                                   </div>
                                   <div className="text-sm text-muted-foreground space-y-1">
                                     <div className="flex items-center gap-2">
-                                      <Clock className="h-3 w-3" />
-                                      {message.dayOffset === 0
-                                        ? "Sent on due date"
-                                        : `Sent ${message.dayOffset} days after due date`}
+                                      <Clock className="h-3 w-3 flex-shrink-0" />
+                                      <span className="text-xs sm:text-sm">
+                                        {message.dayOffset === 0
+                                          ? "Sent on due date"
+                                          : `Sent ${message.dayOffset} days after due date`}
+                                      </span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                      <Calendar className="h-3 w-3" />
-                                      {format(
-                                        message.scheduledDate,
-                                        "MMMM d, yyyy • EEEE",
-                                      )}
+                                      <Calendar className="h-3 w-3 flex-shrink-0" />
+                                      <span className="text-xs sm:text-sm">
+                                        {format(
+                                          message.scheduledDate,
+                                          "MMMM d, yyyy • EEEE",
+                                        )}
+                                      </span>
                                     </div>
                                   </div>
                                 </div>
 
                                 {/* Action buttons */}
-                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => setPreviewMessage(message)}
-                                    className="h-8 w-8 p-0"
+                                    className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                                   >
-                                    <Eye className="h-4 w-4" />
+                                    <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                                   </Button>
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => handleEditMessage(message)}
-                                    className="h-8 w-8 p-0"
+                                    className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                                   >
-                                    <Edit className="h-4 w-4" />
+                                    <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                                   </Button>
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => handleEnhanceWithAI(message)}
                                     disabled={enhancingId === message.id}
-                                    className="h-8 w-8 p-0"
+                                    className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                                   >
                                     {enhancingId === message.id ? (
-                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                      <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
                                     ) : (
-                                      <Sparkles className="h-4 w-4" />
+                                      <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
                                     )}
                                   </Button>
                                   {isEditMode && (
@@ -810,9 +821,9 @@ export default function SetupMessagesPage({
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => handleDeleteMessage(message.id)}
-                                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                      className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-destructive hover:text-destructive"
                                     >
-                                      <Trash2 className="h-4 w-4" />
+                                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                                     </Button>
                                   )}
                                   <Button
@@ -823,12 +834,12 @@ export default function SetupMessagesPage({
                                     onClick={() =>
                                       toggleMessageEnabled(message.id)
                                     }
-                                    className="h-8 w-8 p-0"
+                                    className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                                   >
                                     {message.enabled ? (
-                                      <CheckCircle className="h-4 w-4" />
+                                      <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
                                     ) : (
-                                      <Settings className="h-4 w-4" />
+                                      <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
                                     )}
                                   </Button>
                                 </div>
@@ -840,7 +851,7 @@ export default function SetupMessagesPage({
                                   <div className="text-sm font-medium text-muted-foreground mb-1">
                                     Subject
                                   </div>
-                                  <div className="font-medium text-sm bg-muted/50 rounded-md px-3 py-2 border">
+                                  <div className="font-medium text-xs sm:text-sm bg-muted/50 rounded-md px-3 py-2 border">
                                     &quot;{message.subject}&quot;
                                   </div>
                                 </div>
@@ -848,7 +859,7 @@ export default function SetupMessagesPage({
                                   <div className="text-sm font-medium text-muted-foreground mb-1">
                                     Preview
                                   </div>
-                                  <div className="text-sm text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border">
+                                  <div className="text-xs sm:text-sm text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border">
                                     {message.content.substring(0, 150)}
                                     {message.content.length > 150 && "..."}
                                   </div>
@@ -865,38 +876,38 @@ export default function SetupMessagesPage({
             </Card>
           </div>
 
-          {/* Actions Panel */}
-          <div className="space-y-6">
+          {/* Actions Panel - Show second on mobile */}
+          <div className="order-2 xl:order-2 space-y-4 sm:space-y-6">
             {/* Primary Actions */}
             <Card className="border-0 shadow-lg">
               <CardHeader>
-                <CardTitle className="text-lg">Actions</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-base sm:text-lg">Actions</CardTitle>
+                <CardDescription className="text-sm">
                   {isEditMode ? 'Update your follow-up sequence' : 'Manage your follow-up sequence'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button
-                  className="w-full h-12 text-base font-medium"
+                  className="w-full h-10 sm:h-12 text-sm sm:text-base font-medium"
                   onClick={handleActivateSequence}
                   disabled={saving || enabledCount === 0}
                   size="lg"
                 >
                   {saving ? (
                     <>
-                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 animate-spin" />
                       {isEditMode ? 'Updating...' : 'Activating...'}
                     </>
                   ) : (
                     <>
-                      <Send className="h-5 w-5 mr-2" />
+                      <Send className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                       {isEditMode ? 'Update Sequence' : 'Activate Sequence'}
                     </>
                   )}
                 </Button>
 
                 {enabledCount === 0 && (
-                  <p className="text-sm text-muted-foreground text-center">
+                  <p className="text-xs sm:text-sm text-muted-foreground text-center">
                     Enable at least one message to {isEditMode ? 'update' : 'activate'}
                   </p>
                 )}
@@ -922,8 +933,8 @@ export default function SetupMessagesPage({
             {/* Schedule Summary */}
             <Card className="border-0 shadow-lg">
               <CardHeader>
-                <CardTitle className="text-lg">Schedule Summary</CardTitle>
-                <CardDescription>When messages will be sent</CardDescription>
+                <CardTitle className="text-base sm:text-lg">Schedule Summary</CardTitle>
+                <CardDescription className="text-sm">When messages will be sent</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -945,11 +956,11 @@ export default function SetupMessagesPage({
                           className="flex items-center justify-between py-2 border-b border-border/50 last:border-0"
                         >
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center text-xs font-medium text-primary">
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-primary/10 rounded-full flex items-center justify-center text-xs font-medium text-primary">
                               {index + 1}
                             </div>
                             <div>
-                              <div className="text-sm font-medium capitalize">
+                              <div className="text-xs sm:text-sm font-medium capitalize">
                                 {message.type.replace("_", " ")}
                                 {message.isModified && (
                                   <span className="text-xs text-blue-600 ml-2">•</span>
@@ -961,7 +972,7 @@ export default function SetupMessagesPage({
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm font-medium">
+                            <div className="text-xs sm:text-sm font-medium">
                               {format(message.scheduledDate, "MMM d")}
                             </div>
                             <div className="text-xs text-muted-foreground">
@@ -980,12 +991,12 @@ export default function SetupMessagesPage({
             {/* Tips */}
             <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-blue-600" />
+                <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                   Pro Tips
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm">
+              <CardContent className="space-y-3 text-xs sm:text-sm">
                 <div className="flex gap-2">
                   <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
                   <p>
@@ -1034,32 +1045,32 @@ export default function SetupMessagesPage({
           open={!!editingMessage}
           onOpenChange={() => setEditingMessage(null)}
         >
-          <DialogContent className="max-w-3xl max-h-[90vh]">
+          <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] mx-4">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Edit className="h-5 w-5 text-primary" />
+              <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Edit className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 Edit Message
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-sm">
                 Customize this {editingMessage.type.replace("_", " ")} message
                 for {invoice.client_name}
               </DialogDescription>
             </DialogHeader>
             <ScrollArea className="max-h-[60vh] pr-4">
-              <div className="space-y-6 py-4">
+              <div className="space-y-4 sm:space-y-6 py-4">
                 {/* Message Info */}
-                <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-muted/50 rounded-lg">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center ${getToneColor(editingMessage.tone)}`}
+                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${getToneColor(editingMessage.tone)}`}
                   >
                     {getTypeIcon(editingMessage.type)}
                   </div>
                   <div>
-                    <div className="font-medium capitalize">
+                    <div className="font-medium text-sm sm:text-base capitalize">
                       {editingMessage.type.replace("_", " ")} •{" "}
                       {editingMessage.tone}
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-xs sm:text-sm text-muted-foreground">
                       Scheduled for{" "}
                       {format(editingMessage.scheduledDate, "MMMM d, yyyy")}
                     </div>
@@ -1070,7 +1081,7 @@ export default function SetupMessagesPage({
                 <div className="space-y-2">
                   <Label
                     htmlFor="edit-subject"
-                    className="text-base font-medium"
+                    className="text-sm sm:text-base font-medium"
                   >
                     Subject Line
                   </Label>
@@ -1082,10 +1093,10 @@ export default function SetupMessagesPage({
                         prev ? { ...prev, subject: e.target.value } : null,
                       )
                     }
-                    className="text-base"
+                    className="text-sm sm:text-base"
                     placeholder="Enter email subject..."
                   />
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Keep it clear and professional. This appears in the
                     recipient&apos;s inbox.
                   </p>
@@ -1095,7 +1106,7 @@ export default function SetupMessagesPage({
                 <div className="space-y-2">
                   <Label
                     htmlFor="edit-content"
-                    className="text-base font-medium"
+                    className="text-sm sm:text-base font-medium"
                   >
                     Message Content
                   </Label>
@@ -1107,22 +1118,22 @@ export default function SetupMessagesPage({
                         prev ? { ...prev, content: e.target.value } : null,
                       )
                     }
-                    rows={12}
-                    className="text-base leading-relaxed"
+                    rows={10}
+                    className="text-sm sm:text-base leading-relaxed"
                     placeholder="Enter your message content..."
                   />
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Write as if you&apos;re speaking directly to{" "}
                     {invoice.client_name}. Be professional but human.
                   </p>
                 </div>
 
                 {/* Variables Helper */}
-                <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2 text-sm sm:text-base">
                     Available Variables
                   </h4>
-                  <div className="grid grid-cols-2 gap-2 text-sm text-blue-800 dark:text-blue-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm text-blue-800 dark:text-blue-200">
                     <div>
                       <code>{`{clientName}`}</code> → {invoice.client_name}
                     </div>
@@ -1142,16 +1153,16 @@ export default function SetupMessagesPage({
                 </div>
               </div>
             </ScrollArea>
-            <div className="flex justify-end gap-3 pt-4 border-t">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
               <Button
                 variant="outline"
                 onClick={() => setEditingMessage(null)}
-                className="px-6"
+                className="px-4 sm:px-6 text-sm sm:text-base"
               >
                 Cancel
               </Button>
-              <Button onClick={handleSaveEdit} className="px-6">
-                <Save className="h-4 w-4 mr-2" />
+              <Button onClick={handleSaveEdit} className="px-4 sm:px-6 text-sm sm:text-base">
+                <Save className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                 Save Changes
               </Button>
             </div>
@@ -1165,41 +1176,41 @@ export default function SetupMessagesPage({
           open={!!previewMessage}
           onOpenChange={() => setPreviewMessage(null)}
         >
-          <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] mx-4">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5 text-primary" />
+              <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 Message Preview
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-sm">
                 {previewMessage.type.replace("_", " ")} • Scheduled for{" "}
                 {format(previewMessage.scheduledDate, "MMMM d, yyyy")}
               </DialogDescription>
             </DialogHeader>
             <ScrollArea className="max-h-[70vh]">
-              <div className="space-y-6 py-4">
+              <div className="space-y-4 sm:space-y-6 py-4">
                 {/* Email Header Mockup */}
                 <div className="border rounded-lg overflow-hidden bg-card">
-                  <div className="bg-muted/50 px-4 py-3 border-b text-sm">
-                    <div className="grid grid-cols-1 gap-2">
-                      <div className="flex items-center justify-between">
+                  <div className="bg-muted/50 px-3 sm:px-4 py-2 sm:py-3 border-b text-xs sm:text-sm">
+                    <div className="grid grid-cols-1 gap-1 sm:gap-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                         <span className="font-medium">From:</span>
-                        <span>
+                        <span className="text-xs sm:text-sm break-all">
                           {userProfile?.first_name && userProfile?.last_name
                             ? `${userProfile.first_name} ${userProfile.last_name}`
                             : "Your Name"}{" "}
                           &lt;your-email@domain.com&gt;
                         </span>
                       </div>
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                         <span className="font-medium">To:</span>
-                        <span>
+                        <span className="text-xs sm:text-sm break-all">
                           {invoice.client_name} &lt;{invoice.client_email}&gt;
                         </span>
                       </div>
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                         <span className="font-medium">Date:</span>
-                        <span>
+                        <span className="text-xs sm:text-sm">
                           {format(
                             previewMessage.scheduledDate,
                             "MMMM d, yyyy • h:mm a",
@@ -1210,19 +1221,19 @@ export default function SetupMessagesPage({
                   </div>
 
                   {/* Subject */}
-                  <div className="px-4 py-3 border-b bg-primary/5">
-                    <div className="text-sm font-medium text-muted-foreground mb-1">
+                  <div className="px-3 sm:px-4 py-2 sm:py-3 border-b bg-primary/5">
+                    <div className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">
                       Subject
                     </div>
-                    <div className="text-lg font-semibold">
+                    <div className="text-base sm:text-lg font-semibold">
                       {previewMessage.subject}
                     </div>
                   </div>
 
                   {/* Message Body */}
-                  <div className="px-4 py-6">
+                  <div className="px-3 sm:px-4 py-4 sm:py-6">
                     <div className="prose prose-sm dark:prose-invert max-w-none">
-                      <div className="whitespace-pre-wrap text-base leading-relaxed">
+                      <div className="whitespace-pre-wrap text-sm sm:text-base leading-relaxed">
                         {previewMessage.content}
                       </div>
                     </div>
@@ -1230,34 +1241,34 @@ export default function SetupMessagesPage({
                 </div>
 
                 {/* Message Details */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                   <Card>
-                    <CardContent className="pt-4">
+                    <CardContent className="pt-3 sm:pt-4">
                       <div className="text-center">
                         <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2 ${getToneColor(previewMessage.tone)}`}
+                          className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center mx-auto mb-2 ${getToneColor(previewMessage.tone)}`}
                         >
                           {getTypeIcon(previewMessage.type)}
                         </div>
-                        <div className="font-medium capitalize">
+                        <div className="font-medium text-sm capitalize">
                           {previewMessage.type.replace("_", " ")}
                         </div>
-                        <div className="text-sm text-muted-foreground capitalize">
+                        <div className="text-xs text-muted-foreground capitalize">
                           {previewMessage.tone} tone
                         </div>
                       </div>
                     </CardContent>
                   </Card>
                   <Card>
-                    <CardContent className="pt-4">
+                    <CardContent className="pt-3 sm:pt-4">
                       <div className="text-center">
-                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-950 rounded-full flex items-center justify-center mx-auto mb-2">
-                          <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 dark:bg-blue-950 rounded-full flex items-center justify-center mx-auto mb-2">
+                          <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
                         </div>
-                        <div className="font-medium">
+                        <div className="font-medium text-sm">
                           {format(previewMessage.scheduledDate, "MMM d, yyyy")}
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-xs text-muted-foreground">
                           {previewMessage.dayOffset === 0
                             ? "Due date"
                             : `${previewMessage.dayOffset} days overdue`}
@@ -1266,18 +1277,18 @@ export default function SetupMessagesPage({
                     </CardContent>
                   </Card>
                   <Card>
-                    <CardContent className="pt-4">
+                    <CardContent className="pt-3 sm:pt-4">
                       <div className="text-center">
-                        <div className="w-10 h-10 bg-green-100 dark:bg-green-950 rounded-full flex items-center justify-center mx-auto mb-2">
-                          <Target className="h-5 w-5 text-green-600 dark:text-green-400" />
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 dark:bg-green-950 rounded-full flex items-center justify-center mx-auto mb-2">
+                          <Target className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
                         </div>
-                        <div className="font-medium">
+                        <div className="font-medium text-sm">
                           {previewMessage.enabled ? "Enabled" : "Disabled"}
                           {previewMessage.isModified && (
                             <span className="text-blue-600 ml-1">•</span>
                           )}
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-xs text-muted-foreground">
                           {previewMessage.enabled ? "Will be sent" : "Skipped"}
                           {previewMessage.isModified && " • Modified"}
                         </div>
@@ -1287,19 +1298,19 @@ export default function SetupMessagesPage({
                 </div>
               </div>
             </ScrollArea>
-            <div className="flex justify-between pt-4 border-t">
+            <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4 border-t">
               <Button
                 variant="outline"
                 onClick={() => handleEditMessage(previewMessage)}
-                className="px-6"
+                className="px-4 sm:px-6 text-sm sm:text-base"
               >
-                <Edit className="h-4 w-4 mr-2" />
+                <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                 Edit Message
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setPreviewMessage(null)}
-                className="px-6"
+                className="px-4 sm:px-6 text-sm sm:text-base"
               >
                 Close Preview
               </Button>

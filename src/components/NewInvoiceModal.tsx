@@ -1,4 +1,4 @@
-// src/components/NewInvoiceModal.tsx - Fixed race conditions
+// src/components/NewInvoiceModal.tsx - Fixed race conditions + Enhanced Responsiveness
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -460,35 +460,36 @@ export default function NewInvoiceModal({
         <>
             {/* AI Upload Section */}
             {uploadLoading ? (
-                <div className="border rounded-lg p-8 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
-                    <div className="flex flex-col items-center justify-center space-y-4">
+                <div className="border rounded-lg p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+                    <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4">
                         <div className="relative">
-                            <Loader2 className="h-12 w-12 text-primary animate-spin" />
-                            <Sparkles className="h-6 w-6 text-primary absolute -top-1 -right-1 animate-pulse" />
+                            <Loader2 className="h-8 w-8 sm:h-10 lg:h-12 w-8 sm:w-10 lg:w-12 text-primary animate-spin" />
+                            <Sparkles className="h-4 w-4 sm:h-5 lg:h-6 w-4 sm:w-5 lg:w-6 text-primary absolute -top-1 -right-1 animate-pulse" />
                         </div>
-                        <div className="text-center space-y-2">
-                            <h3 className="font-medium text-lg">Processing Invoice with AI</h3>
-                            <p className="text-sm text-muted-foreground">
+                        <div className="text-center space-y-1 sm:space-y-2">
+                            <h3 className="font-medium text-base sm:text-lg">Processing Invoice with AI</h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground px-2">
                                 Extracting invoice details... This may take a few seconds.
                             </p>
                             <div className="flex items-center justify-center space-x-1 pt-2">
-                                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-                                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
                             </div>
                         </div>
                     </div>
                 </div>
             ) : (
-                <div className="border rounded-lg p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+                <div className="border rounded-lg p-3 sm:p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
                     <div className="flex items-center gap-2 mb-2">
                         <Sparkles className="h-4 w-4 text-primary" />
-                        <h3 className="font-medium">AI Invoice Scanner</h3>
+                        <h3 className="font-medium text-sm sm:text-base">AI Invoice Scanner</h3>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-4">
+                    <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
                         Upload your invoice and let AI extract the details automatically
                     </p>
-                    {/* <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors">
+                    {/* Enhanced AI upload section */}
+                    <div className="border-2 border-dashed border-primary/30 rounded-xl p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-primary/5 to-primary/10 hover:border-primary/50 transition-all duration-300">
                         <input
                             type="file"
                             id="modal-invoice-upload"
@@ -502,42 +503,17 @@ export default function NewInvoiceModal({
                             className="cursor-pointer"
                         >
                             <div className="flex flex-col items-center">
-                                <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-                                <p className="text-sm font-medium mb-1">
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-primary/10 rounded-full flex items-center justify-center mb-3 sm:mb-4 border-2 border-primary/20">
+                                    <Upload className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-primary" />
+                                </div>
+                                <p className="text-sm sm:text-base lg:text-lg font-semibold mb-1 sm:mb-2 text-primary text-center">
                                     Click to upload or drag and drop
                                 </p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-xs sm:text-sm text-muted-foreground text-center">
                                     PDF, PNG, JPG up to 10MB
                                 </p>
                             </div>
                         </label>
-                    </div> */}
-                    {/* // Find the AI upload section and enhance it: */}
-                    <div className="border-2 border-dashed border-primary/30 rounded-xl p-8 bg-gradient-to-br from-primary/5 to-primary/10 hover:border-primary/50 transition-all duration-300">
-                    <input
-                        type="file"
-                        id="modal-invoice-upload"
-                        className="hidden"
-                        accept=".pdf,.png,.jpg,.jpeg"
-                        onChange={handleFileUpload}
-                        disabled={uploadLoading}
-                    />
-                    <label
-                        htmlFor="modal-invoice-upload"
-                        className="cursor-pointer"
-                    >
-                        <div className="flex flex-col items-center">
-                        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 border-2 border-primary/20">
-                            <Upload className="h-8 w-8 text-primary" />
-                        </div>
-                        <p className="text-lg font-semibold mb-2 text-primary">
-                            Click to upload or drag and drop
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                            PDF, PNG, JPG up to 10MB
-                        </p>
-                        </div>
-                    </label>
                     </div>
                 </div>
             )}
@@ -548,16 +524,16 @@ export default function NewInvoiceModal({
     const formFields = (
         <>
             {/* Client Information */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-center gap-2 pb-2 border-b">
-                    <User className="h-5 w-5 text-primary" />
-                    <h3 className="font-semibold text-lg">Client Information</h3>
+                    <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                    <h3 className="font-semibold text-base sm:text-lg">Client Information</h3>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                     <div className="space-y-2">
-                        <Label htmlFor="modal-clientName">
-                            <User className="h-4 w-4 inline mr-1" />
+                        <Label htmlFor="modal-clientName" className="text-xs sm:text-sm">
+                            <User className="h-3 w-3 sm:h-4 sm:w-4 inline mr-1" />
                             Client Name *
                         </Label>
                         <Input
@@ -567,11 +543,12 @@ export default function NewInvoiceModal({
                             onChange={handleInputChange}
                             required
                             placeholder="John Doe"
+                            className="text-sm sm:text-base"
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="modal-clientEmail">
-                            <Mail className="h-4 w-4 inline mr-1" />
+                        <Label htmlFor="modal-clientEmail" className="text-xs sm:text-sm">
+                            <Mail className="h-3 w-3 sm:h-4 sm:w-4 inline mr-1" />
                             Client Email *
                         </Label>
                         <Input
@@ -582,22 +559,23 @@ export default function NewInvoiceModal({
                             onChange={handleInputChange}
                             required
                             placeholder="john@company.com"
+                            className="text-sm sm:text-base"
                         />
                     </div>
                 </div>
             </div>
 
             {/* Invoice Details */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-center gap-2 pb-2 border-b">
-                    <FileText className="h-5 w-5 text-primary" />
-                    <h3 className="font-semibold text-lg">Invoice Details</h3>
+                    <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                    <h3 className="font-semibold text-base sm:text-lg">Invoice Details</h3>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                     <div className="space-y-2">
-                        <Label htmlFor="modal-invoiceNumber">
-                            <Hash className="h-4 w-4 inline mr-1" />
+                        <Label htmlFor="modal-invoiceNumber" className="text-xs sm:text-sm">
+                            <Hash className="h-3 w-3 sm:h-4 sm:w-4 inline mr-1" />
                             Invoice Number *
                         </Label>
                         <Input
@@ -607,11 +585,12 @@ export default function NewInvoiceModal({
                             onChange={handleInputChange}
                             required
                             placeholder="INV-001"
+                            className="text-sm sm:text-base"
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="modal-dueDate">
-                            <Calendar className="h-4 w-4 inline mr-1" />
+                        <Label htmlFor="modal-dueDate" className="text-xs sm:text-sm">
+                            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 inline mr-1" />
                             Due Date *
                         </Label>
                         <Input
@@ -622,14 +601,15 @@ export default function NewInvoiceModal({
                             onChange={handleInputChange}
                             required
                             min={isEditMode ? undefined : format(new Date(), 'yyyy-MM-dd')}
+                            className="text-sm sm:text-base"
                         />
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="modal-amount">
-                            <DollarSign className="h-4 w-4 inline mr-1" />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                    <div className="space-y-2 sm:col-span-2">
+                        <Label htmlFor="modal-amount" className="text-xs sm:text-sm">
+                            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 inline mr-1" />
                             Amount *
                         </Label>
                         <Input
@@ -641,16 +621,17 @@ export default function NewInvoiceModal({
                             onChange={handleInputChange}
                             required
                             placeholder="10000.00"
+                            className="text-sm sm:text-base"
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="modal-currency">Currency</Label>
+                        <Label htmlFor="modal-currency" className="text-xs sm:text-sm">Currency</Label>
                         <select
                             id="modal-currency"
                             name="currency"
                             value={formData.currency}
                             onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value }))}
-                            className="w-full h-9 px-3 rounded-md border border-input bg-transparent text-sm"
+                            className="w-full h-9 px-3 rounded-md border border-input bg-transparent text-xs sm:text-sm"
                         >
                             <option value="INR">₹ INR</option>
                             <option value="USD">$ USD</option>
@@ -663,8 +644,8 @@ export default function NewInvoiceModal({
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="modal-description">
-                        <FileText className="h-4 w-4 inline mr-1" />
+                    <Label htmlFor="modal-description" className="text-xs sm:text-sm">
+                        <FileText className="h-3 w-3 sm:h-4 sm:w-4 inline mr-1" />
                         Description (Optional)
                     </Label>
                     <Textarea
@@ -674,20 +655,21 @@ export default function NewInvoiceModal({
                         onChange={handleInputChange}
                         placeholder="Web development services for Project X..."
                         rows={3}
+                        className="text-sm sm:text-base"
                     />
                 </div>
             </div>
 
             {/* Payment Method Selection */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-center gap-2 pb-2 border-b">
-                    <Smartphone className="h-5 w-5 text-primary" />
-                    <h3 className="font-semibold text-lg">Payment Method</h3>
+                    <Smartphone className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                    <h3 className="font-semibold text-base sm:text-lg">Payment Method</h3>
                 </div>
                 
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                     {/* UPI + Razorpay Option */}
-                    <div className="p-4 border-2 border-green-200 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                    <div className="p-3 sm:p-4 border-2 border-green-200 bg-green-50 dark:bg-green-950/20 rounded-lg">
                         <div className="flex items-start space-x-3">
                             <input
                                 type="radio"
@@ -699,33 +681,35 @@ export default function NewInvoiceModal({
                                     ...prev, 
                                     paymentProvider: e.target.value 
                                 }))}
-                                className="w-4 h-4 text-green-600 mt-1"
+                                className="w-4 h-4 text-green-600 mt-1 flex-shrink-0"
                             />
-                            <div className="flex-1">
-                                <Label htmlFor={`upi-razorpay-${mode}`} className="flex items-center gap-2 cursor-pointer">
-                                    <div className="flex items-center gap-2">
-                                        <QrCode className="h-4 w-4 text-green-600" />
-                                        <span className="font-semibold text-green-800">UPI + Cards via Razorpay</span>
-                                        <span className="text-xs bg-green-200 text-green-800 px-2 py-0.5 rounded-full font-medium">
+                            <div className="flex-1 min-w-0">
+                                <Label htmlFor={`upi-razorpay-${mode}`} className="flex items-start sm:items-center gap-2 cursor-pointer">
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                        <div className="flex items-center gap-2">
+                                            <QrCode className="h-4 w-4 text-green-600 flex-shrink-0" />
+                                            <span className="font-semibold text-green-800 text-sm sm:text-base">UPI + Cards via Razorpay</span>
+                                        </div>
+                                        <span className="text-xs bg-green-200 text-green-800 px-2 py-0.5 rounded-full font-medium w-fit">
                                             Recommended
                                         </span>
                                     </div>
                                 </Label>
                                 <div className="mt-2 space-y-1">
-                                    <div className="flex items-center gap-2 text-sm text-green-700">
-                                        <CheckCircle2 className="h-4 w-4" />
+                                    <div className="flex items-start gap-2 text-xs sm:text-sm text-green-700">
+                                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
                                         <span>Instant UPI payments (PhonePe, GPay, Paytm)</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm text-green-700">
-                                        <CheckCircle2 className="h-4 w-4" />
+                                    <div className="flex items-start gap-2 text-xs sm:text-sm text-green-700">
+                                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
                                         <span>Auto-detection when client pays</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm text-green-700">
-                                        <CheckCircle2 className="h-4 w-4" />
+                                    <div className="flex items-start gap-2 text-xs sm:text-sm text-green-700">
+                                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
                                         <span>QR code + UPI link in emails</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm text-green-700">
-                                        <CheckCircle2 className="h-4 w-4" />
+                                    <div className="flex items-start gap-2 text-xs sm:text-sm text-green-700">
+                                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
                                         <span>Cards & net banking backup</span>
                                     </div>
                                 </div>
@@ -734,7 +718,7 @@ export default function NewInvoiceModal({
                     </div>
                     
                     {/* Manual Payment Option */}
-                    <div className="p-4 border rounded-lg">
+                    <div className="p-3 sm:p-4 border rounded-lg">
                         <div className="flex items-start space-x-3">
                             <input
                                 type="radio"
@@ -746,14 +730,14 @@ export default function NewInvoiceModal({
                                     ...prev, 
                                     paymentProvider: e.target.value 
                                 }))}
-                                className="w-4 h-4 text-primary mt-1"
+                                className="w-4 h-4 text-primary mt-1 flex-shrink-0"
                             />
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0">
                                 <Label htmlFor={`manual-payment-${mode}`} className="flex items-center gap-2 cursor-pointer">
-                                    <Link className="h-4 w-4" />
-                                    <span className="font-medium">Manual Payment Link</span>
+                                    <Link className="h-4 w-4 flex-shrink-0" />
+                                    <span className="font-medium text-sm sm:text-base">Manual Payment Link</span>
                                 </Label>
-                                <p className="text-sm text-muted-foreground mt-1">
+                                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                                     Add your own UPI ID, bank details, or payment link. 
                                     You&apos;ll need to manually confirm payments.
                                 </p>
@@ -765,8 +749,8 @@ export default function NewInvoiceModal({
                 {/* Manual Payment Link Field */}
                 {formData.paymentProvider === '' && (
                     <div className="space-y-2">
-                        <Label htmlFor={`modal-paymentLink-${mode}`}>
-                            <Link className="h-4 w-4 inline mr-1" />
+                        <Label htmlFor={`modal-paymentLink-${mode}`} className="text-xs sm:text-sm">
+                            <Link className="h-3 w-3 sm:h-4 sm:w-4 inline mr-1" />
                             Payment Link or UPI ID
                         </Label>
                         <Input
@@ -776,8 +760,9 @@ export default function NewInvoiceModal({
                             value={formData.paymentLink}
                             onChange={handleInputChange}
                             placeholder="yourname@paytm OR https://paypal.me/yourname"
+                            className="text-sm sm:text-base"
                         />
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs sm:text-sm text-muted-foreground">
                             Enter your UPI ID (like yourname@paytm) or payment link
                         </p>
                     </div>
@@ -788,13 +773,13 @@ export default function NewInvoiceModal({
 
     // Edit mode action buttons with dropdown
     const editModeActions = (
-        <div className="flex justify-end space-x-3 pt-6 border-t">
+        <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4 sm:pt-6 border-t">
             <Button
                 type="button"
                 variant="outline"
                 onClick={() => handleOpenChange(false)}
                 disabled={saving}
-                className="px-6"
+                className="px-4 sm:px-6 text-sm sm:text-base w-full sm:w-auto order-2 sm:order-1"
             >
                 Cancel
             </Button>
@@ -802,17 +787,19 @@ export default function NewInvoiceModal({
             {/* Save Options Dropdown */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button disabled={saving} className="px-6">
+                    <Button disabled={saving} className="px-4 sm:px-6 text-sm sm:text-base w-full sm:w-auto order-1 sm:order-2">
                         {saving ? (
                             <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Saving...
+                                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2 animate-spin" />
+                                <span className="hidden sm:inline">Saving...</span>
+                                <span className="sm:hidden">Saving...</span>
                             </>
                         ) : (
                             <>
-                                <Save className="h-4 w-4 mr-2" />
-                                Save Changes
-                                <ChevronDown className="h-4 w-4 ml-2" />
+                                <Save className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                                <span className="hidden sm:inline">Save Changes</span>
+                                <span className="sm:hidden">Save</span>
+                                <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 ml-2" />
                             </>
                         )}
                     </Button>
@@ -825,7 +812,7 @@ export default function NewInvoiceModal({
                     >
                         <Save className="h-4 w-4 mr-2" />
                         <div className="flex flex-col">
-                            <span className="font-medium">Save Changes</span>
+                            <span className="font-medium text-sm">Save Changes</span>
                             <span className="text-xs text-muted-foreground">Stay on dashboard</span>
                         </div>
                     </DropdownMenuItem>
@@ -839,7 +826,7 @@ export default function NewInvoiceModal({
                     >
                         <Settings className="h-4 w-4 mr-2" />
                         <div className="flex flex-col">
-                            <span className="font-medium">Save & Edit Follow-ups</span>
+                            <span className="font-medium text-sm">Save & Edit Follow-ups</span>
                             <span className="text-xs text-muted-foreground">
                                 {hasExistingFollowups ? 'Modify existing messages' : 'Set up new messages'}
                             </span>
@@ -852,30 +839,32 @@ export default function NewInvoiceModal({
 
     // Create mode action buttons
     const createModeActions = (
-        <div className="flex justify-end space-x-3 pt-6 border-t">
+        <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4 sm:pt-6 border-t">
             <Button
                 type="button"
                 variant="outline"
                 onClick={() => handleOpenChange(false)}
                 disabled={saving}
-                className="px-6"
+                className="px-4 sm:px-6 text-sm sm:text-base w-full sm:w-auto order-2 sm:order-1"
             >
                 Cancel
             </Button>
             <Button 
                 type="submit" 
                 disabled={saving}
-                className="px-6"
+                className="px-4 sm:px-6 text-sm sm:text-base w-full sm:w-auto order-1 sm:order-2"
             >
                 {saving ? (
                     <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Creating...
+                        <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2 animate-spin" />
+                        <span className="hidden sm:inline">Creating...</span>
+                        <span className="sm:hidden">Creating...</span>
                     </>
                 ) : (
                     <>
-                        <FileText className="h-4 w-4 mr-2" />
-                        Create Invoice
+                        <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                        <span className="hidden sm:inline">Create Invoice</span>
+                        <span className="sm:hidden">Create</span>
                     </>
                 )}
             </Button>
@@ -891,39 +880,39 @@ export default function NewInvoiceModal({
                         {trigger}
                     </DialogTrigger>
                 )}
-                <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-                    <DialogHeader className="px-6 pt-6">
-                        <DialogTitle className="flex items-center gap-2">
-                            <Edit className="h-5 w-5 text-primary" />
-                            {modalTitle}
+                <DialogContent className="w-[95vw] max-w-4xl max-h-[95vh] sm:max-h-[90vh] p-0">
+                    <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6">
+                        <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                            <Edit className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+                            <span className="truncate">{modalTitle}</span>
                         </DialogTitle>
-                        <DialogDescription>
+                        <DialogDescription className="text-xs sm:text-sm">
                             {modalDescription}
                         </DialogDescription>
                     </DialogHeader>
 
-                    <ScrollArea className="max-h-[calc(90vh-8rem)] px-6">
-                        <div className="space-y-6 pb-6">
+                    <ScrollArea className="max-h-[calc(95vh-8rem)] sm:max-h-[calc(90vh-8rem)] px-4 sm:px-6">
+                        <div className="space-y-4 sm:space-y-6 pb-4 sm:pb-6">
                             {/* Loading invoice data for edit mode */}
                             {loadingInvoice ? (
                                 <div className="flex items-center justify-center py-8">
                                     <div className="text-center space-y-4">
-                                        <Loader2 className="h-8 w-8 text-primary animate-spin mx-auto" />
-                                        <p className="text-muted-foreground">Loading invoice data...</p>
+                                        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary animate-spin mx-auto" />
+                                        <p className="text-muted-foreground text-sm sm:text-base">Loading invoice data...</p>
                                     </div>
                                 </div>
                             ) : (
-                                <form onSubmit={handleSubmit} className="space-y-6">
+                                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                                     {/* Show follow-up status banner if applicable */}
                                     {hasExistingFollowups && (
-                                        <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                                        <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                                             <div className="flex items-start gap-3">
-                                                <Settings className="h-5 w-5 text-blue-600 mt-0.5" />
-                                                <div>
-                                                    <h4 className="font-medium text-blue-900 dark:text-blue-100">
+                                                <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                                                <div className="min-w-0">
+                                                    <h4 className="font-medium text-blue-900 dark:text-blue-100 text-sm sm:text-base">
                                                         Follow-up Messages Active
                                                     </h4>
-                                                    <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">
+                                                    <p className="text-xs sm:text-sm text-blue-800 dark:text-blue-200 mt-1">
                                                         This invoice has automated follow-up messages set up. 
                                                         You can modify them after saving by choosing &quot;Save & Edit Follow-ups&quot;.
                                                     </p>
@@ -948,30 +937,31 @@ export default function NewInvoiceModal({
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 {children || (
-                    <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        New Invoice
+                    <Button className="text-sm sm:text-base">
+                        <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                        <span className="hidden sm:inline">New Invoice</span>
+                        <span className="sm:hidden">New</span>
                     </Button>
                 )}
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-                <DialogHeader className="px-6 pt-6">
-                    <DialogTitle className="flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-primary" />
-                        {modalTitle}
+            <DialogContent className="w-[95vw] max-w-4xl max-h-[95vh] sm:max-h-[90vh] p-0">
+                <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6">
+                    <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                        <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+                        <span className="truncate">{modalTitle}</span>
                     </DialogTitle>
-                    <DialogDescription>
+                    <DialogDescription className="text-xs sm:text-sm">
                         {modalDescription}
                     </DialogDescription>
                 </DialogHeader>
 
-                <ScrollArea className="max-h-[calc(90vh-8rem)] px-6">
-                    <div className="space-y-6 pb-6">
+                <ScrollArea className="max-h-[calc(95vh-8rem)] sm:max-h-[calc(90vh-8rem)] px-4 sm:px-6">
+                    <div className="space-y-4 sm:space-y-6 pb-4 sm:pb-6">
                         {/* AI Upload Section for create mode */}
                         {createModeContent}
 
                         {/* Manual Form */}
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                             {formFields}
                             {createModeActions}
                         </form>

@@ -2,6 +2,9 @@
 import { supabase } from '@/lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 
+export const runtime = 'nodejs';
+
+
 interface AuthState {
     user: User | null;
     session: Session | null;

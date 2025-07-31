@@ -4,6 +4,9 @@ import { createClient } from '@supabase/supabase-js';
 import { emailService } from '@/lib/email/email-service';
 import type { Database } from '@/types/supabase';
 
+export const runtime = 'nodejs';
+
+
 // Define types for better type safety
 interface FollowUpWithInvoice {
     id: string;
