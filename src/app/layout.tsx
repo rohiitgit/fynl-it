@@ -23,6 +23,7 @@ export default function RootLayout({
         <Providers>
           <AuthProvider>
             {children}
+            <Analytics />
           </AuthProvider>
         </Providers>
       </body>
