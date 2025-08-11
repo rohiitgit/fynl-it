@@ -1,4 +1,5 @@
 // src/app/layout.tsx - Updated with AuthProvider for session management
+import { Analytics } from "@vercel/analytics/next"
 import { Inter } from 'next/font/google'
 import { Providers } from './providers'
 import { AuthProvider } from '@/components/AuthProvider'
