@@ -68,6 +68,7 @@ const FloatingElement = ({
 };
 
 // Dynamic Navbar Component with Fixed Background
+// Dynamic Navbar Component with Smooth Transitions
 const DynamicNavbar = () => {
   const { user, loading, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -92,75 +93,123 @@ const DynamicNavbar = () => {
   }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50">
-      <div className={`container mx-auto transition-all duration-500 ease-in-out ${isScrolled
+    <nav className="fixed top-0 left-0 right-0 z-50 will-change-transform">
+      <div className={`container mx-auto transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu ${isScrolled
         ? 'px-3 sm:px-4 py-2'
         : 'px-3 sm:px-4 py-4 sm:py-6'
         }`}>
-        <div className={`transition-all duration-500 ease-in-out ${isScrolled
-          ? 'bg-card/90 backdrop-blur-xl border border-border/50 rounded-full px-3 sm:px-4 lg:px-6 py-2 sm:py-3 mx-auto max-w-5xl shadow-lg'
-          : 'bg-transparent'
+        <div className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu will-change-transform ${isScrolled
+          ? 'bg-card/90 backdrop-blur-xl border border-border/50 rounded-full px-3 sm:px-4 lg:px-6 py-2 sm:py-3 mx-auto max-w-5xl shadow-xl shadow-primary/5'
+          : 'bg-transparent backdrop-blur-none border-transparent rounded-none px-0 py-0 shadow-none'
           }`}>
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center space-x-1.5 sm:space-x-2 flex-shrink-0">
-              <DollarSign className={`transition-all duration-300 text-primary ${isScrolled ? 'h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6' : 'h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8'
-                }`} />
-              <span className={`font-bold text-foreground transition-all duration-300 ${isScrolled ? 'text-base sm:text-lg lg:text-xl' : 'text-lg sm:text-xl lg:text-2xl'
-                }`}>
-                Fynl-It
-              </span>
-            </div>
 
-            {/* Navigation Items */}
-            {loading ? (
-              // Loading state
-              <div className="flex items-center space-x-2">
-                <div className="h-7 w-10 sm:h-8 sm:w-12 lg:h-9 lg:w-16 bg-muted animate-pulse rounded"></div>
-                <div className="h-7 w-12 sm:h-8 sm:w-16 lg:h-9 lg:w-24 bg-muted animate-pulse rounded"></div>
-              </div>
-            ) : user ? (
-              // Logged in state
-              <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
-                <span className={`text-muted-foreground truncate max-w-[80px] sm:max-w-[120px] lg:max-w-[200px] transition-all duration-300 ${isScrolled ? 'text-xs lg:text-sm hidden sm:block' : 'text-xs sm:text-sm'
+          {/* Content container with subtle slide effect */}
+          <div className={`transform-gpu transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isScrolled ? 'translate-y-0 scale-100' : 'translate-y-0.5 scale-[1.01]'
+            }`}>
+
+            <div className="flex items-center justify-between">
+              {/* Logo with smooth scaling */}
+              <div className="flex items-center space-x-1.5 sm:space-x-2 flex-shrink-0">
+                <div className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu origin-center ${isScrolled ? 'scale-90' : 'scale-100'
                   }`}>
-                  Welcome, {getUserDisplayName()}!
+                  <DollarSign className={`text-primary transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu ${isScrolled
+                    ? 'h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6'
+                    : 'h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8'
+                    }`} />
+                </div>
+
+                <span className={`font-bold text-foreground transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu origin-left ${isScrolled
+                  ? 'text-base sm:text-lg lg:text-xl scale-95'
+                  : 'text-lg sm:text-xl lg:text-2xl scale-100'
+                  }`}>
+                  Fynl-It
                 </span>
-                <Link href="/dashboard">
-                  <Button
-                    size={isScrolled ? "sm" : "default"}
-                    className="gap-1 sm:gap-2 transition-all duration-300 text-xs sm:text-sm px-2 sm:px-3 lg:px-4"
-                  >
-                    <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className={isScrolled ? 'hidden lg:inline' : 'hidden sm:inline'}>Dashboard</span>
-                    <span className={isScrolled ? 'lg:hidden' : 'sm:hidden'}>Go</span>
-                  </Button>
-                </Link>
-                <Button
-                  variant="outline"
-                  size={isScrolled ? "sm" : "default"}
-                  onClick={signOut}
-                  className="gap-1 sm:gap-2 transition-all duration-300 text-xs sm:text-sm px-2 sm:px-3 lg:px-4"
-                >
-                  <LogOut className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className={isScrolled ? 'hidden xl:inline' : 'hidden lg:inline'}>Sign Out</span>
-                </Button>
               </div>
-            ) : (
-              // Logged out state
-              <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
-                <Link href="/auth">
-                  <Button variant="ghost" size={isScrolled ? "sm" : "default"} className="text-xs sm:text-sm px-2 sm:px-3 lg:px-4">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link href="/auth">
-                  <Button size={isScrolled ? "sm" : "default"} className="text-xs sm:text-sm px-2 sm:px-3 lg:px-4">
-                    Get Started
-                  </Button>
-                </Link>
+
+              {/* Navigation Items with staggered animation */}
+              <div className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu ${isScrolled ? 'translate-x-0 opacity-100' : 'translate-x-1 opacity-95'
+                }`}>
+                {loading ? (
+                  // Loading state with smooth skeleton
+                  <div className="flex items-center space-x-2 animate-pulse">
+                    <div className={`bg-muted rounded transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isScrolled
+                      ? 'h-7 w-10 sm:h-8 sm:w-12 lg:h-8 lg:w-14'
+                      : 'h-8 w-12 sm:h-9 sm:w-16 lg:h-9 lg:w-18'
+                      }`}></div>
+                    <div className={`bg-muted rounded transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isScrolled
+                      ? 'h-7 w-12 sm:h-8 sm:w-16 lg:h-8 lg:w-20'
+                      : 'h-8 w-16 sm:h-9 sm:w-20 lg:h-9 lg:w-24'
+                      }`}></div>
+                  </div>
+                ) : user ? (
+                  // Logged in state with smooth transitions
+                  <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
+                    {/* Welcome text with fade effect */}
+                    <span className={`text-muted-foreground truncate max-w-[80px] sm:max-w-[120px] lg:max-w-[200px] transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu ${isScrolled
+                      ? 'text-xs lg:text-sm opacity-80 scale-95 hidden sm:block'
+                      : 'text-xs sm:text-sm opacity-100 scale-100'
+                      }`}>
+                      Welcome, {getUserDisplayName()}!
+                    </span>
+
+                    {/* Dashboard button with smooth scaling */}
+                    <Link href="/dashboard">
+                      <Button
+                        size={isScrolled ? "sm" : "default"}
+                        className={`gap-1 sm:gap-2 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 text-xs sm:text-sm px-2 sm:px-3 lg:px-4 ${isScrolled ? 'shadow-md' : 'shadow-lg'
+                          }`}
+                      >
+                        <BarChart3 className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isScrolled ? 'h-3 w-3 sm:h-4 sm:w-4' : 'h-4 w-4'
+                          }`} />
+                        <span className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isScrolled ? 'hidden lg:inline' : 'hidden sm:inline'
+                          }`}>Dashboard</span>
+                        <span className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isScrolled ? 'lg:hidden' : 'sm:hidden'
+                          }`}>Go</span>
+                      </Button>
+                    </Link>
+
+                    {/* Sign out button with smooth scaling */}
+                    <Button
+                      variant="outline"
+                      size={isScrolled ? "sm" : "default"}
+                      onClick={signOut}
+                      className={`gap-1 sm:gap-2 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 text-xs sm:text-sm px-2 sm:px-3 lg:px-4 ${isScrolled
+                        ? 'border-border/60 hover:border-border bg-card/80'
+                        : 'border-border hover:border-border/80 bg-card/60'
+                        }`}
+                    >
+                      <LogOut className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isScrolled ? 'h-3 w-3 sm:h-4 sm:w-4' : 'h-4 w-4'
+                        }`} />
+                      <span className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isScrolled ? 'hidden xl:inline' : 'hidden lg:inline'
+                        }`}>Sign Out</span>
+                    </Button>
+                  </div>
+                ) : (
+                  // Logged out state with smooth transitions
+                  <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
+                    <Link href="/auth">
+                      <Button
+                        variant="ghost"
+                        size={isScrolled ? "sm" : "default"}
+                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 ${isScrolled ? 'hover:bg-accent/80' : 'hover:bg-accent/60'
+                          }`}
+                      >
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link href="/auth">
+                      <Button
+                        size={isScrolled ? "sm" : "default"}
+                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 ${isScrolled ? 'shadow-md' : 'shadow-lg'
+                          }`}
+                      >
+                        Get Started
+                      </Button>
+                    </Link>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
@@ -169,80 +218,274 @@ const DynamicNavbar = () => {
 };
 
 // Enhanced Responsive Dashboard Preview Component
+// Enhanced Responsive Dashboard Preview Component - Fixed Version
 const DashboardPreview = () => {
   return (
     <div className="relative w-full">
       <div className="relative mx-auto max-w-5xl">
+        {/* Background glow effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl sm:rounded-2xl lg:rounded-3xl blur-xl sm:blur-2xl lg:blur-3xl"></div>
-        <div className="relative bg-card/80 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-lg sm:shadow-xl lg:shadow-2xl p-3 sm:p-4 lg:p-6 xl:p-8 border border-border/20">
-          {/* Dashboard Preview */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-            {/* Invoice Card Preview */}
-            <div className="lg:col-span-2 space-y-2 sm:space-y-3 lg:space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2.5 sm:p-3 lg:p-4 bg-muted/50 rounded-lg sm:rounded-xl gap-2 sm:gap-3 lg:gap-0">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Users className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-xs sm:text-sm lg:text-base truncate">Sarah Chen</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground truncate">Invoice #INV-2024-001</p>
-                  </div>
-                </div>
-                <div className="text-left sm:text-right flex sm:flex-col items-start sm:items-end gap-2 sm:gap-1">
-                  <p className="text-base sm:text-lg lg:text-2xl font-bold">₹25,000</p>
-                  <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs">
-                    Due in 3 days
-                  </Badge>
-                </div>
-              </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2.5 sm:p-3 lg:p-4 bg-muted/50 rounded-lg sm:rounded-xl gap-2 sm:gap-3 lg:gap-0">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-green-600" />
+        {/* Main container */}
+        <div className="relative bg-card/80 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-lg sm:shadow-xl lg:shadow-2xl p-3 sm:p-4 lg:p-6 xl:p-8 border border-border/20">
+
+          {/* Mobile Layout (xs to sm - up to 640px) */}
+          <div className="block sm:hidden space-y-3">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-foreground">Recent Invoices</h3>
+              <div className="text-xs text-muted-foreground">2 pending</div>
+            </div>
+
+            {/* Single invoice card for mobile */}
+            <div className="bg-muted/40 rounded-lg p-3 border border-border/30">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Users className="h-4 w-4 text-primary" />
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-xs sm:text-sm lg:text-base truncate">Tech Startup Inc</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground truncate">Invoice #INV-2024-002</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm truncate">Sarah Chen</p>
+                    <p className="text-xs text-muted-foreground truncate">INV-001</p>
                   </div>
                 </div>
-                <div className="text-left sm:text-right flex sm:flex-col items-start sm:items-end gap-2 sm:gap-1">
-                  <p className="text-base sm:text-lg lg:text-2xl font-bold">₹45,000</p>
-                  <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">
-                    Paid
+                <div className="text-right flex-shrink-0 ml-2">
+                  <p className="text-lg font-bold">₹25K</p>
+                  <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs mt-1">
+                    Due
                   </Badge>
                 </div>
               </div>
             </div>
 
-            {/* Stats Preview */}
-            <div className="space-y-2 sm:space-y-3 lg:space-y-4">
-              <div className="p-2.5 sm:p-3 lg:p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg sm:rounded-xl">
+            {/* Simplified stats for mobile */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg border border-primary/10">
                 <p className="text-xs text-muted-foreground mb-1">This Month</p>
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">₹1,25,000</p>
-                <p className="text-xs sm:text-sm text-green-600 mt-1 sm:mt-2 flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
-                  +23% from last month
+                <p className="text-lg font-bold text-foreground">₹1.2L</p>
+                <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
+                  <TrendingUp className="h-3 w-3" />
+                  +23%
                 </p>
               </div>
-
-              <div className="p-2.5 sm:p-3 lg:p-4 bg-muted/50 rounded-lg sm:rounded-xl">
-                <div className="flex items-center justify-between mb-2 sm:mb-3">
-                  <p className="text-xs sm:text-sm text-muted-foreground">Collection Rate</p>
-                  <p className="text-sm sm:text-base lg:text-lg font-bold text-foreground">87%</p>
-                </div>
-                <div className="w-full bg-border rounded-full h-1 sm:h-1.5 lg:h-2">
-                  <div className="bg-gradient-to-r from-primary to-primary/80 h-1 sm:h-1.5 lg:h-2 rounded-full" style={{ width: '87%' }}></div>
+              <div className="p-3 bg-muted/40 rounded-lg border border-border/30">
+                <p className="text-xs text-muted-foreground mb-1">Collection</p>
+                <p className="text-lg font-bold text-foreground">87%</p>
+                <div className="w-full bg-border rounded-full h-1.5 mt-2">
+                  <div className="bg-gradient-to-r from-primary to-primary/80 h-1.5 rounded-full transition-all duration-1000 ease-out" style={{ width: '87%' }}></div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Floating notification - Responsive positioning */}
-          <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 lg:-top-4 lg:-right-4 bg-green-500 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 lg:px-4 lg:py-2 rounded sm:rounded-md lg:rounded-lg shadow-lg flex items-center gap-1 sm:gap-2 animate-bounce">
-            <Bell className="h-2.5 w-2.5 sm:h-3 sm:w-3 lg:h-4 lg:w-4" />
-            <span className="text-xs sm:text-sm font-medium">Payment Received!</span>
+          {/* Tablet Layout (sm to lg - 640px to 1024px) */}
+          <div className="hidden sm:block lg:hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-semibold text-foreground">Dashboard Overview</h3>
+              <div className="text-sm text-muted-foreground">Updated 2 min ago</div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Stats row for tablet */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm text-muted-foreground">This Month Revenue</p>
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  </div>
+                  <p className="text-2xl font-bold text-foreground mb-2">₹1,25,000</p>
+                  <p className="text-sm text-green-600 flex items-center gap-1">
+                    <TrendingUp className="h-4 w-4" />
+                    +23% from last month
+                  </p>
+                </div>
+
+                <div className="p-4 bg-muted/40 rounded-xl border border-border/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm text-muted-foreground">Collection Rate</p>
+                    <p className="text-xl font-bold text-foreground">87%</p>
+                  </div>
+                  <div className="w-full bg-border rounded-full h-2 mb-2">
+                    <div className="bg-gradient-to-r from-primary to-primary/80 h-2 rounded-full transition-all duration-1000 ease-out" style={{ width: '87%' }}></div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Above industry average</p>
+                </div>
+              </div>
+
+              {/* Invoice cards for tablet */}
+              <div className="space-y-3">
+                <div className="bg-muted/40 rounded-xl p-4 border border-border/30">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
+                        <Users className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm">Sarah Chen</p>
+                        <p className="text-xs text-muted-foreground">Invoice #INV-001 • Due in 3 days</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-bold">₹25,000</p>
+                      <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs mt-1">
+                        Pending
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-muted/40 rounded-xl p-4 border border-border/30">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm">Tech Startup Inc</p>
+                        <p className="text-xs text-muted-foreground">Invoice #INV-002 • Paid today</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-bold">₹45,000</p>
+                      <Badge className="bg-green-100 text-green-700 border-green-200 text-xs mt-1">
+                        Paid
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Layout (lg+ - 1024px and above) */}
+          <div className="hidden lg:block">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-1">Dashboard Overview</h3>
+                <p className="text-sm text-muted-foreground">Track your invoices and payments</p>
+              </div>
+              <div className="text-sm text-muted-foreground">Last updated 2 minutes ago</div>
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              {/* Invoice Cards Section - Takes 2/3 on xl screens */}
+              <div className="xl:col-span-2 space-y-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-base font-medium text-foreground">Recent Invoices</h4>
+                  <Badge variant="outline" className="text-xs">2 pending</Badge>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="bg-muted/40 rounded-xl p-4 border border-border/30 hover:bg-muted/60 transition-colors duration-200">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <Users className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-sm truncate">Sarah Chen</p>
+                          <p className="text-xs text-muted-foreground truncate">Invoice #INV-2024-001</p>
+                          <p className="text-xs text-orange-600 mt-1">Due in 3 days</p>
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-xl font-bold">₹25,000</p>
+                        <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs mt-1">
+                          Pending
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-muted/40 rounded-xl p-4 border border-border/30 hover:bg-muted/60 transition-colors duration-200">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-sm truncate">Tech Startup Inc</p>
+                          <p className="text-xs text-muted-foreground truncate">Invoice #INV-2024-002</p>
+                          <p className="text-xs text-green-600 mt-1">Paid today</p>
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-xl font-bold">₹45,000</p>
+                        <Badge className="bg-green-100 text-green-700 border-green-200 text-xs mt-1">
+                          Paid
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Enhanced Stats Section - Takes 1/3 on xl screens */}
+              <div className="space-y-4">
+                <h4 className="text-base font-medium text-foreground mb-4">Analytics</h4>
+
+                <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/10">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm text-muted-foreground">This Month</p>
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  </div>
+                  <p className="text-2xl font-bold text-foreground mb-3">₹1,25,000</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-green-600 flex items-center gap-1">
+                      <TrendingUp className="h-4 w-4" />
+                      +23%
+                    </p>
+                    <p className="text-xs text-muted-foreground">vs last month</p>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-muted/40 rounded-xl border border-border/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm text-muted-foreground">Collection Rate</p>
+                    <p className="text-xl font-bold text-foreground">87%</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="w-full bg-border rounded-full h-2">
+                      <div className="bg-gradient-to-r from-primary to-primary/80 h-2 rounded-full transition-all duration-1000 ease-out" style={{ width: '87%' }}></div>
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Industry: 72%</span>
+                      <span className="text-green-600">+15% better</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional mini stat for larger screens */}
+                <div className="p-4 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-xl border border-blue-500/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm text-muted-foreground">Avg Payment</p>
+                    <Clock className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <p className="text-xl font-bold text-foreground mb-1">4.2 days</p>
+                  <p className="text-xs text-blue-600">Industry leading</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Floating notification - Right upper corner, avoiding content overlap */}
+          <div className="absolute bg-green-500 text-white rounded-lg shadow-xl flex items-center gap-2 animate-bounce z-20
+            /* Mobile positioning - avoid covering header/content */
+            top-1 right-1 px-2 py-1
+            /* Tablet positioning - slightly more space */
+            sm:top-2 sm:right-2 sm:px-2.5 sm:py-1.5
+            /* Desktop positioning - corner with clearance */
+            lg:top-3 lg:right-3 lg:px-3 lg:py-2
+            /* Ensure it doesn't cover dashboard content */
+            max-w-[100px] sm:max-w-[120px] lg:max-w-none">
+            <Bell className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="text-xs sm:text-sm font-medium truncate">
+              <span className="sm:hidden">Paid !</span>
+              <span className="hidden sm:inline lg:hidden">Paid !</span>
+              <span className="hidden lg:inline">Paid !</span>
+            </span>
           </div>
         </div>
       </div>
@@ -507,7 +750,7 @@ export default function HomePage() {
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="max-w-6xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
-              <div className="space-y-6 sm:space-y-8 order-2 lg:order-1">
+              <div className="space-y-6 sm:space-y-8 order-1 lg:order-1">
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-4 sm:mb-6">
                     <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
@@ -564,7 +807,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="relative order-1 lg:order-2">
+              <div className="relative order-2 lg:order-2">
                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-3 sm:space-y-4">
                     <div className="bg-card/80 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg transition-all duration-300">
