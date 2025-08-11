@@ -217,274 +217,189 @@ const DynamicNavbar = () => {
   );
 };
 
-// Enhanced Responsive Dashboard Preview Component - Fixed Version
+// Enhanced Responsive Dashboard Preview Component - Fixed Layout
 const DashboardPreview = () => {
   return (
     <div className="relative w-full">
-      <div className="relative mx-auto max-w-3xl lg:max-w-4xl xl:max-w-4xl">
+      <div className="relative mx-auto max-w-3xl lg:max-w-4xl">
         {/* Background glow effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl sm:rounded-2xl lg:rounded-3xl blur-xl sm:blur-2xl lg:blur-3xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl sm:rounded-2xl blur-xl sm:blur-2xl"></div>
 
         {/* Main container */}
-        <div className="relative bg-card/80 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-2xl shadow-lg sm:shadow-xl lg:shadow-2xl p-3 sm:p-4 lg:p-5 xl:p-6 border border-border/20">
+        <div className="relative bg-card/80 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl border border-border/20 p-4 sm:p-6">
 
-          {/* Mobile Layout (xs to sm - up to 640px) */}
-          <div className="block sm:hidden space-y-3">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-foreground">Recent Invoices</h3>
-              <div className="text-xs text-muted-foreground">2 pending</div>
-            </div>
-
-            {/* Single invoice card for mobile */}
-            <div className="bg-muted/40 rounded-lg p-3 border border-border/30">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 min-w-0 flex-1">
+          {/* Mobile Layout (xs to sm) */}
+          <div className="block sm:hidden">
+            <div className="space-y-4">
+              {/* Single invoice card */}
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
                     <Users className="h-4 w-4 text-primary" />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-sm truncate">Sarah Chen</p>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm truncate">Sarah Chen</p>
                     <p className="text-xs text-muted-foreground truncate">INV-001</p>
                   </div>
                 </div>
-                <div className="text-right flex-shrink-0 ml-2">
+                <div className="text-right flex-shrink-0">
                   <p className="text-lg font-bold">₹25K</p>
-                  <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs mt-1">
-                    Due
-                  </Badge>
+                  <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs mt-1">Due</Badge>
                 </div>
               </div>
-            </div>
 
-            {/* Simplified stats for mobile */}
-            <div className="grid grid-cols-2 gap-2">
-              <div className="p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg border border-primary/10">
-                <p className="text-xs text-muted-foreground mb-1">This Month</p>
-                <p className="text-lg font-bold text-foreground">₹1.2L</p>
-                <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
-                  <TrendingUp className="h-3 w-3" />
-                  +23%
-                </p>
-              </div>
-              <div className="p-3 bg-muted/40 rounded-lg border border-border/30">
-                <p className="text-xs text-muted-foreground mb-1">Collection</p>
-                <p className="text-lg font-bold text-foreground">87%</p>
-                <div className="w-full bg-border rounded-full h-1.5 mt-2">
-                  <div className="bg-gradient-to-r from-primary to-primary/80 h-1.5 rounded-full transition-all duration-1000 ease-out" style={{ width: '87%' }}></div>
+              {/* Mobile stats */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg">
+                  <p className="text-xs text-muted-foreground">This Month</p>
+                  <p className="text-lg font-bold">₹1.25L</p>
+                  <p className="text-xs text-green-600 flex items-center gap-1">
+                    <TrendingUp className="h-3 w-3" />+23%
+                  </p>
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <p className="text-xs text-muted-foreground">Collection</p>
+                  <p className="text-lg font-bold">87%</p>
+                  <div className="w-full bg-border rounded-full h-1.5 mt-1">
+                    <div className="bg-gradient-to-r from-primary to-primary/80 h-1.5 rounded-full" style={{ width: '87%' }}></div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Tablet Layout (sm to lg - 640px to 1024px) */}
+          {/* Tablet Layout (sm to lg) */}
           <div className="hidden sm:block lg:hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold text-foreground">Dashboard Overview</h3>
-              <div className="text-sm text-muted-foreground">Updated 2 min ago</div>
-            </div>
-
             <div className="space-y-4">
-              {/* Stats row for tablet */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-3 lg:p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/10">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm text-muted-foreground">This Month Revenue</p>
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              {/* Two invoice cards */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
+                      <Users className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">Sarah Chen</p>
+                      <p className="text-sm text-muted-foreground">Invoice #INV-001</p>
+                    </div>
                   </div>
-                  <p className="text-2xl font-bold text-foreground mb-2">₹1,25,000</p>
-                  <p className="text-sm text-green-600 flex items-center gap-1">
-                    <TrendingUp className="h-4 w-4" />
-                    +23% from last month
-                  </p>
+                  <div className="text-right">
+                    <p className="text-xl font-bold">₹25,000</p>
+                    <Badge className="bg-orange-100 text-orange-700 border-orange-200">Due in 3 days</Badge>
+                  </div>
                 </div>
 
-                <div className="p-3 lg:p-4 bg-muted/40 rounded-xl border border-border/30">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm text-muted-foreground">Collection Rate</p>
-                    <p className="text-xl font-bold text-foreground">87%</p>
+                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">Tech Startup</p>
+                      <p className="text-sm text-muted-foreground">Invoice #INV-002</p>
+                    </div>
                   </div>
-                  <div className="w-full bg-border rounded-full h-2 mb-2">
-                    <div className="bg-gradient-to-r from-primary to-primary/80 h-2 rounded-full transition-all duration-1000 ease-out" style={{ width: '87%' }}></div>
+                  <div className="text-right">
+                    <p className="text-xl font-bold">₹45,000</p>
+                    <Badge className="bg-green-100 text-green-700 border-green-200">Paid</Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground">Above industry average</p>
                 </div>
               </div>
 
-              {/* Invoice cards for tablet */}
-              <div className="space-y-3">
-                <div className="bg-muted/40 rounded-xl p-4 border border-border/30">
-                  <div className="flex items-center justify-between">
+              {/* Tablet stats */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl">
+                  <p className="text-sm text-muted-foreground">This Month</p>
+                  <p className="text-2xl font-bold">₹1,25,000</p>
+                  <p className="text-sm text-green-600 flex items-center gap-1">
+                    <TrendingUp className="h-4 w-4" />+23%
+                  </p>
+                </div>
+                <div className="p-4 bg-muted/50 rounded-xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm text-muted-foreground">Collection Rate</p>
+                    <p className="text-xl font-bold">87%</p>
+                  </div>
+                  <div className="w-full bg-border rounded-full h-2">
+                    <div className="bg-gradient-to-r from-primary to-primary/80 h-2 rounded-full" style={{ width: '87%' }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Layout (lg+) - The main 2/3 + 1/3 layout */}
+          <div className="hidden lg:block">
+            <div className="grid grid-cols-3 gap-6">
+
+              {/* Left side: Invoice Cards (2/3 width) */}
+              <div className="col-span-2">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl hover:bg-muted/70 transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
+                      <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
                         <Users className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-semibold text-sm">Sarah Chen</p>
-                        <p className="text-xs text-muted-foreground">Invoice #INV-001 • Due in 3 days</p>
+                        <p className="font-semibold">Sarah Chen</p>
+                        <p className="text-sm text-muted-foreground">Invoice #INV-2024-001</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold">₹25,000</p>
-                      <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs mt-1">
-                        Pending
-                      </Badge>
+                      <p className="text-2xl font-bold">₹25,000</p>
+                      <Badge className="bg-orange-100 text-orange-700 border-orange-200">Due in 3 days</Badge>
                     </div>
                   </div>
-                </div>
 
-                <div className="bg-muted/40 rounded-xl p-4 border border-border/30">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl hover:bg-muted/70 transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
+                      <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
                         <CheckCircle2 className="h-5 w-5 text-green-600" />
                       </div>
                       <div>
-                        <p className="font-semibold text-sm">Tech Startup Inc</p>
-                        <p className="text-xs text-muted-foreground">Invoice #INV-002 • Paid today</p>
+                        <p className="font-semibold">Tech Startup Inc</p>
+                        <p className="text-sm text-muted-foreground">Invoice #INV-2024-002</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold">₹45,000</p>
-                      <Badge className="bg-green-100 text-green-700 border-green-200 text-xs mt-1">
-                        Paid
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Desktop Layout (lg+ - 1024px and above) */}
-          <div className="hidden lg:block">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-lg font-semibold text-foreground mb-1">Dashboard Overview</h3>
-                <p className="text-sm text-muted-foreground">Track your invoices and payments</p>
-              </div>
-              <div className="text-sm text-muted-foreground">Last updated 2 minutes ago</div>
-            </div>
-
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-5">
-              {/* Invoice Cards Section - Takes 2/3 on xl screens */}
-              <div className="xl:col-span-2 space-y-3 lg:space-y-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-base font-medium text-foreground">Recent Invoices</h4>
-                  <Badge variant="outline" className="text-xs">2 pending</Badge>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="bg-muted/40 rounded-xl p-3 lg:p-4 border border-border/30 hover:bg-muted/60 transition-colors duration-200">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <Users className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-sm truncate">Sarah Chen</p>
-                          <p className="text-xs text-muted-foreground truncate">Invoice #INV-2024-001</p>
-                          <p className="text-xs text-orange-600 mt-1">Due in 3 days</p>
-                        </div>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-xl font-bold">₹25,000</p>
-                        <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs mt-1">
-                          Pending
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-muted/40 rounded-xl p-3 lg:p-4 border border-border/30 hover:bg-muted/60 transition-colors duration-200">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <CheckCircle2 className="h-5 w-5 text-green-600" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-sm truncate">Tech Startup Inc</p>
-                          <p className="text-xs text-muted-foreground truncate">Invoice #INV-2024-002</p>
-                          <p className="text-xs text-green-600 mt-1">Paid today</p>
-                        </div>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-xl font-bold">₹45,000</p>
-                        <Badge className="bg-green-100 text-green-700 border-green-200 text-xs mt-1">
-                          Paid
-                        </Badge>
-                      </div>
+                      <p className="text-2xl font-bold">₹45,000</p>
+                      <Badge className="bg-green-100 text-green-700 border-green-200">Paid</Badge>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Enhanced Stats Section - Takes 1/3 on xl screens */}
-              <div className="space-y-3 lg:space-y-4">
-                <h4 className="text-base font-medium text-foreground mb-4">Analytics</h4>
-
-                <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/10">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm text-muted-foreground">This Month</p>
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  </div>
-                  <p className="text-2xl font-bold text-foreground mb-3">₹1,25,000</p>
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-green-600 flex items-center gap-1">
+              {/* Right side: Stats (1/3 width) */}
+              <div className="col-span-1">
+                <div className="space-y-4">
+                  <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/10">
+                    <p className="text-sm text-muted-foreground mb-1">This Month</p>
+                    <p className="text-lg font-bold text-foreground">₹1,25,000</p>
+                    <p className="text-sm text-green-600 mt-2 flex items-center gap-1">
                       <TrendingUp className="h-4 w-4" />
-                      +23%
+                      +23% from last month
                     </p>
-                    <p className="text-xs text-muted-foreground">vs last month</p>
                   </div>
-                </div>
 
-                <div className="p-4 bg-muted/40 rounded-xl border border-border/30">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm text-muted-foreground">Collection Rate</p>
-                    <p className="text-xl font-bold text-foreground">87%</p>
-                  </div>
-                  <div className="space-y-2">
+                  <div className="p-4 bg-muted/50 rounded-xl">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm text-muted-foreground">Collection Rate</p>
+                      <p className="text-lg font-bold text-foreground">87%</p>
+                    </div>
                     <div className="w-full bg-border rounded-full h-2">
                       <div className="bg-gradient-to-r from-primary to-primary/80 h-2 rounded-full transition-all duration-1000 ease-out" style={{ width: '87%' }}></div>
                     </div>
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Industry: 72%</span>
-                      <span className="text-green-600">+15% better</span>
-                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">Above industry average</p>
                   </div>
-                </div>
-
-                {/* Additional mini stat for larger screens */}
-                <div className="p-4 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-xl border border-blue-500/10">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm text-muted-foreground">Avg Payment</p>
-                    <Clock className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <p className="text-xl font-bold text-foreground mb-1">4.2 days</p>
-                  <p className="text-xs text-blue-600">Industry leading</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Floating notification - Right upper corner, avoiding content overlap */}
-          <div className="absolute bg-green-500 text-white rounded-lg shadow-xl flex items-center gap-2 animate-bounce z-20
-            /* Mobile positioning - avoid covering header/content */
-            top-1 right-1 px-2 py-1
-            /* Tablet positioning - slightly more space */
-            sm:top-2 sm:right-2 sm:px-2.5 sm:py-1.5
-            /* Desktop positioning - corner with clearance */
-            lg:top-3 lg:right-3 lg:px-3 lg:py-2
-            /* Ensure it doesn't cover dashboard content */
-            max-w-[100px] sm:max-w-[120px] lg:max-w-none">
-            <Bell className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-            <span className="text-xs sm:text-sm font-medium truncate">
-              <span className="sm:hidden">Paid!</span>
-              <span className="hidden sm:inline lg:hidden">Payment!</span>
-              <span className="hidden lg:inline">Payment Received!</span>
-            </span>
+          {/* Floating notification */}
+          <div className="absolute top-3 right-3 bg-green-500 text-white rounded-lg shadow-xl flex items-center gap-2 animate-bounce z-20 px-3 py-2 max-w-[120px]">
+            <Bell className="h-4 w-4 flex-shrink-0" />
+            <span className="text-sm font-small truncate">Payment!</span>
           </div>
         </div>
       </div>
