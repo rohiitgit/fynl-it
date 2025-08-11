@@ -217,17 +217,16 @@ const DynamicNavbar = () => {
   );
 };
 
-// Enhanced Responsive Dashboard Preview Component
 // Enhanced Responsive Dashboard Preview Component - Fixed Version
 const DashboardPreview = () => {
   return (
     <div className="relative w-full">
-      <div className="relative mx-auto max-w-5xl">
+      <div className="relative mx-auto max-w-3xl lg:max-w-4xl xl:max-w-4xl">
         {/* Background glow effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl sm:rounded-2xl lg:rounded-3xl blur-xl sm:blur-2xl lg:blur-3xl"></div>
 
         {/* Main container */}
-        <div className="relative bg-card/80 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-lg sm:shadow-xl lg:shadow-2xl p-3 sm:p-4 lg:p-6 xl:p-8 border border-border/20">
+        <div className="relative bg-card/80 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-2xl shadow-lg sm:shadow-xl lg:shadow-2xl p-3 sm:p-4 lg:p-5 xl:p-6 border border-border/20">
 
           {/* Mobile Layout (xs to sm - up to 640px) */}
           <div className="block sm:hidden space-y-3">
@@ -289,7 +288,7 @@ const DashboardPreview = () => {
             <div className="space-y-4">
               {/* Stats row for tablet */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/10">
+                <div className="p-3 lg:p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/10">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-sm text-muted-foreground">This Month Revenue</p>
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -301,7 +300,7 @@ const DashboardPreview = () => {
                   </p>
                 </div>
 
-                <div className="p-4 bg-muted/40 rounded-xl border border-border/30">
+                <div className="p-3 lg:p-4 bg-muted/40 rounded-xl border border-border/30">
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-sm text-muted-foreground">Collection Rate</p>
                     <p className="text-xl font-bold text-foreground">87%</p>
@@ -369,16 +368,16 @@ const DashboardPreview = () => {
               <div className="text-sm text-muted-foreground">Last updated 2 minutes ago</div>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-5">
               {/* Invoice Cards Section - Takes 2/3 on xl screens */}
-              <div className="xl:col-span-2 space-y-4">
+              <div className="xl:col-span-2 space-y-3 lg:space-y-4">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-base font-medium text-foreground">Recent Invoices</h4>
                   <Badge variant="outline" className="text-xs">2 pending</Badge>
                 </div>
 
                 <div className="space-y-3">
-                  <div className="bg-muted/40 rounded-xl p-4 border border-border/30 hover:bg-muted/60 transition-colors duration-200">
+                  <div className="bg-muted/40 rounded-xl p-3 lg:p-4 border border-border/30 hover:bg-muted/60 transition-colors duration-200">
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -399,7 +398,7 @@ const DashboardPreview = () => {
                     </div>
                   </div>
 
-                  <div className="bg-muted/40 rounded-xl p-4 border border-border/30 hover:bg-muted/60 transition-colors duration-200">
+                  <div className="bg-muted/40 rounded-xl p-3 lg:p-4 border border-border/30 hover:bg-muted/60 transition-colors duration-200">
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -423,7 +422,7 @@ const DashboardPreview = () => {
               </div>
 
               {/* Enhanced Stats Section - Takes 1/3 on xl screens */}
-              <div className="space-y-4">
+              <div className="space-y-3 lg:space-y-4">
                 <h4 className="text-base font-medium text-foreground mb-4">Analytics</h4>
 
                 <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/10">
@@ -482,9 +481,9 @@ const DashboardPreview = () => {
             max-w-[100px] sm:max-w-[120px] lg:max-w-none">
             <Bell className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
             <span className="text-xs sm:text-sm font-medium truncate">
-              <span className="sm:hidden">Paid !</span>
-              <span className="hidden sm:inline lg:hidden">Paid !</span>
-              <span className="hidden lg:inline">Paid !</span>
+              <span className="sm:hidden">Paid!</span>
+              <span className="hidden sm:inline lg:hidden">Payment!</span>
+              <span className="hidden lg:inline">Payment Received!</span>
             </span>
           </div>
         </div>
@@ -541,9 +540,10 @@ export default function HomePage() {
 
                 {/* Main Heading */}
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight">
-                  Get Paid Without Being
+                  Get your invoices
                   <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent block">
-                    &quot;That&quot; Freelancer
+                    {/* &quot;That&quot; Freelancer */}
+                    Fynlly Paid
                   </span>
                 </h1>
               </div>
@@ -557,7 +557,7 @@ export default function HomePage() {
               <div className="space-y-6 sm:space-y-8 z-10 relative text-center">
                 {/* Subheading */}
                 <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed px-2">
-                  We handle the awkward nudges so you can focus on your work. Smart automation meets professional communication with AI-powered reminders.
+                  Let us handle the awkward nudges so you can focus on your work. Smart automation meets professional communication with AI-powered reminders.
                 </p>
 
                 {/* CTA Buttons */}
@@ -621,15 +621,16 @@ export default function HomePage() {
 
                   {/* Main Heading */}
                   <h1 className="text-4xl xl:text-5xl 2xl:text-6xl font-bold text-foreground leading-tight">
-                    Get Paid Without Being
+                    Get Your Invoices
                     <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent block">
-                      &quot;That&quot; Freelancer
+                      {/* &quot;That&quot; Freelancer */}
+                      Fynlly Paid
                     </span>
                   </h1>
 
                   {/* Subheading */}
                   <p className="text-lg xl:text-xl text-muted-foreground leading-relaxed">
-                    We handle the awkward nudges so you can focus on your work. Smart automation meets professional communication with AI-powered reminders.
+                    Let us handle the awkward nudges so you can focus on your work. Smart automation meets professional communication with AI-powered reminders.
                   </p>
                 </div>
 
