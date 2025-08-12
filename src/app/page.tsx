@@ -497,9 +497,7 @@ export default function HomePage() {
                         <ArrowRight className="ml-1.5 sm:ml-2 h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:translate-x-1" />
                       </Button>
                     </Link>
-                    <Button variant="outline" size="lg" className="w-full sm:w-auto h-11 sm:h-12 lg:h-14 px-4 sm:px-6 lg:px-8 text-sm sm:text-base lg:text-lg font-medium">
-                      See How It Works
-                    </Button>
+                   
                   </div>
                 )}
 
@@ -558,9 +556,7 @@ export default function HomePage() {
                         <ArrowRight className="ml-2 h-4 w-4 xl:h-5 xl:w-5 transition-transform group-hover:translate-x-1" />
                       </Button>
                     </Link>
-                    <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 xl:h-14 px-6 xl:px-8 text-base xl:text-lg font-medium">
-                      See How It Works
-                    </Button>
+                   
                   </div>
                 ) : (
                   // Logged out CTA
@@ -571,9 +567,7 @@ export default function HomePage() {
                         <ArrowRight className="ml-2 h-4 w-4 xl:h-5 xl:w-5 transition-transform group-hover:translate-x-1" />
                       </Button>
                     </Link>
-                    <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 xl:h-14 px-6 xl:px-8 text-base xl:text-lg font-medium">
-                      See How It Works
-                    </Button>
+                   
                   </div>
                 )}
 
