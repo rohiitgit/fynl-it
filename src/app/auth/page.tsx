@@ -28,6 +28,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/lib/hooks/use-toast";
 import { useAuth } from "@/components/AuthProvider";
+import { FcGoogle } from "react-icons/fc";
 
 export default function AuthPage() {
   const [loading, setLoading] = useState(false);
@@ -142,6 +143,36 @@ export default function AuthPage() {
     } catch (err) {
       console.error('Sign in error:', err);
       setMessage({ type: "error", text: "An unexpected error occurred" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        }
+      });
+
+      if (error) {
+        setMessage({ type: "error", text: error.message });
+        toast({
+          title: "Google sign in failed",
+          description: error.message,
+        });
+      }
+      // Note: Successful OAuth redirects automatically, so no success handling needed here
+    } catch (err) {
+      console.error('Google sign in error:', err);
+      setMessage({ type: "error", text: "Failed to sign in with Google" });
+      toast({
+        title: "Google sign in failed",
+        description: "Please try again",
+      });
     } finally {
       setLoading(false);
     }
@@ -410,6 +441,33 @@ export default function AuthPage() {
                 <p className="text-muted-foreground">
                   Create your account or sign in to continue
                 </p>
+              </div>
+
+              {/* Google Sign-In Button - Add this before your Tabs component */}
+              <div>
+                <Button
+                  onClick={handleGoogleSignIn}
+                  disabled={loading}
+                  variant="outline"
+                  className="w-full h-12 border-2 hover:bg-muted transition-all duration-300"
+                >
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                  ) : (
+                    <FcGoogle className="h-5 w-5 mr-2" />
+                  )}
+                  Continue with Google
+                </Button>
+
+                {/* Divider */}
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-border" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">Or continue with email</span>
+                  </div>
+                </div>
               </div>
 
               <Tabs defaultValue="signup" className="w-full">
