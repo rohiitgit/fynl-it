@@ -40,22 +40,6 @@ export default function AuthPage() {
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
 
-  const checkUserExists = async (email: string) => {
-    try {
-      console.log("🔍 Checking profiles table for:", email);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, email')
-        .eq('email', email)
-        .maybeSingle(); // Use maybeSingle instead of single
-
-      console.log("🔍 Profiles query result - data:", data, "error:", error);
-      return !!data; // Returns true if user exists, false if not
-    } catch (error) {
-      console.log("🔍 Profiles query error:", error);
-      return false;
-    }
-  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -235,7 +219,7 @@ export default function AuthPage() {
             <Loader2 className="h-12 w-12 text-primary animate-spin mx-auto" />
           </div>
           <div>
-            <h3 className="font-semibold text-lg">You're already signed in!</h3>
+            <h3 className="font-semibold text-lg">You&apos;re already signed in!</h3>
             <p className="text-muted-foreground">
               Redirecting you to your dashboard...
             </p>
@@ -266,7 +250,7 @@ export default function AuthPage() {
                 Check Your Email!
               </h2>
               <p className="text-muted-foreground mb-6">
-                We've sent a confirmation link to
+                We&apos;ve sent a confirmation link to
               </p>
               <div className="bg-muted rounded-xl p-4 mb-6">
                 <p className="font-semibold text-foreground">{email}</p>
@@ -281,7 +265,7 @@ export default function AuthPage() {
 
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  Didn't receive the email? Check your spam folder or
+                  Didn&apos;t receive the email? Check your spam folder or
                 </p>
                 <Button
                   variant="outline"
@@ -392,7 +376,7 @@ export default function AuthPage() {
             <div className="p-6 bg-muted rounded-2xl border border-border">
               <Sparkles className="h-6 w-6 text-primary mb-3" />
               <p className="text-foreground font-semibold mb-2">
-                "Fynl-It recovered ₹2.5L in pending payments in my first month!"
+                &quot;Fynl-It recovered ₹2.5L in pending payments in my first month!&quot;
               </p>
               <div className="flex items-center gap-2 mb-2">
                 <div className="flex">
@@ -503,7 +487,7 @@ export default function AuthPage() {
                         />
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        We'll send a confirmation link to this email
+                        We&apos;ll send a confirmation link to this email
                       </p>
                     </div>
 
