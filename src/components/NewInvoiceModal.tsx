@@ -60,48 +60,48 @@ interface InvoiceFormData {
 }
 
 interface NewInvoiceModalProps {
-  mode?: 'create' | 'edit';
-  invoiceId?: string;
-  onSuccess?: () => void;
-  onClose?: () => void;
-  // For create mode
-  children?: React.ReactNode;
-  // Add explicit open control for edit mode (optional - if not provided, component manages its own state)
-  open?: boolean;
-  // Trigger element for edit mode
-  trigger?: React.ReactNode;
+    mode?: 'create' | 'edit';
+    invoiceId?: string;
+    onSuccess?: () => void;
+    onClose?: () => void;
+    // For create mode
+    children?: React.ReactNode;
+    // Add explicit open control for edit mode (optional - if not provided, component manages its own state)
+    open?: boolean;
+    // Trigger element for edit mode
+    trigger?: React.ReactNode;
 }
 
 type SaveAction = 'save-only' | 'save-and-edit-followups';
 
-export default function NewInvoiceModal({ 
-  mode = 'create', 
-  invoiceId, 
-  onSuccess, 
-  onClose,
-  children,
-  open: externalOpen,
-  trigger
+export default function NewInvoiceModal({
+    mode = 'create',
+    invoiceId,
+    onSuccess,
+    onClose,
+    children,
+    open: externalOpen,
+    trigger
 }: NewInvoiceModalProps) {
     const router = useRouter();
     const { toast } = useToast();
-    
+
     // For edit mode, use external open state if provided, otherwise use internal state
     // For create mode, always use internal state
     const [internalOpen, setInternalOpen] = useState(false);
     const isEditMode = mode === 'edit';
     const hasExternalControl = isEditMode && externalOpen !== undefined;
     const open = hasExternalControl ? externalOpen : internalOpen;
-    
+
     const [saving, setSaving] = useState(false);
     const [uploadLoading, setUploadLoading] = useState(false);
     const [loadingInvoice, setLoadingInvoice] = useState(false);
     const [hasExistingFollowups, setHasExistingFollowups] = useState(false);
-    
+
     // Use useRef to prevent unnecessary re-renders
     const loadedInvoiceId = useRef<string | null>(null);
     const isInitialLoad = useRef(true);
-    
+
     const [formData, setFormData] = useState<InvoiceFormData>({
         clientName: "",
         clientEmail: "",
@@ -115,8 +115,8 @@ export default function NewInvoiceModal({
     });
 
     const modalTitle = isEditMode ? 'Edit Invoice' : 'Create New Invoice';
-    const modalDescription = isEditMode 
-        ? 'Update your invoice details and optionally edit follow-up messages' 
+    const modalDescription = isEditMode
+        ? 'Update your invoice details and optionally edit follow-up messages'
         : 'Upload an invoice for AI processing or fill in the details manually';
 
     // Stable function to check existing follow-ups - doesn't depend on any state
@@ -182,7 +182,7 @@ export default function NewInvoiceModal({
 
                 // Check for existing follow-ups
                 await checkExistingFollowups(currentInvoiceId);
-                
+
                 // Mark as loaded
                 loadedInvoiceId.current = currentInvoiceId;
                 isInitialLoad.current = false;
@@ -207,7 +207,7 @@ export default function NewInvoiceModal({
                 loadInvoiceData(invoiceId);
             }
         }
-        
+
         // Reset when modal closes
         if (!open && isEditMode) {
             loadedInvoiceId.current = null;
@@ -360,7 +360,7 @@ export default function NewInvoiceModal({
 
                     if (onClose) onClose();
                     if (onSuccess) onSuccess();
-                    
+
                     // Navigate to setup-messages page
                     router.push(`/invoices/${invoiceId}/setup-messages`);
                 }
@@ -385,7 +385,7 @@ export default function NewInvoiceModal({
                         const { data: session } = await supabase.auth.getSession();
                         const response = await fetch('/api/payments/create-link', {
                             method: 'POST',
-                            headers: { 
+                            headers: {
                                 'Content-Type': 'application/json',
                                 'Authorization': `Bearer ${session.session?.access_token}`
                             },
@@ -393,7 +393,7 @@ export default function NewInvoiceModal({
                         });
 
                         const linkResult = await response.json();
-                        
+
                         if (linkResult.success) {
                             toast({
                                 title: "Invoice created with UPI payment!",
@@ -448,7 +448,7 @@ export default function NewInvoiceModal({
         } else {
             setInternalOpen(newOpen);
         }
-        
+
         // Always reset form when closing, regardless of control mode
         if (!newOpen) {
             resetForm();
@@ -529,7 +529,7 @@ export default function NewInvoiceModal({
                     <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     <h3 className="font-semibold text-base sm:text-lg">Client Information</h3>
                 </div>
-                
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="modal-clientName" className="text-xs sm:text-sm">
@@ -571,7 +571,7 @@ export default function NewInvoiceModal({
                     <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     <h3 className="font-semibold text-base sm:text-lg">Invoice Details</h3>
                 </div>
-                
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="modal-invoiceNumber" className="text-xs sm:text-sm">
@@ -666,85 +666,6 @@ export default function NewInvoiceModal({
                     <Smartphone className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     <h3 className="font-semibold text-base sm:text-lg">Payment Method</h3>
                 </div>
-                
-                <div className="space-y-3 sm:space-y-4">
-                    {/* UPI + Razorpay Option */}
-                    <div className="p-3 sm:p-4 border-2 border-green-200 bg-green-50 dark:bg-green-950/20 rounded-lg">
-                        <div className="flex items-start space-x-3">
-                            <input
-                                type="radio"
-                                id={`upi-razorpay-${mode}`}
-                                name="paymentMethod"
-                                value="razorpay"
-                                checked={formData.paymentProvider === 'razorpay'}
-                                onChange={(e) => setFormData(prev => ({ 
-                                    ...prev, 
-                                    paymentProvider: e.target.value 
-                                }))}
-                                className="w-4 h-4 text-green-600 mt-1 flex-shrink-0"
-                            />
-                            <div className="flex-1 min-w-0">
-                                <Label htmlFor={`upi-razorpay-${mode}`} className="flex items-start sm:items-center gap-2 cursor-pointer">
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                        <div className="flex items-center gap-2">
-                                            <QrCode className="h-4 w-4 text-green-600 flex-shrink-0" />
-                                            <span className="font-semibold text-green-800 text-sm sm:text-base">UPI + Cards via Razorpay</span>
-                                        </div>
-                                        <span className="text-xs bg-green-200 text-green-800 px-2 py-0.5 rounded-full font-medium w-fit">
-                                            Recommended
-                                        </span>
-                                    </div>
-                                </Label>
-                                <div className="mt-2 space-y-1">
-                                    <div className="flex items-start gap-2 text-xs sm:text-sm text-green-700">
-                                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
-                                        <span>Instant UPI payments (PhonePe, GPay, Paytm)</span>
-                                    </div>
-                                    <div className="flex items-start gap-2 text-xs sm:text-sm text-green-700">
-                                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
-                                        <span>Auto-detection when client pays</span>
-                                    </div>
-                                    <div className="flex items-start gap-2 text-xs sm:text-sm text-green-700">
-                                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
-                                        <span>QR code + UPI link in emails</span>
-                                    </div>
-                                    <div className="flex items-start gap-2 text-xs sm:text-sm text-green-700">
-                                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
-                                        <span>Cards & net banking backup</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {/* Manual Payment Option */}
-                    <div className="p-3 sm:p-4 border rounded-lg">
-                        <div className="flex items-start space-x-3">
-                            <input
-                                type="radio"
-                                id={`manual-payment-${mode}`}
-                                name="paymentMethod"
-                                value=""
-                                checked={formData.paymentProvider === ''}
-                                onChange={(e) => setFormData(prev => ({ 
-                                    ...prev, 
-                                    paymentProvider: e.target.value 
-                                }))}
-                                className="w-4 h-4 text-primary mt-1 flex-shrink-0"
-                            />
-                            <div className="flex-1 min-w-0">
-                                <Label htmlFor={`manual-payment-${mode}`} className="flex items-center gap-2 cursor-pointer">
-                                    <Link className="h-4 w-4 flex-shrink-0" />
-                                    <span className="font-medium text-sm sm:text-base">Manual Payment Link</span>
-                                </Label>
-                                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                                    Add your own UPI ID, bank details, or payment link. 
-                                    You&apos;ll need to manually confirm payments.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 {/* Manual Payment Link Field */}
                 {formData.paymentProvider === '' && (
@@ -767,6 +688,87 @@ export default function NewInvoiceModal({
                         </p>
                     </div>
                 )}
+
+                <div className="space-y-3 sm:space-y-4">
+                    {/* UPI + Razorpay Option */}
+                    <div className="p-3 sm:p-4 border-2 rounded-lg">
+                        <div className="flex items-start space-x-3">
+                            <input
+                                type="radio"
+                                id={`upi-razorpay-${mode}`}
+                                name="paymentMethod"
+                                value="razorpay"
+                                checked={formData.paymentProvider === 'razorpay'}
+                                onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    paymentProvider: e.target.value
+                                }))}
+                                className="w-4 h-4  mt-1 flex-shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                                <Label htmlFor={`upi-razorpay-${mode}`} className="flex items-start sm:items-center gap-2 cursor-pointer">
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                        <div className="flex items-center gap-2">
+                                            <QrCode className="h-4 w-4 flex-shrink-0" />
+                                            <span className="font-semibold text-sm sm:text-base">UPI + Cards via Razorpay</span>
+                                        </div>
+                                        <span className="text-xs bg-gray-200  px-2 py-0.5 rounded-full font-medium w-fit">
+                                            BETA
+                                        </span>
+                                    </div>
+                                </Label>
+                                {/* <div className="mt-2 space-y-1">
+                                    <div className="flex items-start gap-2 text-xs sm:text-sm text-green-700">
+                                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
+                                        <span>Instant UPI payments (PhonePe, GPay, Paytm)</span>
+                                    </div>
+                                    <div className="flex items-start gap-2 text-xs sm:text-sm text-green-700">
+                                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
+                                        <span>Auto-detection when client pays</span>
+                                    </div>
+                                    <div className="flex items-start gap-2 text-xs sm:text-sm text-green-700">
+                                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
+                                        <span>QR code + UPI link in emails</span>
+                                    </div>
+                                    <div className="flex items-start gap-2 text-xs sm:text-sm text-green-700">
+                                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
+                                        <span>Cards & net banking backup</span>
+                                    </div>
+                                </div> */}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Manual Payment Option */}
+                    <div className="p-3 sm:p-4 border rounded-lg border-green-200 bg-green-50 dark:bg-green-950/20">
+                        <div className="flex items-start space-x-3">
+                            <input
+                                type="radio"
+                                id={`manual-payment-${mode}`}
+                                name="paymentMethod"
+                                value=""
+                                checked={formData.paymentProvider === ''}
+                                onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    paymentProvider: e.target.value
+                                }))}
+                                className="w-4 h-4 text-primary mt-1 flex-shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                                <Label htmlFor={`manual-payment-${mode}`} className="flex items-center gap-2 cursor-pointer">
+                                    <Link className="h-4 w-4 flex-shrink-0" />
+                                    <span className="font-medium text-sm sm:text-base">Enter UPI (RECOMMENDED)</span>
+                                </Label>
+                                <p className="text-xs text-green-600 sm:text-sm text-muted-foreground mt-1">
+                                    Add your own UPI ID, bank details, or payment link.
+                                    You&apos;ll need to manually confirm payments.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
         </>
     );
@@ -816,9 +818,9 @@ export default function NewInvoiceModal({
                             <span className="text-xs text-muted-foreground">Stay on dashboard</span>
                         </div>
                     </DropdownMenuItem>
-                    
+
                     <DropdownMenuSeparator />
-                    
+
                     <DropdownMenuItem
                         onClick={() => handleSaveAction('save-and-edit-followups')}
                         disabled={saving}
@@ -849,8 +851,8 @@ export default function NewInvoiceModal({
             >
                 Cancel
             </Button>
-            <Button 
-                type="submit" 
+            <Button
+                type="submit"
                 disabled={saving}
                 className="px-4 sm:px-6 text-sm sm:text-base w-full sm:w-auto order-1 sm:order-2"
             >
@@ -913,14 +915,14 @@ export default function NewInvoiceModal({
                                                         Follow-up Messages Active
                                                     </h4>
                                                     <p className="text-xs sm:text-sm text-blue-800 dark:text-blue-200 mt-1">
-                                                        This invoice has automated follow-up messages set up. 
+                                                        This invoice has automated follow-up messages set up.
                                                         You can modify them after saving by choosing &quot;Save & Edit Follow-ups&quot;.
                                                     </p>
                                                 </div>
                                             </div>
                                         </div>
                                     )}
-                                    
+
                                     {formFields}
                                     {editModeActions}
                                 </form>
