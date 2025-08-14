@@ -841,14 +841,14 @@ export default function HomePage() {
               <p className="text-muted-foreground mb-3 sm:mb-4 max-w-md text-sm sm:text-base">
                 AI-powered payment recovery platform designed for freelancers and small businesses in India.
               </p>
-              <div className="flex items-center space-x-4">
+              {/* <div className="flex items-center space-x-4">
                 <a href="#" className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors">Privacy</a>
                 <a href="#" className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors">Terms</a>
                 <a href="#" className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors">Support</a>
-              </div>
+              </div> */}
             </div>
 
-            <div className="order-3 sm:order-2">
+            {/* <div className="order-3 sm:order-2">
               <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Product</h3>
               <div className="space-y-2 text-xs sm:text-sm text-muted-foreground">
                 <p className="hover:text-primary transition-colors cursor-pointer">Features</p>
@@ -856,9 +856,9 @@ export default function HomePage() {
                 <p className="hover:text-primary transition-colors cursor-pointer">API</p>
                 <p className="hover:text-primary transition-colors cursor-pointer">Integrations</p>
               </div>
-            </div>
+            </div> */}
 
-            <div className="order-4 sm:order-3">
+            {/* <div className="order-4 sm:order-3">
               <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Company</h3>
               <div className="space-y-2 text-xs sm:text-sm text-muted-foreground">
                 <p className="hover:text-primary transition-colors cursor-pointer">About</p>
@@ -866,7 +866,7 @@ export default function HomePage() {
                 <p className="hover:text-primary transition-colors cursor-pointer">Careers</p>
                 <p className="hover:text-primary transition-colors cursor-pointer">Contact</p>
               </div>
-            </div>
+            </div> */}
           </div>
 
           <div className="border-t border-border mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-xs sm:text-sm text-muted-foreground">
