@@ -28,7 +28,6 @@ import {
     Plus,
     Sparkles,
     Smartphone,
-    CheckCircle2,
     QrCode,
     Edit,
     Save,
@@ -320,36 +319,114 @@ export default function NewInvoiceModal({
         setSaving(true);
 
         try {
+            // 1. Validate user authentication
             const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('No user found');
+            if (!user) {
+                throw new Error('You must be logged in to create an invoice');
+            }
+
+            // 2. Basic validation
+            if (!formData.clientName?.trim()) throw new Error('Client name is required');
+            if (!formData.clientEmail?.trim()) throw new Error('Client email is required');
+            if (!formData.invoiceNumber?.trim()) throw new Error('Invoice number is required');
+            if (!formData.amount?.trim()) throw new Error('Amount is required');
+            if (!formData.dueDate) throw new Error('Due date is required');
+
+            // Validate email format
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.clientEmail.trim())) {
+                throw new Error('Please enter a valid email address');
+            }
+
+            const amount = parseFloat(formData.amount);
+            if (isNaN(amount) || amount <= 0) {
+                throw new Error('Amount must be a valid number greater than 0');
+            }
+
+            // 3. Check for duplicate invoice number (only in create mode)
+            if (!isEditMode) {
+                const { data: existingInvoice, error: duplicateError } = await supabase
+                    .from('invoices')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .eq('invoice_number', formData.invoiceNumber.trim())
+                    .maybeSingle();
+
+                if (duplicateError) {
+                    console.error('Error checking for duplicate invoice:', duplicateError);
+                    throw new Error('Failed to validate invoice number');
+                }
+
+                if (existingInvoice) {
+                    throw new Error('An invoice with this number already exists');
+                }
+            }
+
+            // 4. Prepare invoice data with correct payment method constraints
+            // Based on constraint: payment_method_source = ANY (ARRAY['direct'::text, 'platform'::text])
+            // 'direct' requires user_payment_details
+            // 'platform' is for payment platforms like Razorpay
 
             const invoiceData = {
-                client_name: formData.clientName,
-                client_email: formData.clientEmail,
-                invoice_number: formData.invoiceNumber,
-                amount: parseFloat(formData.amount),
-                currency: formData.currency,
+                client_name: formData.clientName.trim(),
+                client_email: formData.clientEmail.trim().toLowerCase(),
+                invoice_number: formData.invoiceNumber.trim(),
+                amount: amount,
+                currency: formData.currency || 'INR',
                 due_date: formData.dueDate,
-                payment_link: formData.paymentLink,
-                description: formData.description,
+                payment_link: formData.paymentLink?.trim() || null,
+                description: formData.description?.trim() || null,
+
+                // Set payment method source based on provider
+                payment_method_source: formData.paymentProvider === 'razorpay' ? 'platform' : 'direct',
+
+                // Payment provider fields
+                payment_provider: formData.paymentProvider || null,
+
+                // user_payment_details: required when payment_method_source = 'direct'
+                user_payment_details: formData.paymentProvider === 'razorpay'
+                    ? null  // Not needed for platform payments
+                    : (formData.paymentLink?.trim() || 'Payment details will be provided via email'),
+
+                payment_instructions: formData.paymentProvider === 'razorpay'
+                    ? 'Payment will be processed via Razorpay UPI'
+                    : 'Payment instructions will be sent separately',
+
+                // Other payment fields
+                payment_reference: null,
+                razorpay_payment_id: null,
+                auto_detected: false,
+                razorpay_link_id: null,
+                upi_link: null,
+                qr_code_url: null,
+                is_legacy: false,
             };
 
             if (isEditMode && invoiceId) {
-                // Update existing invoice
+                console.log('Updating invoice:', invoiceId);
+
                 const { error } = await supabase
                     .from('invoices')
                     .update(invoiceData)
                     .eq('id', invoiceId)
                     .eq('user_id', user.id);
 
-                if (error) throw error;
+                if (error) {
+                    console.error('Supabase update error:', error);
+                    if (error.code === '23505') {
+                        throw new Error('An invoice with this number already exists');
+                    } else if (error.code === 'P0001') {
+                        throw new Error('Payment configuration error: ' + error.message);
+                    } else if (error.code === '23514') {
+                        throw new Error('Invalid data provided: ' + error.message);
+                    }
+                    throw new Error(`Failed to update invoice: ${error.message}`);
+                }
 
                 if (action === 'save-only') {
                     toast({
                         title: "Invoice updated successfully!",
                         description: "Your changes have been saved",
                     });
-
                     if (onClose) onClose();
                     if (onSuccess) onSuccess();
                 } else if (action === 'save-and-edit-followups') {
@@ -357,16 +434,14 @@ export default function NewInvoiceModal({
                         title: "Invoice updated!",
                         description: "Now let's review your follow-up messages",
                     });
-
                     if (onClose) onClose();
                     if (onSuccess) onSuccess();
-
-                    // Navigate to setup-messages page
                     router.push(`/invoices/${invoiceId}/setup-messages`);
                 }
 
             } else {
-                // Create new invoice
+                console.log('Creating new invoice with data:', invoiceData);
+
                 const { data: invoice, error } = await supabase
                     .from('invoices')
                     .insert({
@@ -377,42 +452,67 @@ export default function NewInvoiceModal({
                     .select()
                     .single();
 
-                if (error) throw error;
+                if (error) {
+                    console.error('Supabase insert error:', error);
 
-                // Handle UPI payment link generation for new invoices
+                    // Handle specific error codes
+                    if (error.code === '23505') {
+                        throw new Error('An invoice with this number already exists');
+                    } else if (error.code === '23514') {
+                        if (error.message.includes('payment_method_source_check')) {
+                            throw new Error('Invalid payment method. Please contact support.');
+                        }
+                        throw new Error('Invalid data provided. Please verify all fields.');
+                    } else if (error.code === '23502') {
+                        throw new Error('Required field missing: ' + error.message);
+                    } else if (error.code === 'P0001') {
+                        throw new Error('Payment configuration error: ' + error.message);
+                    } else if (error.message.includes('invalid input syntax')) {
+                        throw new Error('Invalid data format. Please check date and number fields.');
+                    }
+
+                    throw new Error(`Failed to create invoice: ${error.message}`);
+                }
+
+                if (!invoice) {
+                    throw new Error('Failed to create invoice - no data returned');
+                }
+
+                console.log('Invoice created successfully:', invoice.id);
+
+                // Handle payment link generation for Razorpay
+                let paymentLinkCreated = false;
                 if (formData.paymentProvider === 'razorpay') {
                     try {
                         const { data: session } = await supabase.auth.getSession();
-                        const response = await fetch('/api/payments/create-link', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${session.session?.access_token}`
-                            },
-                            body: JSON.stringify({ invoiceId: invoice.id })
-                        });
-
-                        const linkResult = await response.json();
-
-                        if (linkResult.success) {
-                            toast({
-                                title: "Invoice created with UPI payment!",
-                                description: "Payment link with UPI + QR code generated automatically",
+                        if (session.session?.access_token) {
+                            const response = await fetch('/api/payments/create-link', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${session.session.access_token}`
+                                },
+                                body: JSON.stringify({ invoiceId: invoice.id })
                             });
-                        } else {
-                            toast({
-                                title: "Invoice created",
-                                description: "Payment link generation failed - you can add it manually",
-                            });
+
+                            if (response.ok) {
+                                const linkResult = await response.json();
+                                if (linkResult.success) {
+                                    paymentLinkCreated = true;
+                                }
+                            }
                         }
                     } catch (linkError) {
                         console.error('Payment link generation failed:', linkError);
+                        // Don't throw - invoice was created successfully
                     }
                 }
 
                 toast({
                     title: "Invoice created successfully!",
-                    description: "Now let's set up your follow-up messages",
+                    description: paymentLinkCreated
+                        ? "Payment link with UPI + QR code generated automatically"
+                        : "Now let's set up your follow-up messages",
                 });
 
                 resetForm();
@@ -424,9 +524,13 @@ export default function NewInvoiceModal({
 
         } catch (error) {
             console.error(`Error ${isEditMode ? 'updating' : 'creating'} invoice:`, error);
+
+            const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+
             toast({
                 title: "Error",
-                description: `Failed to ${isEditMode ? 'update' : 'create'} invoice. Please try again.`,
+                description: errorMessage,
+                // variant: "destructive",
             });
         } finally {
             setSaving(false);

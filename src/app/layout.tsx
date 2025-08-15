@@ -4,7 +4,6 @@ import { Inter } from 'next/font/google'
 import { Providers } from './providers'
 import { AuthProvider } from '@/components/AuthProvider'
 import './globals.css'
-import { icons } from "lucide-react"
 
 const inter = Inter({ subsets: ['latin'] })
 
