@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const protectedRoutes = ['/dashboard', '/invoices']
   const authRoutes = ['/auth']
   const callbackRoutes = ['/auth/callback']
-  
+
   const isProtectedRoute = protectedRoutes.some(route => pathname?.startsWith(route))
   const isAuthRoute = authRoutes.some(route => pathname?.startsWith(route))
   const isCallbackRoute = callbackRoutes.some(route => pathname?.startsWith(route))
@@ -74,10 +74,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const initializeAuth = useCallback(async () => {
     try {
       console.log('🔐 Initializing auth state...')
-      
+
       // Get initial session
       const { data: { session: initialSession }, error } = await supabase.auth.getSession()
-      
+
       if (error) {
         console.error('Error getting initial session:', error)
         setUser(null)
@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('Email confirmed:', initialSession?.user?.email_confirmed_at ? 'Yes' : 'No')
         setSession(initialSession)
         setUser(initialSession?.user ?? null)
-        
+
         // If we have a session, validate it's working
         if (initialSession?.user) {
           try {
@@ -113,12 +113,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshSession = useCallback(async () => {
     try {
       const { data: { session: refreshedSession }, error } = await supabase.auth.refreshSession()
-      
+
       if (error) {
         console.error('Error refreshing session:', error)
         return
       }
-      
+
       if (refreshedSession) {
         setSession(refreshedSession)
         setUser(refreshedSession.user)
@@ -134,12 +134,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true)
       const { error } = await supabase.auth.signOut()
-      
+
       if (error) {
         console.error('Sign out error:', error)
         return
       }
-      
+
       setUser(null)
       setSession(null)
       router.replace('/')
@@ -157,12 +157,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
         console.log(`🔄 Auth state changed: ${event}`, newSession?.user?.email || 'No user')
-        
+
         // Update state
         setSession(newSession)
         setUser(newSession?.user ?? null)
         setLoading(false)
-        
+
         // Handle specific events
         switch (event) {
           case 'SIGNED_IN':

@@ -1,53 +1,70 @@
-# 💰 Fynl-It - Freelancer Payment Recovery Platform
+# Nudgr (Fynl-It) 💸
+
+## AI-Powered Payment Recovery Platform for Freelancers & Small Businesses
 
 <div align="center">
 
-![Fynl-It Logo](https://img.shields.io/badge/Fynl--It-Payment%20Recovery-blue?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Node.js](https://img.shields.io/badge/node.js-18%2B-green.svg)
+![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)
+![Supabase](https://img.shields.io/badge/Supabase-Database-green.svg)
+![Vercel](https://img.shields.io/badge/Vercel-Deployment-black.svg)
 
-**Get Paid Without Being "That" Freelancer**
+*Never chase payments again. Let AI do the work.*
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![Supabase](https://img.shields.io/badge/Supabase-Database-green?logo=supabase)](https://supabase.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4-blue?logo=tailwind-css)](https://tailwindcss.com/)
-[![Vercel](https://img.shields.io/badge/Vercel-Deployed-black?logo=vercel)](https://vercel.com/)
-
-[Live Demo](https://fynl-it.vercel.app) • [Documentation](#documentation) • [API Reference](#api-reference) • [Contributing](#contributing)
+[🚀 Live Demo](https://fynl-it.com) • [📖 Documentation](https://docs.fynl-it.com) • [💬 Discord](https://discord.gg/fynl-it)
 
 </div>
 
 ---
 
-## 🚀 **What is Fynl-It?**
+## 📋 **Table of Contents**
 
-Fynl-It is an AI-powered payment recovery platform designed specifically for freelancers and small businesses. It automates the awkward process of chasing payments while maintaining professional relationships with clients.
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Quick Start](#-quick-start)
+- [Configuration](#-configuration)
+- [API Reference](#-api-reference)
+- [Database Schema](#-database-schema)
+- [Development](#-development)
+- [Testing](#-testing)
+- [Deployment](#-deployment)
+- [Contributing](#-contributing)
+- [Support](#-support)
+
+---
+
+## 🎯 **Overview**
+
+Nudgr (branded as Fynl-It) is a comprehensive AI-powered payment recovery platform designed specifically for freelancers and small businesses in India. It automates the entire invoice follow-up process while maintaining professional client relationships through intelligent, progressive communication.
 
 ### **The Problem We Solve**
-- 📧 Sending payment reminders feels awkward and unprofessional
-- ⏰ Manually tracking due dates and follow-ups is time-consuming  
-- 💸 Late payments hurt cash flow and business growth
-- 🤖 Generic reminder emails don't get results
-- 📱 Clients want easy payment methods (especially UPI in India)
+- **45% of freelancers** struggle with late payments
+- **60+ hours per month** spent on payment follow-ups
+- **Awkward client conversations** about overdue invoices
+- **Cash flow disruption** affecting business growth
 
 ### **Our Solution**
-- 🎯 **Automated reminder sequences** with progressive tone escalation
-- 🤖 **AI-powered message generation** for personalized communication
-- 💳 **UPI payment integration** with QR codes for instant payments
-- 📊 **Smart payment detection** that stops reminders automatically
-- 📱 **Mobile-first design** optimized for Indian market
+- **AI-powered automation** for payment reminders
+- **Progressive 5-tier** escalation system
+- **UPI-optimized payments** for instant collection
+- **Professional communication** that preserves relationships
 
 ---
 
 ## ✨ **Key Features**
 
-### 🤖 **AI-Powered Automation**
-- **Invoice Scanning**: Upload PDF/image invoices, AI extracts all details
+### 🤖 **AI-Powered Intelligence**
+- **Invoice Processing**: Automatic data extraction from PDF/images using Google Gemini
 - **Message Enhancement**: AI improves reminder tone and effectiveness
-- **Smart Scheduling**: Automatically schedules follow-ups based on due dates
+- **Smart Scheduling**: Based on due dates and payment history
+- **Personalization**: Context-aware messaging for different client relationships
 
-### 💳 **Payment Integration**
-- **UPI Payments**: Generate QR codes and payment links instantly
+### 💳 **UPI-Optimized Payments**
+- **Instant Payment Links**: Generate QR codes and payment links instantly
 - **Multiple Methods**: Support for cards, net banking, wallets
 - **Auto-Detection**: Webhooks automatically detect payments
 - **Multi-Currency**: INR, USD, EUR, GBP, and more
@@ -96,6 +113,64 @@ Fynl-It is an AI-powered payment recovery platform designed specifically for fre
 
 ---
 
+## 📁 **Project Structure**
+
+```
+nudgr/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── (auth)/            # Authentication pages
+│   │   │   ├── auth/          # Login/signup
+│   │   │   └── callback/      # Auth callback
+│   │   ├── api/               # API routes
+│   │   │   ├── email/         # Email services
+│   │   │   ├── payments/      # Payment processing
+│   │   │   ├── webhooks/      # External webhooks
+│   │   │   ├── scheduler/     # Cron jobs
+│   │   │   └── ai/           # AI processing
+│   │   ├── dashboard/         # Main dashboard
+│   │   ├── invoices/          # Invoice management
+│   │   │   ├── [id]/         # Individual invoice
+│   │   │   └── setup-messages/ # Message configuration
+│   │   ├── globals.css        # Global styles
+│   │   ├── layout.tsx         # Root layout
+│   │   └── page.tsx          # Landing page
+│   ├── components/            # Reusable UI components
+│   │   ├── ui/               # shadcn/ui components
+│   │   ├── AuthProvider.tsx  # Authentication wrapper
+│   │   ├── EmailSettings.tsx # Email configuration
+│   │   └── NewInvoiceModal.tsx # Invoice creation
+│   ├── lib/                   # Utilities and configurations
+│   │   ├── hooks/            # Custom React hooks
+│   │   │   ├── use-email.ts  # Email operations
+│   │   │   ├── use-toast.ts  # Toast notifications
+│   │   │   └── use-auth.ts   # Authentication
+│   │   ├── email/            # Email templates and service
+│   │   │   ├── templates.tsx # React Email templates
+│   │   │   └── service.ts    # Email service logic
+│   │   ├── payments/         # Payment processing
+│   │   │   └── razorpay-upi.ts # UPI integration
+│   │   ├── utils/            # Helper functions
+│   │   └── supabase.ts       # Database client
+│   └── types/                 # TypeScript type definitions
+│       └── supabase.ts       # Database types
+├── supabase/
+│   ├── migrations/           # Database migrations
+│   └── config.toml          # Supabase configuration
+├── tests/                    # Test files
+│   ├── resend-test.js       # Email testing
+│   ├── test-razorpay-webhook.js # Payment testing
+│   └── verified-sender-test.js # Domain verification
+├── public/                   # Static assets
+├── components.json          # shadcn/ui configuration
+├── next.config.ts          # Next.js configuration
+├── package.json            # Dependencies
+├── tailwind.config.js      # Tailwind configuration
+└── CLAUDE.md              # Development guidance
+```
+
+---
+
 ## 🚀 **Quick Start**
 
 ### **Prerequisites**
@@ -107,13 +182,13 @@ Fynl-It is an AI-powered payment recovery platform designed specifically for fre
 
 ### **1. Clone the Repository**
 ```bash
-git clone https://github.com/yourusername/fynl-it.git
-cd fynl-it
+git clone https://github.com/yourusername/nudgr.git
+cd nudgr
 npm install
 ```
 
 ### **2. Environment Setup**
-Copy `.env.example` to `.env.local` and fill in your credentials:
+Copy `.env.example` to `.env.local` and configure:
 
 ```bash
 # Database
@@ -166,47 +241,25 @@ Open [http://localhost:3000](http://localhost:3000) to see the application.
 
 ---
 
-## 📁 **Project Structure**
-
-```
-fynl-it/
-├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── (auth)/            # Authentication pages
-│   │   ├── api/               # API routes
-│   │   ├── dashboard/         # Main dashboard
-│   │   └── invoices/          # Invoice management
-│   ├── components/            # Reusable UI components
-│   │   ├── ui/               # shadcn/ui components
-│   │   └── custom/           # Custom components
-│   ├── lib/                   # Utilities and configurations
-│   │   ├── hooks/            # Custom React hooks
-│   │   ├── email/            # Email templates and service
-│   │   ├── payments/         # Payment processing
-│   │   └── utils/            # Helper functions
-│   └── types/                 # TypeScript type definitions
-├── supabase/
-│   ├── migrations/           # Database migrations
-│   └── config.toml          # Supabase configuration
-├── public/                   # Static assets
-└── docs/                    # Documentation
-```
-
----
-
 ## 🔧 **Configuration**
 
 ### **Database Schema**
 The application uses these main tables:
-- `profiles` - User profile information
-- `invoices` - Invoice data and status
-- `follow_ups` - Scheduled reminder messages
-- `email_logs` - Email delivery tracking
+
+#### **Core Tables**
+- `profiles` - User profile and business information
+- `invoices` - Invoice data with payment status
+- `follow_ups` - Scheduled reminder messages with progressive escalation
+- `email_logs` - Email delivery tracking and analytics
 - `payment_events` - Payment webhook logs
+
+#### **Views**
+- `email_activity` - Aggregated email engagement metrics
+- `invoice_analytics` - Payment analytics and cash flow insights
 
 ### **Payment Integration**
 Configure Razorpay for UPI payments:
-1. Create Razorpay account
+1. Create Razorpay account at [razorpay.com](https://razorpay.com)
 2. Enable Payment Links API
 3. Set up webhooks for payment detection
 4. Configure UPI as primary payment method
@@ -222,30 +275,171 @@ Customize email templates in `src/lib/email/templates.tsx`:
 
 ## 🚦 **API Reference**
 
+### **Authentication**
+All API routes require authentication via Supabase Auth headers.
+
 ### **Invoice Management**
 ```typescript
+# Create new invoice
 POST /api/invoices/create
-PUT  /api/invoices/[id]
-GET  /api/invoices/[id]
+Body: {
+  client_name: string
+  client_email: string
+  invoice_number: string
+  amount: number
+  currency: string
+  due_date: string
+  description?: string
+}
+
+# Update invoice
+PUT /api/invoices/[id]
+Body: { [field]: value }
+
+# Get invoice details
+GET /api/invoices/[id]
 ```
 
 ### **Payment Processing**
 ```typescript
-POST /api/payments/create-link    # Generate UPI payment link
-POST /api/webhooks/razorpay      # Payment webhook handler
+# Generate UPI payment link
+POST /api/payments/create-link
+Body: {
+  invoice_id: string
+  amount: number
+  currency: string
+}
+
+# Payment webhook handler (Razorpay)
+POST /api/webhooks/razorpay
+Headers: {
+  'x-razorpay-signature': string
+}
 ```
 
 ### **AI Features**
 ```typescript
-POST /api/process-invoice        # AI invoice scanning
-POST /api/enhance-message       # AI message enhancement
+# AI invoice scanning
+POST /api/process-invoice
+Body: {
+  file: File | base64
+  type: 'pdf' | 'image'
+}
+
+# AI message enhancement
+POST /api/enhance-message
+Body: {
+  message: string
+  context: 'reminder' | 'followup' | 'final'
+  tone: 'friendly' | 'professional' | 'firm'
+}
 ```
 
 ### **Email System**
 ```typescript
-POST /api/email/send            # Send reminder email
-POST /api/email/test           # Test email configuration
-POST /api/scheduler/send-due-emails  # Cron job endpoint
+# Send reminder email
+POST /api/email/send
+Body: {
+  type: 'reminder' | 'thank_you'
+  to: string
+  subject: string
+  templateProps: EmailTemplateProps
+}
+
+# Test email configuration
+POST /api/email/test
+Body: {
+  testEmail: string
+}
+
+# Automated cron job endpoint
+POST /api/scheduler/send-due-emails
+Headers: {
+  'x-scheduler-key': string
+}
+```
+
+---
+
+## 📊 **Database Schema**
+
+### **Tables Structure**
+
+```sql
+-- User profiles and business information
+profiles (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES auth.users,
+  first_name TEXT,
+  last_name TEXT,
+  business_name TEXT,
+  email TEXT,
+  preferred_from_email TEXT,
+  preferred_from_name TEXT,
+  custom_domain TEXT,
+  domain_verified BOOLEAN DEFAULT false,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+)
+
+-- Invoice data and payment status
+invoices (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES auth.users,
+  client_name TEXT NOT NULL,
+  client_email TEXT NOT NULL,
+  invoice_number TEXT NOT NULL,
+  amount DECIMAL NOT NULL,
+  currency TEXT DEFAULT 'INR',
+  due_date DATE NOT NULL,
+  description TEXT,
+  payment_link TEXT,
+  payment_status TEXT DEFAULT 'pending',
+  paid_at TIMESTAMP,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+)
+
+-- Scheduled reminder messages
+follow_ups (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES auth.users,
+  invoice_id UUID REFERENCES invoices,
+  tier INTEGER NOT NULL, -- 1-5 escalation tier
+  scheduled_date DATE NOT NULL,
+  subject TEXT NOT NULL,
+  message TEXT NOT NULL,
+  status TEXT DEFAULT 'scheduled',
+  sent_at TIMESTAMP,
+  message_id TEXT,
+  created_at TIMESTAMP
+)
+
+-- Email delivery tracking
+email_logs (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES auth.users,
+  invoice_id UUID REFERENCES invoices,
+  follow_up_id UUID REFERENCES follow_ups,
+  email_type TEXT NOT NULL,
+  recipient_email TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  message_id TEXT,
+  status TEXT DEFAULT 'sent',
+  opened_at TIMESTAMP,
+  clicked_at TIMESTAMP,
+  created_at TIMESTAMP
+)
+```
+
+### **Row Level Security (RLS)**
+All tables implement RLS policies to ensure users can only access their own data:
+
+```sql
+-- Example RLS policy for invoices
+CREATE POLICY "Users can only access their own invoices"
+ON invoices FOR ALL
+USING (auth.uid() = user_id);
 ```
 
 ---
@@ -253,128 +447,213 @@ POST /api/scheduler/send-due-emails  # Cron job endpoint
 ## 🔄 **Automated Workflows**
 
 ### **Reminder Sequence**
-1. **Due Date** (Day 0): Friendly reminder
-2. **+3 Days**: Professional follow-up
-3. **+7 Days**: Firm notice
-4. **+14 Days**: Urgent warning
-5. **+21 Days**: Final notice before escalation
+The platform uses a 5-tier progressive reminder system:
 
-### **Payment Detection**
-- Webhook receives payment notification
-- Invoice status updated to "paid"
-- All pending reminders cancelled
-- Thank you email sent automatically
+1. **Day 0** (Due Date): Friendly reminder
+   - Tone: Gentle and professional
+   - Subject: "Friendly reminder: Invoice [NUMBER] due today"
 
-### **AI Enhancement**
-- Invoice upload triggers AI processing
-- Fields extracted and pre-filled
-- Message tone adapted to context
-- Personalization based on client relationship
+2. **Day +3**: Professional follow-up
+   - Tone: Business-like but courteous
+   - Subject: "Follow-up: Invoice [NUMBER] payment pending"
+
+3. **Day +7**: Firm notice
+   - Tone: More direct and assertive
+   - Subject: "Payment Required: Invoice [NUMBER] is overdue"
+
+4. **Day +14**: Urgent warning
+   - Tone: Serious and urgent
+   - Subject: "URGENT: Invoice [NUMBER] payment overdue"
+
+5. **Day +21**: Final notice
+   - Tone: Final warning before escalation
+   - Subject: "FINAL NOTICE: Invoice [NUMBER] payment required"
+
+### **Payment Detection Flow**
+1. Invoice created → UPI payment link generated via Razorpay
+2. Email sent with payment link and QR code
+3. Webhook detects payment → Invoice marked as paid
+4. All pending reminders automatically cancelled
+5. Thank you email sent to client
+
+### **AI Integration**
+- Invoice PDF/image processing extracts client details automatically
+- Message enhancement improves reminder tone and effectiveness
+- Smart scheduling based on due dates and payment history
+- Personalization based on client relationship context
 
 ---
 
-## 🌍 **Deployment**
+## 💻 **Development**
 
-### **Vercel Deployment (Recommended)**
-1. Connect your GitHub repository to Vercel
-2. Configure environment variables
-3. Deploy with automatic HTTPS and CDN
-4. Set up Vercel Cron for scheduled jobs
-
-### **Manual Deployment**
+### **Development Commands**
 ```bash
-# Build for production
-npm run build
+# Development
+npm run dev          # Start development server with Turbopack
+npm run build        # Build for production
+npm start            # Start production server
+npm run lint         # Run ESLint
 
-# Start production server
-npm start
+# Database Operations
+supabase login              # Login to Supabase CLI
+supabase link --project-ref <ref>  # Link to project
+supabase db push           # Run migrations
+supabase db pull           # Pull schema changes
 ```
 
-### **Database Migration**
-```bash
-# Production migration
-supabase db push --linked
+### **Key Services**
 
-# Backup before migration
-supabase db dump --linked > backup.sql
+#### **Email Service** (`src/lib/email/email-service.ts`)
+- Handles reminder sequences with 5-tier escalation system
+- Integrates with React Email templates for mobile-optimized emails
+- Automatic cancellation when payments are received
+- Email tracking and analytics
+
+#### **Payment Service** (`src/lib/payments/razorpay-upi.ts`)
+- UPI-optimized payment links with QR codes
+- Webhook handling for real-time payment detection
+- Multi-currency support with INR focus
+- Payment status tracking and validation
+
+#### **Supabase Client** (`src/lib/supabase.ts`)
+- Enhanced client with custom storage key
+- PKCE flow authentication
+- Row Level Security enforcement
+- Real-time subscriptions for payment updates
+
+### **Custom Hooks**
+
+#### **useEmail Hook** (`src/lib/hooks/use-email.ts`)
+```typescript
+const {
+  sendReminder,
+  sendThankYou,
+  sendTestEmail,
+  sendUPIReminder,
+  loading,
+  error
+} = useEmail();
+
+// Send a payment reminder
+await sendReminder(followUpId);
+
+// Send thank you email
+await sendThankYou(invoiceId);
+
+// Send test email
+await sendTestEmail('test@example.com');
 ```
+
+### **Environment Variables Required**
+```bash
+# Database
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
+# AI Processing
+GEMINI_API_KEY=
+
+# Payment Processing
+RAZORPAY_KEY_ID=
+RAZORPAY_KEY_SECRET=
+RAZORPAY_WEBHOOK_SECRET=
+
+# Email Service
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=
+
+# App Configuration
+NEXT_PUBLIC_APP_URL=
+SCHEDULER_API_KEY=
+```
+
+### **Development Notes**
+- All email templates use React Email for consistent mobile rendering
+- Payment amounts are stored in rupees but converted to paise for Razorpay API
+- Database uses RLS policies - ensure user context is properly set
+- Webhook signature verification is critical for payment security
+- Email tracking uses Resend webhooks for delivery status
+- Cron jobs run on Vercel for automated reminder scheduling
+
+### **Common Patterns**
+- Use `supabase` client from `src/lib/supabase.ts` for all database operations
+- Import types from `src/types/supabase.ts` for type safety
+- Email templates are in `src/lib/email/templates.tsx`
+- Payment utilities are centralized in `src/lib/payments/razorpay-upi.ts`
+- Use React Query hooks from `src/lib/hooks/` for data fetching
+- All API routes include proper error handling and logging
 
 ---
 
 ## 🧪 **Testing**
 
+Test files are located in `/tests/` directory:
+
+### **Available Tests**
+- `resend-test.js` - Email sending functionality
+- `test-razorpay-webhook.js` - Payment webhook processing
+- `verified-sender-test.js` - Email domain verification
+
 ### **Run Tests**
 ```bash
-# Unit tests
-npm run test
+# Run individual tests with Node.js
+node tests/resend-test.js
+node tests/test-razorpay-webhook.js
+node tests/verified-sender-test.js
 
-# E2E tests
-npm run test:e2e
+# Test email configuration
+npm run test:email
 
-# Type checking
-npm run type-check
+# Test payment webhooks
+npm run test:payments
 ```
 
-### **Manual Testing Checklist**
-- [ ] User registration and email verification
-- [ ] Invoice creation with AI scanning
-- [ ] Payment link generation
-- [ ] Email reminder sending
-- [ ] Payment webhook processing
-- [ ] Dashboard analytics display
+### **Testing Checklist**
+- [ ] Email delivery and templating
+- [ ] Payment webhook signature verification
+- [ ] Database operations with RLS
+- [ ] AI invoice processing
+- [ ] Authentication flows
+- [ ] API endpoint responses
 
 ---
 
-## 🔒 **Security**
+## 🚀 **Deployment**
 
-### **Authentication**
-- Supabase Auth with email verification
-- Row Level Security (RLS) policies
-- Protected API routes
-- Session management with refresh tokens
+### **Vercel Deployment**
+1. **Connect Repository**: Link your GitHub repository to Vercel
+2. **Environment Variables**: Set all required environment variables in Vercel dashboard
+3. **Domain Configuration**: Configure custom domain if needed
+4. **Cron Jobs**: Set up Vercel Cron for automated reminders
 
-### **Data Protection**
-- All sensitive data encrypted at rest
-- HTTPS enforced in production
-- API rate limiting
-- Input validation and sanitization
+### **Environment Setup**
+```bash
+# Production environment variables
+NEXT_PUBLIC_SUPABASE_URL=your_production_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_production_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_production_service_role_key
+# ... other environment variables
+```
 
-### **Payment Security**
-- PCI DSS compliant payment processing
-- Webhook signature verification
-- Secure token handling
-- No card data stored locally
+### **Database Migration**
+```bash
+# Run migrations in production
+supabase link --project-ref your-production-ref
+supabase db push
+```
 
----
-
-## 🎯 **Roadmap**
-
-### **Phase 1 - Core MVP** ✅
-- [x] Invoice management
-- [x] Automated reminders
-- [x] UPI payments
-- [x] AI features
-- [x] Mobile responsive
-
-### **Phase 2 - Enhanced Features** 🚧
-- [ ] Advanced analytics
-- [ ] Bulk operations
-- [ ] Custom email domains
-- [ ] SMS reminders
-- [ ] Client portal
-
-### **Phase 3 - Scale & Growth** 📋
-- [ ] Team collaboration
-- [ ] API for integrations
-- [ ] Mobile applications
-- [ ] International payments
-- [ ] Advanced reporting
+### **Webhook Configuration**
+Set up Razorpay webhooks pointing to:
+```
+https://yourdomain.com/api/webhooks/razorpay
+```
 
 ---
 
 ## 🤝 **Contributing**
 
-We love contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ### **Development Process**
 1. Fork the repository
@@ -389,6 +668,15 @@ We love contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for 
 - Use ESLint and Prettier configurations
 - Write tests for new features
 - Update documentation for API changes
+- Follow conventional commit messages
+
+### **Areas for Contribution**
+- [ ] Unit and integration tests
+- [ ] Additional payment providers
+- [ ] Email template improvements
+- [ ] Mobile app development
+- [ ] Internationalization (i18n)
+- [ ] Advanced analytics features
 
 ---
 
@@ -404,6 +692,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - 💬 **Discord**: [Join our community](https://discord.gg/fynl-it)
 - 🐦 **Twitter**: [@FynlIt](https://twitter.com/fynlit)
 - 📖 **Documentation**: [docs.fynl-it.com](https://docs.fynl-it.com)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/yourusername/nudgr/issues)
+- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/yourusername/nudgr/discussions)
 
 ---
 
@@ -415,15 +705,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Razorpay** for UPI payment integration
 - **Google AI** for invoice processing capabilities
 - **Resend** for reliable email delivery
+- **React Email** for amazing email templates
 
 ---
 
 ## 📊 **Analytics & Metrics**
 
-![GitHub Stars](https://img.shields.io/github/stars/yourusername/fynl-it?style=social)
-![GitHub Forks](https://img.shields.io/github/forks/yourusername/fynl-it?style=social)
-![GitHub Issues](https://img.shields.io/github/issues/yourusername/fynl-it)
-![GitHub Pull Requests](https://img.shields.io/github/issues-pr/yourusername/fynl-it)
+![GitHub Stars](https://img.shields.io/github/stars/yourusername/nudgr?style=social)
+![GitHub Forks](https://img.shields.io/github/forks/yourusername/nudgr?style=social)
+![GitHub Issues](https://img.shields.io/github/issues/yourusername/nudgr)
+![GitHub Pull Requests](https://img.shields.io/github/issues-pr/yourusername/nudgr)
 
 ---
 
@@ -431,7 +722,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ for freelancers who deserve to get paid on time**
 
-[⭐ Star this repo](https://github.com/yourusername/fynl-it) if you find it helpful!
+[⭐ Star this repo](https://github.com/yourusername/nudgr) if you find it helpful!
 
 </div>
-
