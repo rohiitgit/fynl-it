@@ -18,19 +18,19 @@ export async function POST(request: NextRequest) {
         // For testing the enhance endpoint directly, wrap the prompt properly
         const fullPrompt = typeof prompt === 'string'
             ? `You are helping enhance a payment reminder email. ${prompt}
-         
+
          Return ONLY a JSON object in this exact format:
          {
            "subject": "enhanced email subject line",
            "content": "enhanced email body content"
          }
-         
+
          Do not include any other text, only the JSON object.`
             : prompt;
 
         // Generate enhanced message
         const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
+            model: "gemini-2.0-flash-exp",
             contents: fullPrompt,
         });
 

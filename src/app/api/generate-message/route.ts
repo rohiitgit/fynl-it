@@ -18,19 +18,19 @@ export async function POST(request: NextRequest) {
         // For testing the endpoint directly, ensure we ask for JSON format
         const fullPrompt = typeof prompt === 'string'
             ? `${prompt}
-         
+
          Return ONLY a JSON object in this exact format:
          {
            "subject": "email subject line",
            "content": "email body content"
          }
-         
+
          Do not include any other text, only the JSON object.`
             : prompt;
 
         // Generate custom message using the correct API format
         const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
+            model: "gemini-2.0-flash-exp",
             contents: fullPrompt,
         });
 
