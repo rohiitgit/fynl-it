@@ -532,7 +532,8 @@ export default function HomePage() {
       <DynamicNavbar />
 
       {/* Hero Section with Floating Elements */}
-      <section className="relative pt-16 sm:pt-20 lg:pt-24 xl:pt-32 pb-12 sm:pb-16 lg:pb-20 overflow-hidden">
+      {/*<section className="relative pt-16 sm:pt-20 lg:pt-24 xl:pt-32 pb-12 sm:pb-16 lg:pb-20 overflow-hidden">*/}
+      <section className="relative pt-16 sm:pt-20 pb-12 sm:pb-16 lg:min-h-screen lg:flex lg:items-center lg:pt-0 lg:pb-0 overflow-hidden">
         {/* Floating Elements - Hidden on mobile and tablet */}
         {floatingElements.map((element, index) => (
           <FloatingElement key={index} {...element} />
@@ -625,7 +626,7 @@ export default function HomePage() {
             </div>
 
             {/* Desktop Layout: Side by side */}
-            <div className="hidden lg:grid lg:grid-cols-2 lg:gap-12 xl:gap-16 lg:items-center">
+            <div className="hidden lg:grid lg:grid-cols-2 lg:gap-12 xl:gap-16 lg:items-center ">
               {/* Left side: Hero Content */}
               <div className="space-y-8 z-10 relative">
                 {/* Badge */}
