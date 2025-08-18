@@ -873,116 +873,67 @@ export default function HomePage() {
       {/* Features Section */}
       <section className="py-12 sm:py-16 lg:py-20 relative">
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
-          <div className="max-w-7xl mx-auto">
-            {/* Section Header */}
-            <div className="text-center space-y-4 mb-12 sm:mb-16">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
-                Everything you need to get paid faster
-              </h2>
-              <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-                From invoice creation to payment collection, we have got every
-                step covered with intelligent automation.
-              </p>
+          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-4 sm:mb-6">
+              <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+              <span className="text-xs sm:text-sm font-medium text-primary">
+                How It Works
+              </span>
             </div>
+            <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-foreground mb-3 sm:mb-4">
+              Simple, Automated, Professional
+            </h2>
+            <p className="text-base sm:text-lg xl:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
+              From invoice creation to payment collection, everything happens
+              automatically while maintaining your professional relationships.
+            </p>
+          </div>
 
-            {/* Features Grid - Responsive */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {/* Feature 1 */}
-              <Card className="border-border/50 hover:border-border transition-all duration-300 hover:shadow-lg group">
-                <CardHeader className="space-y-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <Sparkles className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg sm:text-xl">
-                    AI Invoice Processing
-                  </CardTitle>
-                  <CardDescription className="text-sm sm:text-base">
-                    Upload any invoice format - our AI extracts all details
-                    instantly and creates professional payment requests.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
+            <Card className="text-center hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group">
+              <CardHeader className="pb-4 sm:pb-6 lg:pb-8 p-4 sm:p-6">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 lg:mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Mail className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-primary" />
+                </div>
+                <CardTitle className="text-base sm:text-lg lg:text-xl mb-2 sm:mb-3">
+                  1. Add Your Invoice
+                </CardTitle>
+                <CardDescription className="text-sm sm:text-base">
+                  Upload via AI scanner or enter details manually. We generate
+                  UPI payment links automatically.
+                </CardDescription>
+              </CardHeader>
+            </Card>
 
-              {/* Feature 2 */}
-              <Card className="border-border/50 hover:border-border transition-all duration-300 hover:shadow-lg group">
-                <CardHeader className="space-y-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <CreditCard className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg sm:text-xl">
-                    UPI Payment Links
-                  </CardTitle>
-                  <CardDescription className="text-sm sm:text-base">
-                    Generate instant UPI payment links and QR codes. Clients pay
-                    with just one tap using any UPI app.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+            <Card className="text-center hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group">
+              <CardHeader className="pb-4 sm:pb-6 lg:pb-8 p-4 sm:p-6">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 lg:mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Zap className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-primary" />
+                </div>
+                <CardTitle className="text-base sm:text-lg lg:text-xl mb-2 sm:mb-3">
+                  2. Auto Follow-ups
+                </CardTitle>
+                <CardDescription className="text-sm sm:text-base">
+                  AI-powered reminders that get progressively more assertive.
+                  Professional tone that preserves relationships.
+                </CardDescription>
+              </CardHeader>
+            </Card>
 
-              {/* Feature 3 */}
-              <Card className="border-border/50 hover:border-border transition-all duration-300 hover:shadow-lg group">
-                <CardHeader className="space-y-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <Zap className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg sm:text-xl">
-                    Smart Automation
-                  </CardTitle>
-                  <CardDescription className="text-sm sm:text-base">
-                    5-tier reminder system that gets progressively more urgent.
-                    Stops automatically when payment is received.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-
-              {/* Feature 4 */}
-              <Card className="border-border/50 hover:border-border transition-all duration-300 hover:shadow-lg group">
-                <CardHeader className="space-y-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <MessageCircle className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg sm:text-xl">
-                    Professional Communication
-                  </CardTitle>
-                  <CardDescription className="text-sm sm:text-base">
-                    AI-enhanced messages that maintain professional
-                    relationships while ensuring prompt payments.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-
-              {/* Feature 5 */}
-              <Card className="border-border/50 hover:border-border transition-all duration-300 hover:shadow-lg group">
-                <CardHeader className="space-y-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <BarChart3 className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg sm:text-xl">
-                    Payment Analytics
-                  </CardTitle>
-                  <CardDescription className="text-sm sm:text-base">
-                    Track payment patterns, collection rates, and client
-                    behavior to optimize your cash flow.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-
-              {/* Feature 6 */}
-              <Card className="border-border/50 hover:border-border transition-all duration-300 hover:shadow-lg group">
-                <CardHeader className="space-y-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <Shield className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg sm:text-xl">
-                    Secure & Reliable
-                  </CardTitle>
-                  <CardDescription className="text-sm sm:text-base">
-                    Bank-grade security with real-time payment detection and
-                    automatic status updates.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </div>
+            <Card className="text-center hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group sm:col-span-2 lg:col-span-1">
+              <CardHeader className="pb-4 sm:pb-6 lg:pb-8 p-4 sm:p-6">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-green-500/20 to-green-500/10 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 lg:mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-green-600" />
+                </div>
+                <CardTitle className="text-base sm:text-lg lg:text-xl mb-2 sm:mb-3">
+                  3. Get Paid Faster
+                </CardTitle>
+                <CardDescription className="text-sm sm:text-base">
+                  Instant UPI payments with QR codes. Auto-detection stops
+                  reminders and sends thank you notes.
+                </CardDescription>
+              </CardHeader>
+            </Card>
           </div>
         </div>
       </section>
@@ -1010,7 +961,7 @@ export default function HomePage() {
                 </Button>
               </Link>
             ) : (
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+              <div className="sm:flex-row items-center justify-center gap-3 sm:gap-4">
                 <Link href="/auth">
                   <Button
                     size="lg"
@@ -1020,7 +971,7 @@ export default function HomePage() {
                     <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
                 </Link>
-                <p className="text-xs sm:text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground py-3">
                   No credit card required • Setup in 2 minutes
                 </p>
               </div>
