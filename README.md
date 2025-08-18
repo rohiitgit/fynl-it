@@ -13,8 +13,7 @@
 
 *Never chase payments again. Let AI do the work.*
 
-[🚀 Live Demo](https://fynl-it.com) • [📖 Documentation](https://docs.fynl-it.com) • [💬 Discord](https://discord.gg/fynl-it)
-
+[🚀 Live Demo](https://fynl.it)
 </div>
 
 ---
