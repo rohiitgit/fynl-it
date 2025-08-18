@@ -722,7 +722,7 @@ export default function HomePage() {
 
       {/* Why Choose Fynl-It Section */}
       {/* Benefits Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-br from-primary/5 to-primary/10 relative">
+      <section className="py-12 sm:py-16 bg-gradient-to-br from-primary/5 to-primary/10 relative">
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="max-w-6xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
