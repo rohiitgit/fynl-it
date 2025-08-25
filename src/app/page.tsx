@@ -16,7 +16,6 @@ import {
   DollarSign,
   Mail,
   TrendingUp,
-  BarChart3,
   Users,
   Bell,
   Sparkles,
@@ -29,8 +28,11 @@ import {
   MessageCircle,
   Calendar,
   Star,
+  AlertCircle,
+  User,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/components/AuthProvider";
 
 // Floating elements data
@@ -158,13 +160,7 @@ const DynamicNavbar = () => {
                     isScrolled ? "scale-90" : "scale-100"
                   }`}
                 >
-                  <DollarSign
-                    className={`text-primary transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu ${
-                      isScrolled
-                        ? "h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6"
-                        : "h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8"
-                    }`}
-                  />
+                  
                 </div>
 
                 <span
@@ -526,6 +522,17 @@ export default function HomePage() {
             transform: translateY(-15px) rotate(3deg);
           }
         }
+        @keyframes glow {
+          0%, 100% {
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3), 0 0 20px rgba(34, 197, 94, 0.2);
+          }
+          50% {
+            box-shadow: 0 10px 40px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.4);
+          }
+        }
+        .glow-button {
+          animation: glow 2s ease-in-out infinite;
+        }
       `}</style>
 
       {/* Dynamic Navbar */}
@@ -566,9 +573,9 @@ export default function HomePage() {
 
                 {/* Main Heading */}
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight">
-                  Get your invoices
+                  Never Chase Clients for 
                   <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent block">
-                    Fynlly Paid
+                    Payment Again
                   </span>
                 </h1>
               </div>
@@ -582,42 +589,34 @@ export default function HomePage() {
               <div className="space-y-6 sm:space-y-8 z-10 relative text-center">
                 {/* Subheading */}
                 <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed px-2">
-                  Let us handle the awkward nudges so you can focus on your
-                  work. Smart automation meets professional communication with
-                  AI-powered reminders.
+                  Upload your invoice → AI sends professional reminders → Get paid faster.
+                  <span className="block mt-2 font-semibold text-green-600">
+                    100% Free. No credit card needed.
+                  </span>
                 </p>
 
                 {/* CTA Buttons */}
                 {user ? (
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+                  <div className="flex flex-col items-center justify-center gap-3">
                     <Link href="/dashboard">
                       <Button
                         size="lg"
-                        className="w-full sm:w-auto gap-2 text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
+                        className="w-full sm:w-auto gap-2 text-lg px-8 py-4 bg-black hover:bg-black text-white border border-green-500/20 glow-button"
                       >
                         Go to Dashboard
-                        <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <ArrowRight className="h-5 w-5" />
                       </Button>
                     </Link>
                   </div>
                 ) : (
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+                  <div className="flex flex-col items-center justify-center gap-3">
                     <Link href="/auth">
                       <Button
                         size="lg"
-                        className="w-full sm:w-auto gap-2 text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
+                        className="w-full sm:w-auto gap-2 text-lg px-12 py-4 bg-black hover:bg-black text-white border border-green-500/20 glow-button"
                       >
-                        Start for Free
-                        <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
-                      </Button>
-                    </Link>
-                    <Link href="/auth">
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className="w-full sm:w-auto gap-2 text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
-                      >
-                        Watch Demo
+                        Get Started Free
+                        <ArrowRight className="h-5 w-5" />
                       </Button>
                     </Link>
                   </div>
@@ -639,44 +638,36 @@ export default function HomePage() {
 
                 {/* Main Heading */}
                 <h1 className="text-4xl xl:text-5xl 2xl:text-6xl font-bold text-foreground leading-tight">
-                  Get your invoices
+                  Never Chase Clients for
                   <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent block">
-                    Fynlly Paid
+                    Payment Again
                   </span>
                 </h1>
 
                 {/* Subheading */}
                 <p className="text-xl text-muted-foreground leading-relaxed">
-                  Let us handle the awkward nudges so you can focus on your
-                  work. Smart automation meets professional communication with
-                  AI-powered reminders.
+                  Upload your invoice → AI sends professional reminders → Get paid faster.
+                  <span className="block mt-3 font-semibold text-green-600 text-lg">
+                    100% Free. No credit card needed.
+                  </span>
                 </p>
 
                 {/* CTA Buttons */}
                 {user ? (
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col gap-4">
                     <Link href="/dashboard">
-                      <Button size="lg" className="gap-2 text-base px-8 py-4">
+                      <Button size="lg" className="gap-2 text-lg px-12 py-4 bg-black hover:bg-black text-white border border-green-500/20 glow-button">
                         Go to Dashboard
                         <ArrowRight className="h-5 w-5" />
                       </Button>
                     </Link>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col gap-4">
                     <Link href="/auth">
-                      <Button size="lg" className="gap-2 text-base px-8 py-4">
-                        Start for Free
+                      <Button size="lg" className="gap-2 text-lg px-12 py-4 bg-black hover:bg-black text-white border border-green-500/20 glow-button">
+                        Get Started Free
                         <ArrowRight className="h-5 w-5" />
-                      </Button>
-                    </Link>
-                    <Link href="/auth">
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className="gap-2 text-base px-8 py-4"
-                      >
-                        Watch Demo
                       </Button>
                     </Link>
                   </div>
@@ -720,6 +711,36 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Why Free? Trust Building Section */}
+      <section className="py-8 sm:py-12 bg-gradient-to-r from-green-50 to-blue-50 border-y border-green-200">
+        <div className="container mx-auto px-3 sm:px-4 lg:px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-xl sm:text-2xl font-bold text-green-800 mb-4">
+              🤔 Why is this completely free?
+            </h2>
+            <p className="text-green-700 text-base sm:text-lg mb-6 leading-relaxed">
+              We&apos;re a new startup testing our concept with real freelancers. Your feedback helps us 
+              build something the community actually needs. Once we prove this works, we might add 
+              premium features - but the core will always stay free.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-green-700 font-medium">No hidden costs</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-green-700 font-medium">No credit card ever</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-green-700 font-medium">Built by freelancers</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Why Choose Fynl-It Section */}
       {/* Benefits Section */}
       <section className="py-12 sm:py-16 bg-gradient-to-br from-primary/5 to-primary/10 relative">
@@ -738,37 +759,35 @@ export default function HomePage() {
                     Why Choose Fynl-It?
                   </h2>
                   <p className="text-base sm:text-lg lg:text-xl text-muted-foreground">
-                    Designed specifically for Indian freelancers and small
-                    businesses who want to get paid without damaging client
-                    relationships.
+                    Designed specifically for Indian freelancers who want to get paid faster 
+                    without damaging client relationships.
                   </p>
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="flex items-start gap-3">
                     <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                      <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1 text-sm sm:text-base">
-                        UPI Optimized
+                        AI-Powered Messages
                       </h3>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        Instant payments with QR codes and UPI links
+                        Professional reminders that maintain client relationships
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
                     <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                      <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1 text-sm sm:text-base">
-                        AI-Powered
+                        UPI Instant Payments
                       </h3>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        Smart invoice scanning and message enhancement
+                        QR codes and payment links for immediate collection
                       </p>
                     </div>
                   </div>
@@ -779,10 +798,10 @@ export default function HomePage() {
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1 text-sm sm:text-base">
-                        Saves Time
+                        Automatic Follow-ups
                       </h3>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        Complete automation from reminder to payment
+                        Never miss a payment reminder again
                       </p>
                     </div>
                   </div>
@@ -793,10 +812,10 @@ export default function HomePage() {
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1 text-sm sm:text-base">
-                        Professional
+                        Relationship Safe
                       </h3>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        Maintains relationships while ensuring payment
+                        Professional tone that preserves client trust
                       </p>
                     </div>
                   </div>
@@ -939,44 +958,84 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Founder Credibility & CTA Section */}
       <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-r from-primary/5 to-primary/10">
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
-          <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
-              Ready to get paid faster?
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Join thousands of freelancers who have automated their payment
-              collection and never chase clients again.
-            </p>
-
-            {user ? (
-              <Link href="/dashboard">
-                <Button
-                  size="lg"
-                  className="gap-2 text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
-                >
-                  Go to Dashboard
-                  <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
-                </Button>
-              </Link>
-            ) : (
-              <div className="sm:flex-row items-center justify-center gap-3 sm:gap-4">
-                <Link href="/auth">
-                  <Button
-                    size="lg"
-                    className="w-full sm:w-auto gap-2 text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
-                  >
-                    Start for Free
-                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+          <div className="max-w-5xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              {/* Founder Story */}
+              <div className="bg-card p-6 sm:p-8 rounded-xl border shadow-lg">
+                <div className="flex items-start gap-4 mb-6">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden flex-shrink-0 border-2 border-primary/20">
+                    <Image
+                      src="https://pbs.twimg.com/profile_images/1951372472378355712/lM7iBtkf_400x400.jpg"
+                      alt="Rohit - Founder & Developer"
+                      width={80}
+                      height={80}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2">Built by a freelancer, for freelancers</h3>
+                    <p className="text-sm text-muted-foreground">Rohit • Founder & Developer</p>
+                  </div>
+                </div>
+                <blockquote className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4">
+                  &quot;I was spending 5+ hours every month writing awkward &apos;gentle reminder&apos; emails to clients. 
+                  It was affecting my relationships and my cash flow. So I built this tool to automate the 
+                  process professionally.&quot;
+                </blockquote>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button variant="outline" size="sm" className="gap-2" asChild>
+                    <a href="https://x.com/rohiitcodes">
+                      <Mail className="h-4 w-4" />
+                      Contact Founder
+                    </a>
                   </Button>
-                </Link>
-                <p className="text-xs sm:text-sm text-muted-foreground py-3">
-                  No credit card required • Setup in 2 minutes
-                </p>
+                  <Button variant="outline" size="sm" className="gap-2" asChild>
+                    <a href="https://chat.whatsapp.com/ISXLzprKTWdJjiv4dOaS2F?mode=ac_t" target="_blank" rel="noopener noreferrer">
+                      <Users className="h-4 w-4" />
+                      Join Community
+                    </a>
+                  </Button>
+                </div>
               </div>
-            )}
+
+              {/* Main CTA */}
+              <div className="text-center lg:text-left space-y-6">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
+                  Ready to stop chasing payments?
+                </h2>
+                <p className="text-base sm:text-lg text-muted-foreground">
+                  Join our early community of freelancers who are building this together. 
+                  Your feedback shapes the product.
+                </p>
+                
+                {user ? (
+                  <Link href="/dashboard">
+                    <Button
+                      size="lg"
+                      className="w-full lg:w-auto gap-2 text-lg px-12 py-4 bg-black hover:bg-black text-white border border-green-500/20 glow-button"
+                    >
+                      Go to Dashboard
+                      <ArrowRight className="h-5 w-5" />
+                    </Button>
+                  </Link>
+                ) : (
+                  <div className="space-y-4">
+                    <Link href="/auth">
+                      <Button
+                        size="lg"
+                        className="w-full lg:w-auto gap-2 text-lg px-12 py-4 bg-black hover:bg-black text-white border border-green-500/20 glow-button"
+                      >
+                        Get Started Free
+                        <ArrowRight className="h-5 w-5" />
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -988,7 +1047,6 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
               {/* Logo */}
               <div className="flex items-center space-x-2">
-                <DollarSign className="h-6 w-6 text-primary" />
                 <span className="text-lg font-bold text-foreground">
                   Fynl-It
                 </span>

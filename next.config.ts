@@ -15,11 +15,11 @@ const nextConfig = {
         pathname: '/**',
       },
       // Add other domains you might need for external images
-      // {
-      //   protocol: 'https',
-      //   hostname: 'example.com',
-      //   pathname: '/**',
-      // },
+      {
+        protocol: 'https',
+        hostname: 'pbs.twimg.com',
+        pathname: '/**',
+      },
     ],
     unoptimized: false,
   },
