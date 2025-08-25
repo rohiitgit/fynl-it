@@ -96,7 +96,7 @@ const FloatingElement = ({
 }) => {
   return (
     <div
-      className="absolute opacity-10 text-primary pointer-events-none hidden xl:block"
+      className="absolute opacity-20 bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent pointer-events-none hidden xl:block"
       style={{
         ...position,
         animation: `float ${duration}s ease-in-out ${delay}s infinite`,
@@ -134,41 +134,39 @@ const DynamicNavbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 will-change-transform">
       <div
-        className={`container mx-auto transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu ${
-          isScrolled ? "px-3 sm:px-4 py-2" : "px-3 sm:px-4 py-4 sm:py-6"
-        }`}
+        className={`container mx-auto transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu ${isScrolled ? "px-3 sm:px-4 py-2" : "px-3 sm:px-4 py-4 sm:py-6"
+          }`}
       >
         <div
-          className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu will-change-transform ${
-            isScrolled
-              ? "bg-card/90 backdrop-blur-xl border border-border/50 rounded-full px-3 sm:px-4 lg:px-6 py-2 sm:py-3 mx-auto max-w-5xl shadow-xl shadow-primary/5"
-              : "bg-transparent backdrop-blur-none border-transparent rounded-none px-0 py-0 shadow-none"
-          }`}
+          className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu will-change-transform ${isScrolled
+            ? "bg-card/90 backdrop-blur-xl border border-border/50 rounded-full px-3 sm:px-4 lg:px-6 py-2 sm:py-3 mx-auto max-w-5xl shadow-lg shadow-green-500/20"
+            : "bg-transparent backdrop-blur-none border-transparent rounded-none px-0 py-0 shadow-none"
+            }`}
         >
           <div
-            className={`transform-gpu transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
-              isScrolled
-                ? "translate-y-0 scale-100"
-                : "translate-y-0.5 scale-[1.01]"
-            }`}
+            className={`transform-gpu transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isScrolled
+              ? "translate-y-0 scale-100"
+              : "translate-y-0.5 scale-[1.01]"
+              }`}
           >
             <div className="flex items-center justify-between">
               {/* Logo with smooth scaling */}
               <div className="flex items-center space-x-1.5 sm:space-x-2 flex-shrink-0">
                 <div
-                  className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu origin-center ${
-                    isScrolled ? "scale-90" : "scale-100"
-                  }`}
+                  className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu origin-center ${isScrolled ? "scale-90" : "scale-100"
+                    }`}
                 >
-                  
+
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all">
+                  <DollarSign className="h-7 w-7 text-white" />
                 </div>
 
                 <span
-                  className={`font-bold text-foreground transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu origin-left ${
-                    isScrolled
-                      ? "text-base sm:text-lg lg:text-xl scale-95"
-                      : "text-lg sm:text-xl lg:text-2xl scale-100"
-                  }`}
+                  className={`font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu origin-left ${isScrolled
+                    ? "text-base sm:text-lg lg:text-xl scale-95"
+                    : "text-lg sm:text-xl lg:text-2xl scale-100"
+                    }`}
                 >
                   Fynl-It
                 </span>
@@ -176,44 +174,39 @@ const DynamicNavbar = () => {
 
               {/* Navigation Items */}
               <div
-                className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu ${
-                  isScrolled
-                    ? "translate-x-0 opacity-100"
-                    : "translate-x-1 opacity-95"
-                }`}
+                className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu ${isScrolled
+                  ? "translate-x-0 opacity-100"
+                  : "translate-x-1 opacity-95"
+                  }`}
               >
                 {loading ? (
                   <div className="flex items-center space-x-2 animate-pulse">
                     <div
-                      className={`bg-muted rounded transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
-                        isScrolled
-                          ? "h-7 w-10 sm:h-8 sm:w-12 lg:h-8 lg:w-14"
-                          : "h-8 w-12 sm:h-9 sm:w-16 lg:h-9 lg:w-18"
-                      }`}
+                      className={`bg-muted rounded transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isScrolled
+                        ? "h-7 w-10 sm:h-8 sm:w-12 lg:h-8 lg:w-14"
+                        : "h-8 w-12 sm:h-9 sm:w-16 lg:h-9 lg:w-18"
+                        }`}
                     ></div>
                     <div
-                      className={`bg-muted rounded transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
-                        isScrolled
-                          ? "h-7 w-12 sm:h-8 sm:w-16 lg:h-8 lg:w-20"
-                          : "h-8 w-16 sm:h-9 sm:w-20 lg:h-9 lg:w-24"
-                      }`}
+                      className={`bg-muted rounded transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isScrolled
+                        ? "h-7 w-12 sm:h-8 sm:w-16 lg:h-8 lg:w-20"
+                        : "h-8 w-16 sm:h-9 sm:w-20 lg:h-9 lg:w-24"
+                        }`}
                     ></div>
                   </div>
                 ) : user ? (
                   <div className="flex items-center space-x-2 sm:space-x-3">
                     <span
-                      className={`text-muted-foreground transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] hidden sm:block ${
-                        isScrolled ? "text-xs" : "text-sm"
-                      }`}
+                      className={`text-muted-foreground transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] hidden sm:block ${isScrolled ? "text-xs" : "text-sm"
+                        }`}
                     >
                       Hi, {getUserDisplayName()}!
                     </span>
                     <Link href="/dashboard">
                       <Button
                         size={isScrolled ? "sm" : "default"}
-                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 ${
-                          isScrolled ? "shadow-md" : "shadow-lg"
-                        }`}
+                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 shadow-lg shadow-green-500/20
+                          }`}
                       >
                         Dashboard
                       </Button>
@@ -222,9 +215,8 @@ const DynamicNavbar = () => {
                       variant="ghost"
                       size={isScrolled ? "sm" : "default"}
                       onClick={signOut}
-                      className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 ${
-                        isScrolled ? "hover:bg-accent/80" : "hover:bg-accent/60"
-                      }`}
+                      className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 ${isScrolled ? "hover:bg-accent/80" : "hover:bg-accent/60"
+                        }`}
                     >
                       Sign Out
                     </Button>
@@ -235,11 +227,10 @@ const DynamicNavbar = () => {
                       <Button
                         variant="ghost"
                         size={isScrolled ? "sm" : "default"}
-                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 ${
-                          isScrolled
-                            ? "hover:bg-accent/80"
-                            : "hover:bg-accent/60"
-                        }`}
+                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 ${isScrolled
+                          ? "hover:bg-accent/80"
+                          : "hover:bg-accent/60"
+                          }`}
                       >
                         Sign In
                       </Button>
@@ -247,9 +238,8 @@ const DynamicNavbar = () => {
                     <Link href="/auth">
                       <Button
                         size={isScrolled ? "sm" : "default"}
-                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 ${
-                          isScrolled ? "shadow-md" : "shadow-lg"
-                        }`}
+                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 shadow-lg shadow-green-500/20
+                          }`}
                       >
                         Get Started
                       </Button>
@@ -274,7 +264,7 @@ const DashboardPreview = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl sm:rounded-2xl blur-xl sm:blur-2xl"></div>
 
         {/* Main container */}
-        <div className="relative bg-card/80 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl border border-border/20 overflow-hidden">
+        <div className="relative bg-card/90 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-lg shadow-green-500/20 border border-border/20 overflow-hidden">
           {/* Mobile & Tablet Layout (xs to lg) - Use Image */}
           <div className="block lg:hidden">
             <div className="relative">
@@ -295,7 +285,7 @@ const DashboardPreview = () => {
                         </span>*/}
                       </div>
                       <div className="flex items-center space-x-1 sm:space-x-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <div className="w-2 h-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full"></div>
                         {/*<span className="text-xs text-muted-foreground">
                           Live
                         </span>*/}
@@ -304,17 +294,17 @@ const DashboardPreview = () => {
 
                     {/* Stats Cards */}
                     <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      <div className="bg-card/60 rounded-lg p-2 sm:p-3 border border-border/30">
+                      <div className="bg-card/80 rounded-lg p-2 sm:p-3 border border-border/30">
                         <p className="text-xs text-muted-foreground">
                           This Month
                         </p>
                         <p className="text-lg sm:text-xl font-bold">₹1.25L</p>
-                        <p className="text-xs text-green-600 flex items-center gap-1">
+                        <p className="text-xs bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent flex items-center gap-1">
                           <TrendingUp className="h-3 w-3" />
                           +23%
                         </p>
                       </div>
-                      <div className="bg-card/60 rounded-lg p-2 sm:p-3 border border-border/30">
+                      <div className="bg-card/80 rounded-lg p-2 sm:p-3 border border-border/30">
                         <p className="text-xs text-muted-foreground">
                           Collection Rate
                         </p>
@@ -330,7 +320,7 @@ const DashboardPreview = () => {
 
                     {/* Invoice List */}
                     <div className="flex-1 space-y-2 sm:space-y-3">
-                      <div className="flex items-center justify-between bg-card/60 rounded-lg p-2 sm:p-3 border border-border/30">
+                      <div className="flex items-center justify-between bg-card/80 rounded-lg p-2 sm:p-3 border border-border/30">
                         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                           <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
                             <Users className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
@@ -346,13 +336,13 @@ const DashboardPreview = () => {
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="text-sm sm:text-lg font-bold">₹45K</p>
-                          <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">
+                          <Badge className="bg-green-100 bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent border-green-200 text-xs">
                             Paid
                           </Badge>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between bg-card/60 rounded-lg p-2 sm:p-3 border border-border/30">
+                      <div className="flex items-center justify-between bg-card/80 rounded-lg p-2 sm:p-3 border border-border/30">
                         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                           <div className="w-6 h-6 sm:w-8 sm:h-8 bg-orange-500/20 rounded-full flex items-center justify-center flex-shrink-0">
                             <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
@@ -377,7 +367,7 @@ const DashboardPreview = () => {
                   </div>
 
                   {/* Floating notification */}
-                  <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-green-500 text-white rounded-lg shadow-xl flex items-center gap-1 sm:gap-2 animate-bounce z-20 px-2 py-1 sm:px-3 sm:py-2 max-w-[100px] sm:max-w-[120px]">
+                  <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-green-500 text-white rounded-lg shadow-lg shadow-green-500/30 flex items-center gap-1 sm:gap-2 animate-bounce z-20 px-2 py-1 sm:px-3 sm:py-2 max-w-[100px] sm:max-w-[120px]">
                     <Bell className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                     <span className="text-xs font-medium truncate">
                       Payment!
@@ -408,7 +398,7 @@ const DashboardPreview = () => {
                     </div>
                     <div className="text-right">
                       <p className="text-xl font-bold">₹45,000</p>
-                      <Badge className="bg-green-100 text-green-700 border-green-200">
+                      <Badge className="bg-green-100 bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent border-green-200">
                         Paid
                       </Badge>
                     </div>
@@ -461,7 +451,7 @@ const DashboardPreview = () => {
                 <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl">
                   <p className="text-sm text-muted-foreground">This Month</p>
                   <p className="text-3xl font-bold">₹1,25,000</p>
-                  <p className="text-sm text-green-600 flex items-center gap-1 mt-2">
+                  <p className="text-sm bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent flex items-center gap-1 mt-2">
                     <TrendingUp className="h-4 w-4" />
                     +23% from last month
                   </p>
@@ -489,7 +479,7 @@ const DashboardPreview = () => {
           </div>
 
           {/* Floating notification - Only show on desktop */}
-          <div className="absolute top-3 right-3 bg-green-500 text-white rounded-lg shadow-xl items-center gap-2 animate-bounce z-20 px-3 py-2 max-w-[120px] hidden lg:flex">
+          <div className="absolute top-3 right-3 bg-green-500 text-white rounded-lg shadow-lg shadow-green-500/30 items-center gap-2 animate-bounce z-20 px-3 py-2 max-w-[120px] hidden lg:flex">
             <Bell className="h-4 w-4 flex-shrink-0" />
             <span className="text-sm font-medium truncate">Payment!</span>
           </div>
@@ -573,8 +563,8 @@ export default function HomePage() {
 
                 {/* Main Heading */}
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight">
-                  Never Chase Clients for 
-                  <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent block">
+                  Never Chase Clients for
+                  <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent block">
                     Payment Again
                   </span>
                 </h1>
@@ -589,8 +579,8 @@ export default function HomePage() {
               <div className="space-y-6 sm:space-y-8 z-10 relative text-center">
                 {/* Subheading */}
                 <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed px-2">
-                  Upload your invoice → AI sends professional reminders → Get paid faster.
-                  <span className="block mt-2 font-semibold text-green-600">
+                  Upload your invoice → <span className="font-semibold">AI sends professional reminders</span> → <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent font-semibold">Get paid faster</span>.
+                  <span className="block mt-2 font-semibold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">
                     100% Free. No credit card needed.
                   </span>
                 </p>
@@ -639,15 +629,15 @@ export default function HomePage() {
                 {/* Main Heading */}
                 <h1 className="text-4xl xl:text-5xl 2xl:text-6xl font-bold text-foreground leading-tight">
                   Never Chase Clients for
-                  <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent block">
+                  <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent block">
                     Payment Again
                   </span>
                 </h1>
 
                 {/* Subheading */}
                 <p className="text-xl text-muted-foreground leading-relaxed">
-                  Upload your invoice → AI sends professional reminders → Get paid faster.
-                  <span className="block mt-3 font-semibold text-green-600 text-lg">
+                  Upload your invoice → <span>AI sends professional reminders</span> → <span className="">Get paid faster</span>.
+                  <span className="block mt-3 font-semibold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent text-lg">
                     100% Free. No credit card needed.
                   </span>
                 </p>
@@ -712,29 +702,25 @@ export default function HomePage() {
       </section>
 
       {/* Why Free? Trust Building Section */}
-      <section className="py-8 sm:py-12 bg-gradient-to-r from-green-50 to-blue-50 border-y border-green-200">
+      <section className="py-16 sm:py-20 bg-gradient-to-r from-green-50 to-emerald-50 border-y border-green-200/50 relative">
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"></div>
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-xl sm:text-2xl font-bold text-green-800 mb-4">
+            <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent mb-4">
               🤔 Why is this completely free?
             </h2>
-            <p className="text-green-700 text-base sm:text-lg mb-6 leading-relaxed">
-              We&apos;re a new startup testing our concept with real freelancers. Your feedback helps us 
-              build something the community actually needs. Once we prove this works, we might add 
-              premium features - but the core will always stay free.
+            <p className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent text-base sm:text-lg mb-6 leading-relaxed">
+              We&apos;re building this with the freelancer community. Your feedback shapes the product.
+              Core features will always stay free.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm">
+            <div className="flex items-center justify-center gap-6 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-green-700 font-medium">No hidden costs</span>
+                <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent font-medium">No hidden costs</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-green-700 font-medium">No credit card ever</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-green-700 font-medium">Built by freelancers</span>
+                <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent font-medium">Built by freelancers</span>
               </div>
             </div>
           </div>
@@ -743,7 +729,8 @@ export default function HomePage() {
 
       {/* Why Choose Fynl-It Section */}
       {/* Benefits Section */}
-      <section className="py-12 sm:py-16 bg-gradient-to-br from-primary/5 to-primary/10 relative">
+      <section className="py-16 sm:py-20 bg-gradient-to-br from-primary/5 to-primary/10 relative">
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"></div>
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="max-w-6xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
@@ -756,10 +743,10 @@ export default function HomePage() {
                     </span>
                   </div>
                   <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-3 sm:mb-4">
-                    Why Choose Fynl-It?
+                    Why Choose <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">Fynl-It</span>?
                   </h2>
                   <p className="text-base sm:text-lg lg:text-xl text-muted-foreground">
-                    Designed specifically for Indian freelancers who want to get paid faster 
+                    Designed specifically for Indian freelancers who want to <span>get paid faster</span>
                     without damaging client relationships.
                   </p>
                 </div>
@@ -781,6 +768,7 @@ export default function HomePage() {
 
                   <div className="flex items-start gap-3">
                     <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1 text-sm sm:text-base">
@@ -825,12 +813,12 @@ export default function HomePage() {
               <div className="relative order-2 lg:order-2">
                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-3 sm:space-y-4">
-                    <div className="bg-card/80 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg transition-all duration-300">
+                    <div className="bg-card/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg hover:shadow-green-500/30 shadow-green-500/20 transition-all duration-300">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
                         <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
-                          <Star className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                          <Star className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
                         </div>
-                        <span className="font-semibold text-xs sm:text-sm">
+                        <span className="font-semibold text-xs sm:text-sm bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">
                           85% Faster
                         </span>
                       </div>
@@ -839,7 +827,7 @@ export default function HomePage() {
                       </p>
                     </div>
 
-                    <div className="bg-card/80 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg transition-all duration-300">
+                    <div className="bg-card/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg hover:shadow-green-500/30 shadow-green-500/20 transition-all duration-300">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
                         <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
                           <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
@@ -855,7 +843,7 @@ export default function HomePage() {
                   </div>
 
                   <div className="space-y-3 sm:space-y-4 pt-6 sm:pt-8">
-                    <div className="bg-card/80 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg transition-all duration-300">
+                    <div className="bg-card/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg hover:shadow-green-500/30 shadow-green-500/20 transition-all duration-300">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
                         <div className="w-6 h-6 sm:w-8 sm:h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
                           <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
@@ -869,7 +857,7 @@ export default function HomePage() {
                       </p>
                     </div>
 
-                    <div className="bg-card/80 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg transition-all duration-300">
+                    <div className="bg-card/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg hover:shadow-green-500/30 shadow-green-500/20 transition-all duration-300">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
                         <div className="w-6 h-6 sm:w-8 sm:h-8 bg-orange-500/20 rounded-lg flex items-center justify-center">
                           <Target className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
@@ -891,7 +879,8 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-12 sm:py-16 lg:py-20 relative">
+      <section className="py-16 sm:py-20 lg:py-24 relative">
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"></div>
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="text-center mb-8 sm:mb-12 lg:mb-16">
             <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-4 sm:mb-6">
@@ -901,16 +890,15 @@ export default function HomePage() {
               </span>
             </div>
             <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-foreground mb-3 sm:mb-4">
-              Simple, Automated, Professional
+              <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">Simple, Automated, Professional</span>
             </h2>
             <p className="text-base sm:text-lg xl:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
-              From invoice creation to payment collection, everything happens
-              automatically while maintaining your professional relationships.
+              Everything happens automatically while maintaining your <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent font-semibold">professional relationships</span>.
             </p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
-            <Card className="text-center hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group">
+            <Card className="text-center hover:shadow-lg hover:shadow-green-500/30 shadow-green-500/20 transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group">
               <CardHeader className="pb-4 sm:pb-6 lg:pb-8 p-4 sm:p-6">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 lg:mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Mail className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-primary" />
@@ -925,7 +913,7 @@ export default function HomePage() {
               </CardHeader>
             </Card>
 
-            <Card className="text-center hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group">
+            <Card className="text-center hover:shadow-lg hover:shadow-green-500/30 shadow-green-500/20 transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group">
               <CardHeader className="pb-4 sm:pb-6 lg:pb-8 p-4 sm:p-6">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 lg:mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Zap className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-primary" />
@@ -934,16 +922,16 @@ export default function HomePage() {
                   2. Auto Follow-ups
                 </CardTitle>
                 <CardDescription className="text-sm sm:text-base">
-                  AI-powered reminders that get progressively more assertive.
+                  <span className=" font-semibold">AI-powered reminders</span> that get progressively more assertive.
                   Professional tone that preserves relationships.
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="text-center hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group sm:col-span-2 lg:col-span-1">
+            <Card className="text-center hover:shadow-lg hover:shadow-green-500/30 shadow-green-500/20 transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group sm:col-span-2 lg:col-span-1">
               <CardHeader className="pb-4 sm:pb-6 lg:pb-8 p-4 sm:p-6">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-green-500/20 to-green-500/10 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 lg:mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-green-600" />
+                  <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-green-500" />
                 </div>
                 <CardTitle className="text-base sm:text-lg lg:text-xl mb-2 sm:mb-3">
                   3. Get Paid Faster
@@ -959,12 +947,13 @@ export default function HomePage() {
       </section>
 
       {/* Founder Credibility & CTA Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-r from-primary/5 to-primary/10">
+      <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-r from-primary/5 to-primary/10 relative">
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"></div>
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="max-w-5xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Founder Story */}
-              <div className="bg-card p-6 sm:p-8 rounded-xl border shadow-lg">
+              <div className="bg-card p-6 sm:p-8 rounded-xl border shadow-lg shadow-green-500/20">
                 <div className="flex items-start gap-4 mb-6">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden flex-shrink-0 border-2 border-primary/20">
                     <Image
@@ -981,8 +970,8 @@ export default function HomePage() {
                   </div>
                 </div>
                 <blockquote className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4">
-                  &quot;I was spending 5+ hours every month writing awkward &apos;gentle reminder&apos; emails to clients. 
-                  It was affecting my relationships and my cash flow. So I built this tool to automate the 
+                  &quot;I was spending 5+ hours every month writing awkward &apos;gentle reminder&apos; emails to clients.
+                  It was affecting my relationships and my cash flow. So I built this tool to automate the
                   process professionally.&quot;
                 </blockquote>
                 <div className="flex flex-col sm:flex-row gap-3">
@@ -1004,13 +993,13 @@ export default function HomePage() {
               {/* Main CTA */}
               <div className="text-center lg:text-left space-y-6">
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
-                  Ready to stop chasing payments?
+                  Ready to stop chasing <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">payments</span>?
                 </h2>
                 <p className="text-base sm:text-lg text-muted-foreground">
-                  Join our early community of freelancers who are building this together. 
+                  Join our early community of freelancers who are building this together.
                   Your feedback shapes the product.
                 </p>
-                
+
                 {user ? (
                   <Link href="/dashboard">
                     <Button
@@ -1041,13 +1030,17 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-card/50 backdrop-blur-lg">
+      <footer className="border-t border-border bg-card/90 backdrop-blur-lg">
         <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-8 sm:py-12">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+
               {/* Logo */}
               <div className="flex items-center space-x-2">
-                <span className="text-lg font-bold text-foreground">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all">
+                  <DollarSign className="h-7 w-7 text-white" />
+                </div>
+                <span className="text-lg font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">
                   Fynl-It
                 </span>
               </div>

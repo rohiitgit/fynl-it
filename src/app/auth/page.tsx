@@ -209,7 +209,7 @@ export default function AuthPage() {
               <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all">
                 <DollarSign className="h-7 w-7 text-white" />
               </div>
-              <span className="text-3xl font-bold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent">
+              <span className="text-3xl font-bold text-green-500">
                 Fynl-It
               </span>
             </Link>
@@ -217,22 +217,22 @@ export default function AuthPage() {
             <div>
               <h1 className="text-4xl font-bold text-foreground mb-4">
                 Start getting paid <br />
-                <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                <span className="text-green-500">
                   on autopilot
                 </span>
               </h1>
               <p className="text-lg text-muted-foreground">
-                Join thousands of freelancers who never chase payments anymore.
+                Join freelancers who never chase payments anymore.
               </p>
             </div>
 
             <div className="space-y-4">
               <div className="flex items-start gap-3 group cursor-pointer">
                 <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
-                  <Zap className="h-5 w-5 text-green-600" />
+                  <Zap className="h-5 w-5 text-green-500" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground group-hover:text-green-700 transition-colors">Lightning Fast Setup</h3>
+                  <h3 className="font-semibold text-foreground group-hover:text-green-500 transition-colors">Lightning Fast Setup</h3>
                   <p className="text-sm text-muted-foreground">Get started in under 5 minutes</p>
                 </div>
               </div>
@@ -269,7 +269,7 @@ export default function AuthPage() {
                   <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
                     <DollarSign className="h-6 w-6 text-white" />
                   </div>
-                  <span className="text-2xl font-bold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent">
+                  <span className="text-2xl font-bold text-green-500">
                     Fynl-It
                   </span>
                 </div>
@@ -298,20 +298,20 @@ export default function AuthPage() {
 
                 <div className="text-center space-y-4">
                   <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200/50 rounded-xl p-4">
-                    <div className="flex items-center justify-center gap-2 text-sm text-green-700 font-medium">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <div className="flex items-center justify-center gap-2 text-sm text-green-500 font-medium">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
                       <span>30-day free trial • No credit card required</span>
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-3 mt-6">
                     <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-green-50/30 border border-green-200/30 rounded-lg p-3">
-                      <Shield className="h-4 w-4 text-green-600" />
-                      <span className="text-green-700">Secure</span>
+                      <Shield className="h-4 w-4 text-green-500" />
+                      <span className="text-green-500">Secure</span>
                     </div>
                     <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-green-50/30 border border-green-200/30 rounded-lg p-3">
-                      <Zap className="h-4 w-4 text-green-600" />
-                      <span className="text-green-700">Instant</span>
+                      <Zap className="h-4 w-4 text-green-500" />
+                      <span className="text-green-500">Instant</span>
                     </div>
                   </div>
                 </div>
@@ -334,17 +334,6 @@ export default function AuthPage() {
                   </AlertDescription>
                 </Alert>
               )}
-
-              {/* Footer */}
-              <div className="mt-8 pt-6 border-t border-border text-center">
-                <Link
-                  href="/"
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2 font-medium"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Back to Home
-                </Link>
-              </div>
             </Card>
           </div>
         </div>
