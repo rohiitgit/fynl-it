@@ -95,7 +95,7 @@ const FloatingElement = ({
 }) => {
   return (
     <div
-      className="absolute opacity-20 bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent pointer-events-none hidden xl:block"
+      className="absolute opacity-20 text-green-500 pointer-events-none hidden xl:block"
       style={{
         ...position,
         animation: `float ${duration}s ease-in-out ${delay}s infinite`,
