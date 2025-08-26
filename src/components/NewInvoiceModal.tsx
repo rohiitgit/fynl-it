@@ -567,7 +567,7 @@ export default function NewInvoiceModal({
                 <div className="border rounded-lg p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
                     <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4">
                         <div className="relative">
-                            <Loader2 className="h-8 w-8 sm:h-10 lg:h-12 w-8 sm:w-10 lg:w-12 text-primary animate-spin" />
+                            <Loader2 className="h-8 w-8 sm:h-10 lg:h-12 w-8 sm:w-10 lg:w-12 text-green-600 animate-spin" />
                             <Sparkles className="h-4 w-4 sm:h-5 lg:h-6 w-4 sm:w-5 lg:w-6 text-primary absolute -top-1 -right-1 animate-pulse" />
                         </div>
                         <div className="text-center space-y-1 sm:space-y-2">
@@ -576,9 +576,9 @@ export default function NewInvoiceModal({
                                 Extracting invoice details... This may take a few seconds.
                             </p>
                             <div className="flex items-center justify-center space-x-1 pt-2">
-                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
                             </div>
                         </div>
                     </div>
@@ -593,7 +593,7 @@ export default function NewInvoiceModal({
                         Upload your invoice and let AI extract the details automatically
                     </p>
                     {/* Enhanced AI upload section */}
-                    <div className="border-2 border-dashed border-primary/30 rounded-xl p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-primary/5 to-primary/10 hover:border-primary/50 transition-all duration-300">
+                    <div className="border-2 border-dashed border-green-500/30 rounded-xl p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-green-500/5 to-green-500/10 hover:border-green-500/50 transition-all duration-300">
                         <input
                             type="file"
                             id="modal-invoice-upload"
@@ -607,7 +607,7 @@ export default function NewInvoiceModal({
                             className="cursor-pointer"
                         >
                             <div className="flex flex-col items-center">
-                                <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-primary/10 rounded-full flex items-center justify-center mb-3 sm:mb-4 border-2 border-primary/20">
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-3 sm:mb-4 border-2 border-green-500/20">
                                     <Upload className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-primary" />
                                 </div>
                                 <p className="text-sm sm:text-base lg:text-lg font-semibold mb-1 sm:mb-2 text-primary text-center">
@@ -896,7 +896,7 @@ export default function NewInvoiceModal({
                     <Button disabled={saving} className="px-4 sm:px-6 text-sm sm:text-base w-full sm:w-auto order-1 sm:order-2">
                         {saving ? (
                             <>
-                                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2 animate-spin" />
+                                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2 animate-spin text-green-600" />
                                 <span className="hidden sm:inline">Saving...</span>
                                 <span className="sm:hidden">Saving...</span>
                             </>
@@ -962,7 +962,7 @@ export default function NewInvoiceModal({
             >
                 {saving ? (
                     <>
-                        <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2 animate-spin" />
+                        <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2 animate-spin text-green-600" />
                         <span className="hidden sm:inline">Creating...</span>
                         <span className="sm:hidden">Creating...</span>
                     </>
@@ -1003,7 +1003,7 @@ export default function NewInvoiceModal({
                             {loadingInvoice ? (
                                 <div className="flex items-center justify-center py-8">
                                     <div className="text-center space-y-4">
-                                        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary animate-spin mx-auto" />
+                                        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 animate-spin mx-auto" />
                                         <p className="text-muted-foreground text-sm sm:text-base">Loading invoice data...</p>
                                     </div>
                                 </div>

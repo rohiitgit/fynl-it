@@ -112,9 +112,8 @@ function AuthCallbackContent() {
                 <CardHeader className="text-center">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center">
                         {status === 'loading' && (
-                            <div className="relative">
-                                <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                                <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
+                            <div className="w-8 h-8 relative">
+                                <div className="animate-spin rounded-full h-8 w-8 border-4 border-green-500/20 border-t-green-500"></div>
                             </div>
                         )}
                         {(status === 'success' || status === 'cross-device') && (
@@ -222,9 +221,8 @@ function AuthCallbackLoading() {
             <Card className="w-full max-w-md shadow-lg">
                 <CardHeader className="text-center">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center">
-                        <div className="relative">
-                            <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                            <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
+                        <div className="w-8 h-8 relative">
+                            <div className="animate-spin rounded-full h-8 w-8 border-4 border-green-500/20 border-t-green-500"></div>
                         </div>
                     </div>
                     <CardTitle className="text-xl">Loading...</CardTitle>

@@ -150,7 +150,7 @@ export default function ManualEmailTrigger({
             >
               {loading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin text-green-600" />
                   Sending...
                 </>
               ) : (

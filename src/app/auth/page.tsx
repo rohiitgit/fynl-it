@@ -149,12 +149,11 @@ export default function AuthPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-muted/50 dark:from-background dark:via-card/30 dark:to-card/50 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="relative">
-            <Loader2 className="h-12 w-12 text-primary animate-spin mx-auto" />
-            <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-pulse" />
+          <div className="w-12 h-12 mx-auto relative">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500/20 border-t-green-500"></div>
           </div>
           <div>
-            <h3 className="font-semibold text-lg text-primary">
+            <h3 className="font-semibold text-lg text-green-600">
               Checking your session...
             </h3>
             <p className="text-muted-foreground">
@@ -171,8 +170,8 @@ export default function AuthPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-muted/50 dark:from-background dark:via-card/30 dark:to-card/50 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="relative">
-            <Loader2 className="h-12 w-12 text-primary animate-spin mx-auto" />
+          <div className="w-12 h-12 mx-auto relative">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500/20 border-t-green-500"></div>
           </div>
           <div>
             <h3 className="font-semibold text-lg">You&apos;re already signed in!</h3>
@@ -289,7 +288,7 @@ export default function AuthPage() {
                   className="w-full h-16 bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300 text-gray-900 shadow-lg hover:shadow-xl transition-all duration-300 text-lg font-semibold"
                 >
                   {loading ? (
-                    <Loader2 className="h-6 w-6 mr-3 animate-spin" />
+                    <Loader2 className="h-6 w-6 mr-3 animate-spin text-green-600" />
                   ) : (
                     <FcGoogle className="h-6 w-6 mr-3" />
                   )}
@@ -321,14 +320,14 @@ export default function AuthPage() {
               {message.text && (
                 <Alert className={`mt-6 border-2 ${message.type === "error"
                   ? "border-destructive/50 bg-destructive/10"
-                  : "border-primary/50 bg-primary/10"
+                  : "border-green-500/50 bg-green-500/10"
                   }`}>
                   {message.type === "error" ? (
                     <AlertCircle className="h-4 w-4 text-destructive" />
                   ) : (
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
                   )}
-                  <AlertDescription className={`${message.type === "error" ? "text-destructive" : "text-primary"
+                  <AlertDescription className={`${message.type === "error" ? "text-destructive" : "text-green-600"
                     }`}>
                     {message.text}
                   </AlertDescription>

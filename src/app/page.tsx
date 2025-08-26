@@ -238,7 +238,7 @@ const DynamicNavbar = () => {
                     <Link href="/auth">
                       <Button
                         size={isScrolled ? "sm" : "default"}
-                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 shadow-lg shadow-green-500/20
+                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 shadow-lg shadow-green-500/20 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 border-0
                           }`}
                       >
                         Get Started
@@ -261,7 +261,7 @@ const DashboardPreview = () => {
     <div className="relative w-full">
       <div className="relative mx-auto max-w-3xl lg:max-w-4xl">
         {/* Background glow effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl sm:rounded-2xl blur-xl sm:blur-2xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/10 rounded-xl sm:rounded-2xl blur-xl sm:blur-2xl"></div>
 
         {/* Main container */}
         <div className="relative bg-card/90 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-lg shadow-green-500/20 border border-border/20 overflow-hidden">
@@ -277,8 +277,8 @@ const DashboardPreview = () => {
                     {/* Header */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        {/*<div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                          <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                        {/*<div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500/20 rounded-full flex items-center justify-center">
+                          <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                         </div>
                         <span className="text-sm sm:text-base font-semibold">
                           Fynl-It Dashboard
@@ -311,7 +311,7 @@ const DashboardPreview = () => {
                         <p className="text-lg sm:text-xl font-bold">87%</p>
                         <div className="w-full bg-border rounded-full h-1.5 mt-1">
                           <div
-                            className="bg-gradient-to-r from-primary to-primary/80 h-1.5 rounded-full transition-all duration-1000"
+                            className="bg-gradient-to-r from-green-500 to-emerald-500/80 h-1.5 rounded-full transition-all duration-1000"
                             style={{ width: "87%" }}
                           ></div>
                         </div>
@@ -322,8 +322,8 @@ const DashboardPreview = () => {
                     <div className="flex-1 space-y-2 sm:space-y-3">
                       <div className="flex items-center justify-between bg-card/80 rounded-lg p-2 sm:p-3 border border-border/30">
                         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                            <Users className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <Users className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                           </div>
                           <div className="min-w-0">
                             <p className="font-semibold text-xs sm:text-sm truncate">
@@ -386,8 +386,8 @@ const DashboardPreview = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl hover:bg-muted/70 transition-colors">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
-                        <Users className="h-5 w-5 text-primary" />
+                      <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                        <Users className="h-5 w-5 text-green-600" />
                       </div>
                       <div>
                         <p className="font-semibold">Sarah Chen</p>
@@ -448,7 +448,7 @@ const DashboardPreview = () => {
 
               {/* Right side: Analytics (1/3 width) */}
               <div className="space-y-4">
-                <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl">
+                <div className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/5 rounded-xl">
                   <p className="text-sm text-muted-foreground">This Month</p>
                   <p className="text-3xl font-bold">₹1,25,000</p>
                   <p className="text-sm bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent flex items-center gap-1 mt-2">
@@ -466,7 +466,7 @@ const DashboardPreview = () => {
                   </div>
                   <div className="w-full bg-border rounded-full h-2">
                     <div
-                      className="bg-gradient-to-r from-primary to-primary/80 h-2 rounded-full transition-all duration-1000 ease-out"
+                      className="bg-gradient-to-r from-green-500 to-emerald-500/80 h-2 rounded-full transition-all duration-1000 ease-out"
                       style={{ width: "87%" }}
                     ></div>
                   </div>
@@ -554,9 +554,9 @@ export default function HomePage() {
               {/* Mobile: Hero Badge and Heading First */}
               <div className="space-y-4 sm:space-y-6 z-10 relative text-center">
                 {/* Badge */}
-                <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-primary/10 border border-primary/20 rounded-full">
-                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-pulse" />
-                  <span className="text-xs sm:text-sm font-medium text-primary">
+                <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 bg-green-500 border border-green-600 rounded-full">
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full animate-pulse" />
+                  <span className="text-xs sm:text-sm font-medium text-white">
                     AI-Powered Payment Recovery
                   </span>
                 </div>
@@ -591,7 +591,7 @@ export default function HomePage() {
                     <Link href="/dashboard">
                       <Button
                         size="lg"
-                        className="w-full sm:w-auto gap-2 text-lg px-8 py-4 bg-black hover:bg-black text-white border border-green-500/20 glow-button"
+                        className="w-full sm:w-auto gap-2 text-lg px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300"
                       >
                         Go to Dashboard
                         <ArrowRight className="h-5 w-5" />
@@ -603,7 +603,7 @@ export default function HomePage() {
                     <Link href="/auth">
                       <Button
                         size="lg"
-                        className="w-full sm:w-auto gap-2 text-lg px-12 py-4 bg-black hover:bg-black text-white border border-green-500/20 glow-button"
+                        className="w-full sm:w-auto gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300"
                       >
                         Get Started Free
                         <ArrowRight className="h-5 w-5" />
@@ -619,9 +619,9 @@ export default function HomePage() {
               {/* Left side: Hero Content */}
               <div className="space-y-8 z-10 relative">
                 {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                  <span className="text-sm font-medium text-primary">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 border border-green-600 rounded-full">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  <span className="text-sm font-medium text-white">
                     AI-Powered Payment Recovery
                   </span>
                 </div>
@@ -646,7 +646,7 @@ export default function HomePage() {
                 {user ? (
                   <div className="flex flex-col gap-4">
                     <Link href="/dashboard">
-                      <Button size="lg" className="gap-2 text-lg px-12 py-4 bg-black hover:bg-black text-white border border-green-500/20 glow-button">
+                      <Button size="lg" className="gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300">
                         Go to Dashboard
                         <ArrowRight className="h-5 w-5" />
                       </Button>
@@ -655,7 +655,7 @@ export default function HomePage() {
                 ) : (
                   <div className="flex flex-col gap-4">
                     <Link href="/auth">
-                      <Button size="lg" className="gap-2 text-lg px-12 py-4 bg-black hover:bg-black text-white border border-green-500/20 glow-button">
+                      <Button size="lg" className="gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300">
                         Get Started Free
                         <ArrowRight className="h-5 w-5" />
                       </Button>
@@ -729,16 +729,16 @@ export default function HomePage() {
 
       {/* Why Choose Fynl-It Section */}
       {/* Benefits Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-br from-primary/5 to-primary/10 relative">
+      <section className="py-16 sm:py-20 bg-gradient-to-br from-green-500/5 to-emerald-500/10 relative">
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"></div>
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="max-w-6xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
               <div className="space-y-6 sm:space-y-8 order-1 lg:order-1">
                 <div>
-                  <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-4 sm:mb-6">
-                    <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-                    <span className="text-xs sm:text-sm font-medium text-primary">
+                  <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full mb-4 sm:mb-6">
+                    <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                    <span className="text-xs sm:text-sm font-medium text-green-600">
                       Built for Freelancers
                     </span>
                   </div>
@@ -753,8 +753,8 @@ export default function HomePage() {
 
                 <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                      <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1 text-sm sm:text-base">
@@ -767,8 +767,8 @@ export default function HomePage() {
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                      <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1 text-sm sm:text-base">
@@ -781,8 +781,8 @@ export default function HomePage() {
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                      <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1 text-sm sm:text-base">
@@ -795,8 +795,8 @@ export default function HomePage() {
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                      <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1 text-sm sm:text-base">
@@ -883,14 +883,14 @@ export default function HomePage() {
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"></div>
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-4 sm:mb-6">
-              <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-              <span className="text-xs sm:text-sm font-medium text-primary">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full mb-4 sm:mb-6">
+              <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+              <span className="text-xs sm:text-sm font-medium text-green-600">
                 How It Works
               </span>
             </div>
             <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-foreground mb-3 sm:mb-4">
-              <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">Simple, Automated, Professional</span>
+              Simple, Automated, Professional
             </h2>
             <p className="text-base sm:text-lg xl:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
               Everything happens automatically while maintaining your <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent font-semibold">professional relationships</span>.
@@ -900,8 +900,8 @@ export default function HomePage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
             <Card className="text-center hover:shadow-lg hover:shadow-green-500/30 shadow-green-500/20 transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group">
               <CardHeader className="pb-4 sm:pb-6 lg:pb-8 p-4 sm:p-6">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 lg:mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <Mail className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-primary" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 lg:mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Mail className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-green-600" />
                 </div>
                 <CardTitle className="text-base sm:text-lg lg:text-xl mb-2 sm:mb-3">
                   1. Add Your Invoice
@@ -915,8 +915,8 @@ export default function HomePage() {
 
             <Card className="text-center hover:shadow-lg hover:shadow-green-500/30 shadow-green-500/20 transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group">
               <CardHeader className="pb-4 sm:pb-6 lg:pb-8 p-4 sm:p-6">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 lg:mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <Zap className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-primary" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 lg:mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Zap className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-green-600" />
                 </div>
                 <CardTitle className="text-base sm:text-lg lg:text-xl mb-2 sm:mb-3">
                   2. Auto Follow-ups
@@ -947,7 +947,7 @@ export default function HomePage() {
       </section>
 
       {/* Founder Credibility & CTA Section */}
-      <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-r from-primary/5 to-primary/10 relative">
+      <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-r from-green-500/5 to-emerald-500/10 relative">
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"></div>
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="max-w-5xl mx-auto">
@@ -955,7 +955,7 @@ export default function HomePage() {
               {/* Founder Story */}
               <div className="bg-card p-6 sm:p-8 rounded-xl border shadow-lg shadow-green-500/20">
                 <div className="flex items-start gap-4 mb-6">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden flex-shrink-0 border-2 border-primary/20">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden flex-shrink-0 border-2 border-green-500/20">
                     <Image
                       src="https://pbs.twimg.com/profile_images/1951372472378355712/lM7iBtkf_400x400.jpg"
                       alt="Rohit - Founder & Developer"
@@ -1004,7 +1004,7 @@ export default function HomePage() {
                   <Link href="/dashboard">
                     <Button
                       size="lg"
-                      className="w-full lg:w-auto gap-2 text-lg px-12 py-4 bg-black hover:bg-black text-white border border-green-500/20 glow-button"
+                      className="w-full lg:w-auto gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300"
                     >
                       Go to Dashboard
                       <ArrowRight className="h-5 w-5" />
@@ -1015,7 +1015,7 @@ export default function HomePage() {
                     <Link href="/auth">
                       <Button
                         size="lg"
-                        className="w-full lg:w-auto gap-2 text-lg px-12 py-4 bg-black hover:bg-black text-white border border-green-500/20 glow-button"
+                        className="w-full lg:w-auto gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300"
                       >
                         Get Started Free
                         <ArrowRight className="h-5 w-5" />

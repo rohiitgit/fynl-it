@@ -42,6 +42,7 @@ import {
   RefreshCw,
   Trash2,
   Save,
+  DollarSign,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/lib/hooks/use-toast";
@@ -503,9 +504,8 @@ export default function SetupMessagesPage({
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center p-4">
         <div className="text-center space-y-4 max-w-sm w-full">
-          <div className="relative">
-            <Loader2 className="h-12 w-12 text-primary animate-spin mx-auto" />
-            <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
+          <div className="w-12 h-12 mx-auto relative">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500/20 border-t-green-500"></div>
           </div>
           <div>
             <h3 className="font-semibold text-lg">Loading invoice details</h3>
@@ -582,18 +582,22 @@ export default function SetupMessagesPage({
 
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
         {/* Invoice Summary */}
-        <Card className="mb-6 sm:mb-8 border-0 shadow-lg bg-gradient-to-r from-card to-card/50">
+        <Card className="mb-6 sm:mb-8 border-0 shadow-lg shadow-green-500/20 bg-gradient-to-r from-card to-card/50">
           <CardHeader className="pb-3 sm:pb-4">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                    <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg sm:text-xl">
-                      {isEditMode ? 'Edit Follow-up Messages' : 'Setup Follow-up Messages'}
-                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">Fynl-It</span>
+                      <span className="text-lg sm:text-xl font-semibold">•</span>
+                      <CardTitle className="text-lg sm:text-xl">
+                        {isEditMode ? 'Edit Messages' : 'Setup Messages'}
+                      </CardTitle>
+                    </div>
                     <CardDescription className="text-sm sm:text-base">
                       {isEditMode ? 'Modify automated reminders for' : 'Configure automated reminders for'}{" "}
                       <span className="font-medium">{invoice.client_name}</span>
@@ -669,12 +673,12 @@ export default function SetupMessagesPage({
         <div className="flex flex-col xl:grid xl:grid-cols-4 gap-6 sm:gap-8">
           {/* Message Timeline - Show first on mobile */}
           <div className="order-1 xl:order-1 xl:col-span-3">
-            <Card className="border-0 shadow-lg">
+            <Card className="border-0 shadow-lg shadow-green-500/20">
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                      <Timer className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                      <Timer className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                       Follow-up Timeline
                     </CardTitle>
                     <CardDescription className="text-sm">
@@ -713,7 +717,7 @@ export default function SetupMessagesPage({
                       <div
                         className={`group relative rounded-xl border transition-all duration-300 ${
                           message.enabled
-                            ? "bg-card hover:shadow-md border-border/50"
+                            ? "bg-card hover:shadow-md hover:shadow-green-500/20 border-border/50"
                             : "bg-muted/30 border-muted hover:bg-muted/50"
                         } ${
                           message.isModified 
@@ -733,7 +737,7 @@ export default function SetupMessagesPage({
                             <div
                               className={`flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center border-2 transition-all ${
                                 message.enabled
-                                  ? "bg-primary border-primary text-primary-foreground shadow-lg"
+                                  ? "bg-gradient-to-br from-green-500 to-emerald-600 border-green-500 text-white shadow-lg shadow-green-500/30"
                                   : "bg-muted border-muted-foreground/30 text-muted-foreground"
                               }`}
                             >
@@ -811,7 +815,7 @@ export default function SetupMessagesPage({
                                     className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                                   >
                                     {enhancingId === message.id ? (
-                                      <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                                      <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin text-green-600" />
                                     ) : (
                                       <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
                                     )}
@@ -879,7 +883,7 @@ export default function SetupMessagesPage({
           {/* Actions Panel - Show second on mobile */}
           <div className="order-2 xl:order-2 space-y-4 sm:space-y-6">
             {/* Primary Actions */}
-            <Card className="border-0 shadow-lg">
+            <Card className="border-0 shadow-lg shadow-green-500/20">
               <CardHeader>
                 <CardTitle className="text-base sm:text-lg">Actions</CardTitle>
                 <CardDescription className="text-sm">
@@ -888,14 +892,14 @@ export default function SetupMessagesPage({
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button
-                  className="w-full h-10 sm:h-12 text-sm sm:text-base font-medium"
+                  className="w-full h-10 sm:h-12 text-sm sm:text-base font-medium bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 border-0"
                   onClick={handleActivateSequence}
                   disabled={saving || enabledCount === 0}
                   size="lg"
                 >
                   {saving ? (
                     <>
-                      <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 animate-spin" />
+                      <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 animate-spin text-green-600" />
                       {isEditMode ? 'Updating...' : 'Activating...'}
                     </>
                   ) : (
@@ -931,7 +935,7 @@ export default function SetupMessagesPage({
             </Card>
 
             {/* Schedule Summary */}
-            <Card className="border-0 shadow-lg">
+            <Card className="border-0 shadow-lg shadow-green-500/20">
               <CardHeader>
                 <CardTitle className="text-base sm:text-lg">Schedule Summary</CardTitle>
                 <CardDescription className="text-sm">When messages will be sent</CardDescription>
@@ -956,7 +960,7 @@ export default function SetupMessagesPage({
                           className="flex items-center justify-between py-2 border-b border-border/50 last:border-0"
                         >
                           <div className="flex items-center gap-2">
-                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-primary/10 rounded-full flex items-center justify-center text-xs font-medium text-primary">
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-full flex items-center justify-center text-xs font-medium text-green-600">
                               {index + 1}
                             </div>
                             <div>
@@ -989,37 +993,37 @@ export default function SetupMessagesPage({
             </Card>
 
             {/* Tips */}
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+            <Card className="border-0 shadow-lg shadow-green-500/20 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
               <CardHeader>
                 <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                   Pro Tips
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-xs sm:text-sm">
                 <div className="flex gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
+                  <div className="w-1.5 h-1.5 bg-green-600 rounded-full mt-2 flex-shrink-0" />
                   <p>
                     Use the <Sparkles className="h-3 w-3 inline mx-1" /> AI
                     enhance button to improve message tone
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
+                  <div className="w-1.5 h-1.5 bg-green-600 rounded-full mt-2 flex-shrink-0" />
                   <p>
                     Preview messages before {isEditMode ? 'updating' : 'activating'} to ensure they sound
                     right
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
+                  <div className="w-1.5 h-1.5 bg-green-600 rounded-full mt-2 flex-shrink-0" />
                   <p>
                     Disable unnecessary messages to avoid over-communication
                   </p>
                 </div>
                 {isEditMode && (
                   <div className="flex gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
+                    <div className="w-1.5 h-1.5 bg-green-600 rounded-full mt-2 flex-shrink-0" />
                     <p>
                       Use &quot;Reset to Defaults&quot; to start fresh with template messages
                     </p>
@@ -1048,7 +1052,7 @@ export default function SetupMessagesPage({
           <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] mx-4">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <Edit className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                <Edit className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                 Edit Message
               </DialogTitle>
               <DialogDescription className="text-sm">
@@ -1179,7 +1183,7 @@ export default function SetupMessagesPage({
           <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] mx-4">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                 Message Preview
               </DialogTitle>
               <DialogDescription className="text-sm">
@@ -1221,7 +1225,7 @@ export default function SetupMessagesPage({
                   </div>
 
                   {/* Subject */}
-                  <div className="px-3 sm:px-4 py-2 sm:py-3 border-b bg-primary/5">
+                  <div className="px-3 sm:px-4 py-2 sm:py-3 border-b bg-green-500/5">
                     <div className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">
                       Subject
                     </div>
