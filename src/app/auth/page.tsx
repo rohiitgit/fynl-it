@@ -12,7 +12,6 @@ import {
   Shield,
   Zap,
   Globe,
-  ChevronLeft,
   Mail,
   FileText,
   CreditCard,

@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -28,8 +29,6 @@ import {
   MessageCircle,
   Calendar,
   Star,
-  AlertCircle,
-  User,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -491,7 +490,58 @@ const DashboardPreview = () => {
 
 // Main Landing Page Component
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (!loading && user) {
+      console.log('Redirecting authenticated user to dashboard');
+      router.push('/dashboard');
+    }
+  }, [user, loading, router]);
+
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 mx-auto relative">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500/20 border-t-green-500"></div>
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg text-green-600">
+              Loading...
+            </h3>
+            <p className="text-muted-foreground">
+              Checking your session
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is authenticated, show loading while redirecting
+  if (user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 mx-auto relative">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500/20 border-t-green-500"></div>
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg">
+              Welcome back!
+            </h3>
+            <p className="text-muted-foreground">
+              Redirecting you to your dashboard...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary overflow-hidden">

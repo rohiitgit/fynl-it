@@ -12,7 +12,6 @@ interface AuthContextType {
   loading: boolean
   signOut: () => Promise<void>
   refreshSession: () => Promise<void>
-  isEmailConfirmed: boolean
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -21,7 +20,6 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signOut: async () => {},
   refreshSession: async () => {},
-  isEmailConfirmed: false,
 })
 
 export const useAuth = () => {
@@ -40,8 +38,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Check if user's email is confirmed
-  const isEmailConfirmed = user?.email_confirmed_at ? true : false
 
   // Define protected and auth routes
   const protectedRoutes = ['/dashboard', '/invoices']
@@ -52,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAuthRoute = authRoutes.some(route => pathname?.startsWith(route))
   const isCallbackRoute = callbackRoutes.some(route => pathname?.startsWith(route))
 
-  // Handle route protection with email verification
+  // Handle route protection
   const handleRouteProtection = useCallback((currentUser: User | null, currentSession: Session | null) => {
     if (!initialized || isCallbackRoute) return // Don't redirect during initialization or on callback routes
 
@@ -60,12 +56,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!currentUser || !currentSession) {
         console.log('Redirecting to auth - user not authenticated')
         router.replace('/auth')
-      } else if (!currentUser.email_confirmed_at) {
-        console.log('Redirecting to auth - email not confirmed')
-        router.replace('/auth')
       }
-    } else if (isAuthRoute && currentUser && currentUser.email_confirmed_at) {
-      console.log('Redirecting to dashboard - user already authenticated and confirmed')
+    } else if (isAuthRoute && currentUser) {
+      console.log('Redirecting to dashboard - user already authenticated')
       router.replace('/dashboard')
     }
   }, [isProtectedRoute, isAuthRoute, isCallbackRoute, router, initialized])
@@ -84,7 +77,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(null)
       } else {
         console.log('Initial session:', initialSession?.user?.email || 'No session')
-        console.log('Email confirmed:', initialSession?.user?.email_confirmed_at ? 'Yes' : 'No')
         setSession(initialSession)
         setUser(initialSession?.user ?? null)
 
@@ -167,7 +159,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         switch (event) {
           case 'SIGNED_IN':
             console.log('✅ User signed in:', newSession?.user?.email)
-            console.log('Email confirmed:', newSession?.user?.email_confirmed_at ? 'Yes' : 'No')
             break
           case 'SIGNED_OUT':
             console.log('👋 User signed out')
@@ -205,7 +196,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     signOut,
     refreshSession,
-    isEmailConfirmed,
   }
 
   return (
