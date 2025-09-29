@@ -45,6 +45,8 @@ Core tables:
 - `follow_ups` - Scheduled reminder messages with progressive escalation
 - `email_logs` - Email delivery tracking and analytics
 
+**Important**: All tables use Row Level Security (RLS) policies to ensure users can only access their own data. The database is set up via Supabase migrations in the `supabase/migrations/` directory.
+
 Views:
 - `email_activity` - Aggregated email engagement metrics
 - `invoice_analytics` - Payment analytics and cash flow insights
@@ -137,15 +139,12 @@ Each tier has distinct AI-enhanced messaging and escalated tone.
 
 ## Testing
 
-Test files are located in `/tests/` directory:
-- `resend-test.js` - Email sending functionality
-- `test-razorpay-webhook.js` - Payment webhook processing
-- `verified-sender-test.js` - Email domain verification
+**Note**: The `/tests/` directory mentioned in the README does not currently exist in the codebase. Testing infrastructure needs to be set up.
 
-Run individual tests with Node.js:
-```bash
-node tests/resend-test.js
-```
+For testing individual components and API routes, you can:
+- Test API endpoints directly via curl or Postman
+- Use the built-in email test functionality in the dashboard
+- Verify payment webhooks using Razorpay dashboard
 
 ## Development Notes
 
@@ -164,3 +163,18 @@ node tests/resend-test.js
 - Payment utilities are centralized in `src/lib/payments/razorpay-upi.ts`
 - Use React Query hooks from `src/lib/hooks/` for data fetching
 - All API routes include proper error handling and logging
+
+## Component Structure
+
+- UI components are in `src/components/ui/` (shadcn/ui components)
+- Custom components are in `src/components/` (AuthProvider, EmailSettings, etc.)
+- Pages follow Next.js 15 App Router structure in `src/app/`
+- Authentication pages are in `src/app/(auth)/`
+- Main dashboard and invoice management in `src/app/dashboard/` and `src/app/invoices/`
+
+## Scheduled Jobs
+
+The application uses Vercel Cron for scheduled reminders:
+- Configured in `vercel.json` to run daily at 9 AM UTC
+- Endpoint: `/api/scheduler/send-due-emails`
+- Processes all scheduled follow-ups and sends reminder emails

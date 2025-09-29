@@ -298,7 +298,7 @@ export default function AuthPage() {
                   <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200/50 rounded-xl p-4">
                     <div className="flex items-center justify-center gap-2 text-sm text-green-500 font-medium">
                       <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>30-day free trial • No credit card required</span>
+                      <span>100% Free • No credit card required</span>
                     </div>
                   </div>
                   

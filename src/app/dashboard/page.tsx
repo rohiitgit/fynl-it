@@ -702,7 +702,7 @@ export default function Dashboard() {
                   <div>
                     <h4 className="font-medium mb-2 text-sm sm:text-base">Default Timing</h4>
                     <p className="text-sm text-muted-foreground">
-                      Reminders are sent: Due date, +3 days, +7 days, +14 days, +30 days
+                      Reminders are sent: Due date, +3 days, +7 days, +14 days, +21 days
                     </p>
                   </div>
                   <div>

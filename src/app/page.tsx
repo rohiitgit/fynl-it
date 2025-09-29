@@ -106,7 +106,7 @@ const FloatingElement = ({
   );
 };
 
-// Dynamic Navbar Component with Smooth Transitions
+// Dynamic Navbar Component with Attractive Scroll Transformations
 const DynamicNavbar = () => {
   const { user, loading, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -123,80 +123,82 @@ const DynamicNavbar = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      const scrolled = window.scrollY > 30; // Trigger earlier for smoother feel
+      if (scrolled !== isScrolled) {
+        setIsScrolled(scrolled);
+      }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isScrolled]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 will-change-transform">
       <div
-        className={`container mx-auto transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu ${isScrolled ? "px-3 sm:px-4 py-2" : "px-3 sm:px-4 py-4 sm:py-6"
+        className={`container mx-auto transition-all duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1)] transform-gpu ${isScrolled ? "px-3 sm:px-4 py-1.5" : "px-3 sm:px-4 py-4 sm:py-6"
           }`}
       >
         <div
-          className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu will-change-transform ${isScrolled
-            ? "bg-card/90 backdrop-blur-xl border border-border/50 rounded-full px-3 sm:px-4 lg:px-6 py-2 sm:py-3 mx-auto max-w-5xl shadow-lg shadow-green-500/20"
+          className={`transition-all duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1)] transform-gpu will-change-transform ${isScrolled
+            ? "bg-card/95 backdrop-blur-xl border border-border/60 rounded-full px-4 sm:px-5 lg:px-7 py-2.5 sm:py-3.5 mx-auto max-w-4xl shadow-xl shadow-green-500/25"
             : "bg-transparent backdrop-blur-none border-transparent rounded-none px-0 py-0 shadow-none"
             }`}
         >
           <div
-            className={`transform-gpu transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isScrolled
+            className={`transform-gpu transition-all duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1)] ${isScrolled
               ? "translate-y-0 scale-100"
-              : "translate-y-0.5 scale-[1.01]"
+              : "translate-y-0 scale-100"
               }`}
           >
             <div className="flex items-center justify-between">
-              {/* Logo with smooth scaling */}
+              {/* Logo with Smooth Scaling */}
               <div className="flex items-center space-x-1.5 sm:space-x-2 flex-shrink-0">
                 <div
-                  className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu origin-center ${isScrolled ? "scale-90" : "scale-100"
+                  className={`transition-all duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1)] transform-gpu origin-center ${isScrolled ? "scale-95" : "scale-100"
                     }`}
                 >
-
-                </div>
-                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all">
-                  <DollarSign className="h-7 w-7 text-white" />
+                  <div className={`bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg transition-all duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1)] ${isScrolled ? "w-10 h-10" : "w-12 h-12"}`}>
+                    <DollarSign className={`text-white transition-all duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1)] ${isScrolled ? "h-5 w-5" : "h-7 w-7"}`} />
+                  </div>
                 </div>
 
                 <span
-                  className={`font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu origin-left ${isScrolled
-                    ? "text-base sm:text-lg lg:text-xl scale-95"
-                    : "text-lg sm:text-xl lg:text-2xl scale-100"
+                  className={`font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent transition-all duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1)] transform-gpu origin-left ${isScrolled
+                    ? "text-lg sm:text-xl scale-98"
+                    : "text-xl sm:text-2xl scale-100"
                     }`}
                 >
                   Fynl-It
                 </span>
               </div>
 
-              {/* Navigation Items */}
+              {/* Navigation Items with Smooth Transitions */}
               <div
-                className={`transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu ${isScrolled
+                className={`transition-all duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1)] transform-gpu ${isScrolled
                   ? "translate-x-0 opacity-100"
-                  : "translate-x-1 opacity-95"
+                  : "translate-x-0 opacity-100"
                   }`}
               >
                 {loading ? (
                   <div className="flex items-center space-x-2 animate-pulse">
                     <div
-                      className={`bg-muted rounded transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isScrolled
-                        ? "h-7 w-10 sm:h-8 sm:w-12 lg:h-8 lg:w-14"
-                        : "h-8 w-12 sm:h-9 sm:w-16 lg:h-9 lg:w-18"
+                      className={`bg-muted rounded transition-all duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1)] ${isScrolled
+                        ? "h-8 w-12 sm:h-8 sm:w-14"
+                        : "h-9 w-16 sm:h-9 sm:w-18"
                         }`}
                     ></div>
                     <div
-                      className={`bg-muted rounded transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isScrolled
-                        ? "h-7 w-12 sm:h-8 sm:w-16 lg:h-8 lg:w-20"
-                        : "h-8 w-16 sm:h-9 sm:w-20 lg:h-9 lg:w-24"
+                      className={`bg-muted rounded transition-all duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1)] ${isScrolled
+                        ? "h-8 w-16 sm:h-8 sm:w-18"
+                        : "h-9 w-20 sm:h-9 sm:w-22"
                         }`}
                     ></div>
                   </div>
                 ) : user ? (
                   <div className="flex items-center space-x-2 sm:space-x-3">
                     <span
-                      className={`text-muted-foreground transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] hidden sm:block ${isScrolled ? "text-xs" : "text-sm"
+                      className={`text-muted-foreground transition-all duration-500 ease-[cubic-bezier(0.4,0.0,0.2,1)] hidden sm:block ${isScrolled ? "text-sm" : "text-sm"
                         }`}
                     >
                       Hi, {getUserDisplayName()}!
@@ -204,7 +206,7 @@ const DynamicNavbar = () => {
                     <Link href="/dashboard">
                       <Button
                         size={isScrolled ? "sm" : "default"}
-                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 shadow-lg shadow-green-500/20
+                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-300 ease-[cubic-bezier(0.4,0.0,0.2,1)] transform-gpu hover:scale-105 active:scale-95 shadow-lg shadow-green-500/20 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0
                           }`}
                       >
                         Dashboard
@@ -214,7 +216,7 @@ const DynamicNavbar = () => {
                       variant="ghost"
                       size={isScrolled ? "sm" : "default"}
                       onClick={signOut}
-                      className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 ${isScrolled ? "hover:bg-accent/80" : "hover:bg-accent/60"
+                      className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-300 ease-[cubic-bezier(0.4,0.0,0.2,1)] transform-gpu hover:scale-105 active:scale-95 ${isScrolled ? "hover:bg-accent/80" : "hover:bg-accent/60"
                         }`}
                     >
                       Sign Out
@@ -226,7 +228,7 @@ const DynamicNavbar = () => {
                       <Button
                         variant="ghost"
                         size={isScrolled ? "sm" : "default"}
-                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 ${isScrolled
+                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-300 ease-[cubic-bezier(0.4,0.0,0.2,1)] transform-gpu hover:scale-105 active:scale-95 ${isScrolled
                           ? "hover:bg-accent/80"
                           : "hover:bg-accent/60"
                           }`}
@@ -237,7 +239,7 @@ const DynamicNavbar = () => {
                     <Link href="/auth">
                       <Button
                         size={isScrolled ? "sm" : "default"}
-                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] transform-gpu hover:scale-105 active:scale-95 shadow-lg shadow-green-500/20 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 border-0
+                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-300 ease-[cubic-bezier(0.4,0.0,0.2,1)] transform-gpu hover:scale-105 active:scale-95 shadow-lg shadow-green-500/20 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0
                           }`}
                       >
                         Get Started
@@ -260,10 +262,10 @@ const DashboardPreview = () => {
     <div className="relative w-full">
       <div className="relative mx-auto max-w-3xl lg:max-w-4xl">
         {/* Background glow effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/10 rounded-xl sm:rounded-2xl blur-xl sm:blur-2xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-muted/30 to-muted/10 rounded-xl sm:rounded-2xl blur-xl sm:blur-2xl"></div>
 
         {/* Main container */}
-        <div className="relative bg-card/90 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-lg shadow-green-500/20 border border-border/20 overflow-hidden">
+        <div className="relative bg-card/90 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-xl shadow-black/10 border border-border/20 overflow-hidden">
           {/* Mobile & Tablet Layout (xs to lg) - Use Image */}
           <div className="block lg:hidden">
             <div className="relative">
@@ -335,7 +337,9 @@ const DashboardPreview = () => {
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="text-sm sm:text-lg font-bold">₹45K</p>
-                          <Badge className="bg-green-100 bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent border-green-200 text-xs">
+                          <Badge className="bg-success/10 text-success border-success/20 text-xs relative">
+                            <div className="absolute inset-0 pattern-dots text-success/20"></div>
+                            <CheckCircle className="h-3 w-3 mr-1" />
                             Paid
                           </Badge>
                         </div>
@@ -357,7 +361,9 @@ const DashboardPreview = () => {
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="text-sm sm:text-lg font-bold">₹25K</p>
-                          <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs">
+                          <Badge className="bg-warning/10 text-warning border-warning/20 text-xs relative">
+                            <div className="absolute inset-0 pattern-diagonal text-warning/20"></div>
+                            <Clock className="h-3 w-3 mr-1" />
                             Due
                           </Badge>
                         </div>
@@ -366,7 +372,7 @@ const DashboardPreview = () => {
                   </div>
 
                   {/* Floating notification */}
-                  <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-green-500 text-white rounded-lg shadow-lg shadow-green-500/30 flex items-center gap-1 sm:gap-2 animate-bounce z-20 px-2 py-1 sm:px-3 sm:py-2 max-w-[100px] sm:max-w-[120px]">
+                  <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-green-500 text-white rounded-lg shadow-lg shadow-primary/30 flex items-center gap-1 sm:gap-2 animate-bounce z-20 px-2 py-1 sm:px-3 sm:py-2 max-w-[100px] sm:max-w-[120px]">
                     <Bell className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                     <span className="text-xs font-medium truncate">
                       Payment!
@@ -397,7 +403,9 @@ const DashboardPreview = () => {
                     </div>
                     <div className="text-right">
                       <p className="text-xl font-bold">₹45,000</p>
-                      <Badge className="bg-green-100 bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent border-green-200">
+                      <Badge className="bg-success/10 text-success border-success/20 relative">
+                        <div className="absolute inset-0 pattern-dots text-success/20"></div>
+                        <CheckCircle className="h-3 w-3 mr-1" />
                         Paid
                       </Badge>
                     </div>
@@ -417,7 +425,9 @@ const DashboardPreview = () => {
                     </div>
                     <div className="text-right">
                       <p className="text-xl font-bold">₹25,000</p>
-                      <Badge className="bg-orange-100 text-orange-700 border-orange-200">
+                      <Badge className="bg-warning/10 text-warning border-warning/20 relative">
+                        <div className="absolute inset-0 pattern-diagonal text-warning/20"></div>
+                        <Clock className="h-3 w-3 mr-1" />
                         Due
                       </Badge>
                     </div>
@@ -437,7 +447,9 @@ const DashboardPreview = () => {
                     </div>
                     <div className="text-right">
                       <p className="text-xl font-bold">₹75,000</p>
-                      <Badge className="bg-blue-100 text-blue-700 border-blue-200">
+                      <Badge className="bg-chart-2/10 text-chart-2 border-chart-2/20 relative">
+                        <div className="absolute inset-0 pattern-dots text-chart-2/20"></div>
+                        <Mail className="h-3 w-3 mr-1" />
                         Sent
                       </Badge>
                     </div>
@@ -478,7 +490,7 @@ const DashboardPreview = () => {
           </div>
 
           {/* Floating notification - Only show on desktop */}
-          <div className="absolute top-3 right-3 bg-green-500 text-white rounded-lg shadow-lg shadow-green-500/30 items-center gap-2 animate-bounce z-20 px-3 py-2 max-w-[120px] hidden lg:flex">
+          <div className="absolute top-3 right-3 bg-green-500 text-white rounded-lg shadow-lg shadow-primary/30 items-center gap-2 animate-bounce z-20 px-3 py-2 max-w-[120px] hidden lg:flex">
             <Bell className="h-4 w-4 flex-shrink-0" />
             <span className="text-sm font-medium truncate">Payment!</span>
           </div>
@@ -611,8 +623,8 @@ export default function HomePage() {
                   </span>
                 </div>
 
-                {/* Main Heading */}
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight">
+                {/* Main Heading - Using fluid typography */}
+                <h1 className="font-bold text-foreground leading-tight">
                   Never Chase Clients for
                   <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent block">
                     Payment Again
@@ -627,21 +639,21 @@ export default function HomePage() {
 
               {/* Mobile: Subheading and CTAs Third */}
               <div className="space-y-6 sm:space-y-8 z-10 relative text-center">
-                {/* Subheading */}
-                <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed px-2">
-                  Upload your invoice → <span className="font-semibold">AI sends professional reminders</span> → <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent font-semibold">Get paid faster</span>.
-                  <span className="block mt-2 font-semibold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">
+                {/* Subheading - Improved readability */}
+                <p className="text-lg text-muted-foreground leading-relaxed px-2">
+                  Upload your invoice → <span className="font-semibold text-foreground">AI sends professional reminders</span> → <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent font-semibold">Get paid faster</span>.
+                  <span className="block mt-3 font-semibold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">
                     100% Free. No credit card needed.
                   </span>
                 </p>
 
-                {/* CTA Buttons */}
+                {/* Progressive CTA Strategy */}
                 {user ? (
                   <div className="flex flex-col items-center justify-center gap-3">
                     <Link href="/dashboard">
                       <Button
                         size="lg"
-                        className="w-full sm:w-auto gap-2 text-lg px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300"
+                        className="w-full sm:w-auto gap-2 text-lg px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-primary/20 hover:shadow-primary/30"
                       >
                         Go to Dashboard
                         <ArrowRight className="h-5 w-5" />
@@ -650,10 +662,11 @@ export default function HomePage() {
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center gap-3">
+                    {/* Primary CTA */}
                     <Link href="/auth">
                       <Button
                         size="lg"
-                        className="w-full sm:w-auto gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300"
+                        className="w-full sm:w-auto gap-2 text-lg px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-primary/20 hover:shadow-primary/30"
                       >
                         Get Started Free
                         <ArrowRight className="h-5 w-5" />
@@ -676,27 +689,27 @@ export default function HomePage() {
                   </span>
                 </div>
 
-                {/* Main Heading */}
-                <h1 className="text-4xl xl:text-5xl 2xl:text-6xl font-bold text-foreground leading-tight">
+                {/* Main Heading - Using fluid typography */}
+                <h1 className="font-bold text-foreground leading-tight">
                   Never Chase Clients for
                   <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent block">
                     Payment Again
                   </span>
                 </h1>
 
-                {/* Subheading */}
+                {/* Subheading - Improved readability */}
                 <p className="text-xl text-muted-foreground leading-relaxed">
-                  Upload your invoice → <span>AI sends professional reminders</span> → <span className="">Get paid faster</span>.
+                  Upload your invoice → <span className="font-semibold text-foreground">AI sends professional reminders</span> → <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent font-semibold">Get paid faster</span>.
                   <span className="block mt-3 font-semibold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent text-lg">
                     100% Free. No credit card needed.
                   </span>
                 </p>
 
-                {/* CTA Buttons */}
+                {/* Progressive CTA Strategy - Desktop */}
                 {user ? (
                   <div className="flex flex-col gap-4">
                     <Link href="/dashboard">
-                      <Button size="lg" className="gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300">
+                      <Button size="lg" className="gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-primary/20 hover:shadow-primary/30">
                         Go to Dashboard
                         <ArrowRight className="h-5 w-5" />
                       </Button>
@@ -704,8 +717,9 @@ export default function HomePage() {
                   </div>
                 ) : (
                   <div className="flex flex-col gap-4">
+                    {/* Primary CTA */}
                     <Link href="/auth">
-                      <Button size="lg" className="gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300">
+                      <Button size="lg" className="gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-primary/20 hover:shadow-primary/30">
                         Get Started Free
                         <ArrowRight className="h-5 w-5" />
                       </Button>
@@ -751,36 +765,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Why Free? Trust Building Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-r from-green-50 to-emerald-50 border-y border-green-200/50 relative">
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"></div>
-        <div className="container mx-auto px-3 sm:px-4 lg:px-6">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent mb-4">
-              🤔 Why is this completely free?
-            </h2>
-            <p className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent text-base sm:text-lg mb-6 leading-relaxed">
-              We&apos;re building this with the freelancer community. Your feedback shapes the product.
-              Core features will always stay free.
-            </p>
-            <div className="flex items-center justify-center gap-6 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent font-medium">No hidden costs</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent font-medium">Built by freelancers</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Why Choose Fynl-It Section */}
       {/* Benefits Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-br from-green-500/5 to-emerald-500/10 relative">
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"></div>
+      <section className="py-16 sm:py-20 bg-gradient-to-br from-primary/5 to-primary-light/10 relative">
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="max-w-6xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
@@ -863,7 +852,7 @@ export default function HomePage() {
               <div className="relative order-2 lg:order-2">
                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-3 sm:space-y-4">
-                    <div className="bg-card/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg hover:shadow-green-500/30 shadow-green-500/20 transition-all duration-300">
+                    <div className="bg-card/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg hover:shadow-primary/30 shadow-primary/20 transition-all duration-300">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
                         <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
                           <Star className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
@@ -877,7 +866,7 @@ export default function HomePage() {
                       </p>
                     </div>
 
-                    <div className="bg-card/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg hover:shadow-green-500/30 shadow-green-500/20 transition-all duration-300">
+                    <div className="bg-card/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg hover:shadow-primary/30 shadow-primary/20 transition-all duration-300">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
                         <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
                           <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
@@ -893,7 +882,7 @@ export default function HomePage() {
                   </div>
 
                   <div className="space-y-3 sm:space-y-4 pt-6 sm:pt-8">
-                    <div className="bg-card/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg hover:shadow-green-500/30 shadow-green-500/20 transition-all duration-300">
+                    <div className="bg-card/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg hover:shadow-primary/30 shadow-primary/20 transition-all duration-300">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
                         <div className="w-6 h-6 sm:w-8 sm:h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
                           <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
@@ -907,7 +896,7 @@ export default function HomePage() {
                       </p>
                     </div>
 
-                    <div className="bg-card/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg hover:shadow-green-500/30 shadow-green-500/20 transition-all duration-300">
+                    <div className="bg-card/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg hover:shadow-primary/30 shadow-primary/20 transition-all duration-300">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
                         <div className="w-6 h-6 sm:w-8 sm:h-8 bg-orange-500/20 rounded-lg flex items-center justify-center">
                           <Target className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
@@ -930,7 +919,7 @@ export default function HomePage() {
 
       {/* Features Section */}
       <section className="py-16 sm:py-20 lg:py-24 relative">
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"></div>
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="text-center mb-8 sm:mb-12 lg:mb-16">
             <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full mb-4 sm:mb-6">
@@ -948,7 +937,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
-            <Card className="text-center hover:shadow-lg hover:shadow-green-500/30 shadow-green-500/20 transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group">
+            <Card className="text-center hover:shadow-lg hover:shadow-primary/30 shadow-primary/20 transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group">
               <CardHeader className="pb-4 sm:pb-6 lg:pb-8 p-4 sm:p-6">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 lg:mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Mail className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-green-600" />
@@ -963,7 +952,7 @@ export default function HomePage() {
               </CardHeader>
             </Card>
 
-            <Card className="text-center hover:shadow-lg hover:shadow-green-500/30 shadow-green-500/20 transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group">
+            <Card className="text-center hover:shadow-lg hover:shadow-primary/30 shadow-primary/20 transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group">
               <CardHeader className="pb-4 sm:pb-6 lg:pb-8 p-4 sm:p-6">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 lg:mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Zap className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-green-600" />
@@ -978,7 +967,7 @@ export default function HomePage() {
               </CardHeader>
             </Card>
 
-            <Card className="text-center hover:shadow-lg hover:shadow-green-500/30 shadow-green-500/20 transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group sm:col-span-2 lg:col-span-1">
+            <Card className="text-center hover:shadow-lg hover:shadow-primary/30 shadow-primary/20 transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 group sm:col-span-2 lg:col-span-1">
               <CardHeader className="pb-4 sm:pb-6 lg:pb-8 p-4 sm:p-6">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-green-500/20 to-green-500/10 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 lg:mb-6 group-hover:scale-110 transition-transform duration-300">
                   <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-green-500" />
@@ -998,16 +987,16 @@ export default function HomePage() {
 
       {/* Founder Credibility & CTA Section */}
       <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-r from-green-500/5 to-emerald-500/10 relative">
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"></div>
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="max-w-5xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Founder Story */}
-              <div className="bg-card p-6 sm:p-8 rounded-xl border shadow-lg shadow-green-500/20">
+              <div className="bg-card p-6 sm:p-8 rounded-xl border shadow-lg shadow-primary/20">
                 <div className="flex items-start gap-4 mb-6">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden flex-shrink-0 border-2 border-green-500/20">
                     <Image
-                      src="https://pbs.twimg.com/profile_images/1951372472378355712/lM7iBtkf_400x400.jpg"
+                      src="https://pbs.twimg.com/profile_images/1968061325189451777/KyQy5SeP_400x400.jpg"
                       alt="Rohit - Founder & Developer"
                       width={80}
                       height={80}
@@ -1054,7 +1043,7 @@ export default function HomePage() {
                   <Link href="/dashboard">
                     <Button
                       size="lg"
-                      className="w-full lg:w-auto gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300"
+                      className="w-full lg:w-auto gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-300"
                     >
                       Go to Dashboard
                       <ArrowRight className="h-5 w-5" />
@@ -1065,7 +1054,7 @@ export default function HomePage() {
                     <Link href="/auth">
                       <Button
                         size="lg"
-                        className="w-full lg:w-auto gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300"
+                        className="w-full lg:w-auto gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-300"
                       >
                         Get Started Free
                         <ArrowRight className="h-5 w-5" />
