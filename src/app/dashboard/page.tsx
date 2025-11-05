@@ -193,7 +193,7 @@ export default function Dashboard() {
 
       if (error) {
         if ((error.message.includes('NetworkError') || error.message.includes('JWT')) && retryCount < 2) {
-          console.log('Retrying invoice fetch after auth/network error...');
+          // Retry on transient auth/network errors
           setTimeout(() => fetchInvoices(retryCount + 1), 500);
           return;
         }

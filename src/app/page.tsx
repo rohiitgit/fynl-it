@@ -508,7 +508,6 @@ export default function HomePage() {
   // Redirect authenticated users to dashboard
   useEffect(() => {
     if (!loading && user) {
-      console.log('Redirecting authenticated user to dashboard');
       router.push('/dashboard');
     }
   }, [user, loading, router]);
@@ -996,7 +995,7 @@ export default function HomePage() {
                 <div className="flex items-start gap-4 mb-6">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden flex-shrink-0 border-2 border-green-500/20">
                     <Image
-                      src="https://pbs.twimg.com/profile_images/1968061325189451777/KyQy5SeP_400x400.jpg"
+                      src="https://pbs.twimg.com/profile_images/1985608719510749190/W9-9HPVI_400x400.jpg"
                       alt="Rohit - Founder & Developer"
                       width={80}
                       height={80}

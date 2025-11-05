@@ -1,6 +1,7 @@
-// src/lib/auth-utils.ts - Fixed TypeScript errors
+// src/lib/auth-utils.ts - With structured logging
 import { supabase } from '@/lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
+import { authLogger } from '@/lib/logger';
 
 // export const runtime = 'nodejs';
 
@@ -27,7 +28,10 @@ export const authUtils = {
             const { data, error } = await supabase.auth.getSession();
             return { session: data.session, error };
         } catch (error) {
-            console.error('Error getting current session:', error);
+            authLogger.error({
+                action: 'session_get_error',
+                err: error instanceof Error ? error : new Error(String(error)),
+            }, 'Error getting current session');
             return { session: null, error: error as Error };
         }
     },
@@ -39,12 +43,18 @@ export const authUtils = {
         try {
             const { data, error } = await supabase.auth.refreshSession();
             if (error) {
-                console.error('Session refresh failed:', error);
+                authLogger.error({
+                    action: 'session_refresh_failed',
+                    err: error,
+                }, 'Session refresh failed');
                 return { session: null, error };
             }
             return { session: data.session, error: null };
         } catch (error) {
-            console.error('Error refreshing session:', error);
+            authLogger.error({
+                action: 'session_refresh_error',
+                err: error instanceof Error ? error : new Error(String(error)),
+            }, 'Error refreshing session');
             return { session: null, error: error as Error };
         }
     },
@@ -61,7 +71,10 @@ export const authUtils = {
             const { error } = await supabase.auth.signOut();
 
             if (error) {
-                console.error('Sign out error:', error);
+                authLogger.error({
+                    action: 'signout_error',
+                    err: error,
+                }, 'Sign out error');
                 return { error };
             }
 
@@ -76,7 +89,10 @@ export const authUtils = {
 
             return { error: null };
         } catch (error) {
-            console.error('Error during sign out:', error);
+            authLogger.error({
+                action: 'signout_exception',
+                err: error instanceof Error ? error : new Error(String(error)),
+            }, 'Error during sign out');
             return { error: error as Error };
         }
     },
@@ -114,7 +130,10 @@ export const authUtils = {
 
         if (refreshTime > 0) {
             const timeoutId = setTimeout(async () => {
-                console.log('🔄 Auto-refreshing session...');
+                authLogger.info({
+                    action: 'session_auto_refresh_triggered',
+                    refreshTimeSeconds: refreshTime,
+                }, 'Auto-refreshing session');
                 const { session: newSession, error } = await this.refreshSession();
 
                 if (!error && newSession) {
@@ -122,7 +141,10 @@ export const authUtils = {
                     // Set up next refresh
                     this.setupAutoRefresh(newSession, callback);
                 } else {
-                    console.error('Auto-refresh failed:', error);
+                    authLogger.error({
+                        action: 'session_auto_refresh_failed',
+                        err: error instanceof Error ? error : new Error(String(error)),
+                    }, 'Auto-refresh failed');
                 }
             }, refreshTime * 1000);
 
@@ -179,7 +201,10 @@ export const authUtils = {
                     const { event, session, user } = JSON.parse(e.newValue);
                     callback(event, session, user);
                 } catch (error) {
-                    console.error('Error parsing auth broadcast:', error);
+                    authLogger.error({
+                        action: 'auth_broadcast_parse_error',
+                        err: error instanceof Error ? error : new Error(String(error)),
+                    }, 'Error parsing auth broadcast');
                 }
             }
         };
@@ -209,7 +234,10 @@ export const authUtils = {
         try {
             // Check if session is expired
             if (this.isSessionExpired(session)) {
-                console.log('Session is expired');
+                authLogger.debug({
+                    action: 'session_expired',
+                    expiresAt: session.expires_at,
+                }, 'Session is expired');
                 return false;
             }
 
@@ -217,13 +245,19 @@ export const authUtils = {
             const { data, error } = await supabase.auth.getUser();
 
             if (error || !data.user) {
-                console.log('Session validation failed:', error?.message);
+                authLogger.debug({
+                    action: 'session_validation_failed',
+                    errorMessage: error?.message,
+                }, 'Session validation failed');
                 return false;
             }
 
             return true;
         } catch (error) {
-            console.error('Error validating session:', error);
+            authLogger.error({
+                action: 'session_validation_error',
+                err: error instanceof Error ? error : new Error(String(error)),
+            }, 'Error validating session');
             return false;
         }
     },
@@ -232,19 +266,26 @@ export const authUtils = {
      * Handle session recovery after page reload
      */
     async recoverSession(): Promise<AuthState> {
-        console.log('🔍 Attempting session recovery...');
+        authLogger.info({
+            action: 'session_recovery_started',
+        }, 'Attempting session recovery');
 
         try {
             // First, try to get the session from storage
             const { session, error } = await this.getCurrentSession();
 
             if (error) {
-                console.error('Session recovery failed:', error);
+                authLogger.error({
+                    action: 'session_recovery_failed',
+                    err: error,
+                }, 'Session recovery failed');
                 return { user: null, session: null, loading: false };
             }
 
             if (!session) {
-                console.log('No session found in storage');
+                authLogger.debug({
+                    action: 'session_recovery_no_session',
+                }, 'No session found in storage');
                 return { user: null, session: null, loading: false };
             }
 
@@ -252,12 +293,17 @@ export const authUtils = {
             const isValid = await this.validateSession(session);
 
             if (!isValid) {
-                console.log('Session validation failed, clearing...');
+                authLogger.info({
+                    action: 'session_recovery_invalid',
+                }, 'Session validation failed, clearing session');
                 await this.signOut();
                 return { user: null, session: null, loading: false };
             }
 
-            console.log('✅ Session recovered successfully');
+            authLogger.info({
+                action: 'session_recovered',
+                userId: session.user.id,
+            }, 'Session recovered successfully');
 
             // Set up auto-refresh for the recovered session
             this.setupAutoRefresh(session);
@@ -269,7 +315,10 @@ export const authUtils = {
             };
 
         } catch (error) {
-            console.error('Session recovery error:', error);
+            authLogger.error({
+                action: 'session_recovery_error',
+                err: error instanceof Error ? error : new Error(String(error)),
+            }, 'Session recovery error');
             return { user: null, session: null, loading: false };
         }
     },

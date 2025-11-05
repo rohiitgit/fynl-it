@@ -402,8 +402,6 @@ export default function NewInvoiceModal({
             };
 
             if (isEditMode && invoiceId) {
-                console.log('Updating invoice:', invoiceId);
-
                 const { error } = await supabase
                     .from('invoices')
                     .update(invoiceData)
@@ -440,8 +438,6 @@ export default function NewInvoiceModal({
                 }
 
             } else {
-                console.log('Creating new invoice with data:', invoiceData);
-
                 const { data: invoice, error } = await supabase
                     .from('invoices')
                     .insert({
@@ -477,8 +473,6 @@ export default function NewInvoiceModal({
                 if (!invoice) {
                     throw new Error('Failed to create invoice - no data returned');
                 }
-
-                console.log('Invoice created successfully:', invoice.id);
 
                 // Handle payment link generation for Razorpay
                 let paymentLinkCreated = false;

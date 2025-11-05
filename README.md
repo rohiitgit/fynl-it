@@ -565,6 +565,13 @@ RESEND_FROM_EMAIL=
 # App Configuration
 NEXT_PUBLIC_APP_URL=
 SCHEDULER_API_KEY=
+
+# Rate Limiting (Upstash Redis)
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+
+# Optional: Rate Limit Bypass Token (for testing/admin)
+RATE_LIMIT_BYPASS_TOKEN=
 ```
 
 ### **Development Notes**
@@ -585,36 +592,239 @@ SCHEDULER_API_KEY=
 
 ---
 
+## 🛡️ **Rate Limiting & Security**
+
+### **Overview**
+All API routes are protected with comprehensive rate limiting using **Upstash Redis**. This prevents abuse of expensive operations (AI processing, email sending, payment creation) and protects your API quotas.
+
+### **Rate Limit Tiers**
+
+#### **Tier 1: AI Routes (STRICT)**
+Routes: `/api/process-invoice`, `/api/enhance-message`, `/api/generate-message`
+
+| User Type | Limit | Window |
+|-----------|-------|--------|
+| Authenticated | 10 requests | 1 hour |
+| Anonymous (IP) | 3 requests | 15 minutes |
+
+**Why**: AI operations use Google Gemini API which has quotas and costs. Strict limits prevent quota exhaustion.
+
+#### **Tier 2: Email Routes (MODERATE)**
+Routes: `/api/email/test`
+
+| User Type | Limit | Window |
+|-----------|-------|--------|
+| Authenticated | 5 requests | 1 hour |
+| Anonymous (IP) | 1 request | 1 hour |
+
+**Why**: Email sending affects sender reputation and has costs via Resend.
+
+#### **Tier 3: Payment Routes (AUTHENTICATED ONLY)**
+Routes: `/api/payments/create-link`
+
+| User Type | Limit | Window |
+|-----------|-------|--------|
+| Authenticated | 20 requests | 1 hour |
+| Anonymous | ❌ Not allowed | - |
+
+**Why**: Financial operations require authentication. Generous limits allow multiple invoice creation.
+
+#### **Tier 4: Webhook Routes (SPECIAL)**
+Routes: `/api/webhooks/razorpay`
+
+| User Type | Limit | Window |
+|-----------|-------|--------|
+| Any IP | 1000 requests | 1 hour |
+
+**Why**: Webhooks can spike legitimately. Primary protection is signature verification.
+
+#### **Tier 5: Scheduler Routes (INTERNAL)**
+Routes: `/api/scheduler/send-due-emails`
+
+| User Type | Limit | Window |
+|-----------|-------|--------|
+| API Key Auth | 10 requests | 1 hour |
+
+**Why**: Called by Vercel Cron once daily. API key provides primary protection.
+
+### **Rate Limit Headers**
+All API responses include rate limit information:
+
+```http
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 9
+X-RateLimit-Reset: 1640995200
+Retry-After: 3600 (only when limit exceeded)
+```
+
+### **Rate Limit Exceeded Response**
+When rate limit is exceeded, you'll receive:
+
+```json
+{
+  "error": "Too Many Requests",
+  "message": "Rate limit exceeded. Please try again in 15 minutes.",
+  "retryAfter": 900,
+  "resetAt": "2025-01-01T12:00:00.000Z"
+}
+```
+
+HTTP Status: `429 Too Many Requests`
+
+### **Bypassing Rate Limits (Testing/Admin)**
+Set the `RATE_LIMIT_BYPASS_TOKEN` environment variable and include it in requests:
+
+```bash
+curl -H "x-rate-limit-bypass: your_bypass_token" \
+     -H "Authorization: Bearer token" \
+     https://your-app.com/api/process-invoice
+```
+
+⚠️ **Never commit bypass tokens to version control!**
+
+### **Setup Instructions**
+
+1. **Create Upstash Redis Database**:
+   - Sign up at [upstash.com](https://upstash.com)
+   - Create a new Redis database
+   - Copy the REST API URL and Token
+
+2. **Add Environment Variables**:
+   ```bash
+   UPSTASH_REDIS_REST_URL=https://your-redis.upstash.io
+   UPSTASH_REDIS_REST_TOKEN=your_token_here
+   ```
+
+3. **Deploy**: Rate limiting is automatically enabled when these variables are set
+
+4. **Monitoring**: View rate limit analytics in your Upstash dashboard
+
+### **Graceful Degradation**
+If Upstash Redis is unavailable:
+- Requests are **allowed** (fail open)
+- Errors are logged but don't block requests
+- This prevents Redis outages from breaking your app
+
+### **Security Features**
+✅ All AI routes require authentication
+✅ Email routes require authentication
+✅ Payment routes require authentication
+✅ Webhook signature verification (HMAC SHA256)
+✅ IP-based rate limiting for anonymous requests
+✅ User-based rate limiting for authenticated requests
+✅ Standardized error responses
+✅ Rate limit bypass for testing
+
+---
+
 ## 🧪 **Testing**
 
-Test files are located in `/tests/` directory:
+### **Test Infrastructure**
+The project uses **Jest** and **React Testing Library** for comprehensive testing:
 
-### **Available Tests**
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode (for development)
+npm run test:watch
+
+# Generate coverage report
+npm run test:coverage
+```
+
+### **Test Structure**
+```
+__tests__/
+├── components/          # Component tests
+│   ├── ui/             # UI component tests
+│   │   └── button.test.tsx
+│   └── AuthProvider.test.tsx
+├── lib/                # Utility and hook tests
+│   ├── hooks/
+│   │   └── use-toast.test.ts
+│   └── utils.test.ts
+└── utils/              # Test utilities
+    ├── test-utils.tsx  # Custom render with providers
+    └── mock-data.ts    # Mock data for tests
+```
+
+### **Writing Tests**
+
+#### **Component Testing Example**
+```typescript
+import { render, screen } from '@/tests/utils/test-utils'
+import { Button } from '@/components/ui/button'
+
+describe('Button', () => {
+  it('should render with text', () => {
+    render(<Button>Click me</Button>)
+    expect(screen.getByRole('button')).toHaveTextContent('Click me')
+  })
+})
+```
+
+#### **Hook Testing Example**
+```typescript
+import { renderHook } from '@testing-library/react'
+import { useToast } from '@/lib/hooks/use-toast'
+
+describe('useToast', () => {
+  it('should show success toast', () => {
+    const { result } = renderHook(() => useToast())
+    result.current.success('Success!')
+    // Assertions...
+  })
+})
+```
+
+### **Mocking**
+The test setup includes mocks for:
+- **Supabase Client**: All database operations
+- **Next.js Navigation**: Router, pathname, searchParams
+- **React Query**: QueryClient for data fetching
+- **localStorage**: Browser storage
+- **fetch API**: HTTP requests
+- **Radix UI Portal**: Modal/dropdown rendering
+
+### **Coverage Thresholds**
+Current coverage requirements:
+- **Branches**: 50%
+- **Functions**: 50%
+- **Lines**: 60%
+- **Statements**: 60%
+
+### **Manual Integration Tests**
+Additional integration test files are in `/tests/` directory:
 - `resend-test.js` - Email sending functionality
 - `test-razorpay-webhook.js` - Payment webhook processing
 - `verified-sender-test.js` - Email domain verification
 
-### **Run Tests**
+Run manual tests:
 ```bash
-# Run individual tests with Node.js
 node tests/resend-test.js
 node tests/test-razorpay-webhook.js
 node tests/verified-sender-test.js
-
-# Test email configuration
-npm run test:email
-
-# Test payment webhooks
-npm run test:payments
 ```
 
 ### **Testing Checklist**
+- [x] Utility functions (cn, formatters)
+- [x] Custom hooks (useToast)
+- [x] UI components (Button)
+- [x] Authentication (AuthProvider)
 - [ ] Email delivery and templating
 - [ ] Payment webhook signature verification
 - [ ] Database operations with RLS
 - [ ] AI invoice processing
-- [ ] Authentication flows
 - [ ] API endpoint responses
+
+### **Best Practices**
+1. **Use custom render** from `test-utils.tsx` to include providers
+2. **Mock external dependencies** (Supabase, APIs, etc.)
+3. **Test user interactions** with `@testing-library/user-event`
+4. **Query by accessibility roles** (button, textbox, etc.)
+5. **Use data-testid** sparingly, prefer semantic queries
+6. **Mock at module level** for consistent behavior
 
 ---
 

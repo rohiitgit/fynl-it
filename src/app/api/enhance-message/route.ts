@@ -1,11 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { supabase } from '@/lib/supabase';
+import { applyRateLimit, addRateLimitHeaders } from '@/lib/rate-limit/rate-limiter';
+import { AI_RATE_LIMIT } from '@/lib/rate-limit/config';
+import { createAuthRequiredResponse } from '@/lib/rate-limit/responses';
+import { aiLogger } from '@/lib/logger';
 
 // Initialize the Gemini API with the API key
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
 export async function POST(request: NextRequest) {
     try {
+        // 1. Check authentication
+        const authHeader = request.headers.get('authorization');
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return createAuthRequiredResponse();
+        }
+
+        const token = authHeader.replace('Bearer ', '');
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+        if (authError || !user) {
+            return createAuthRequiredResponse();
+        }
+
+        // 2. Check rate limit
+        const rateLimitResult = await applyRateLimit(request, user.id, AI_RATE_LIMIT, 'ai');
+        if (rateLimitResult.response) {
+            return rateLimitResult.response; // Rate limit exceeded
+        }
+
+        // 3. Process the request
         const { prompt } = await request.json();
 
         if (!prompt) {
@@ -44,7 +69,12 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        console.log('Gemini response:', text); // Debug log
+        aiLogger.debug({
+            action: 'message_enhancement_response',
+            userId: user.id,
+            promptLength: prompt.length,
+            responseLength: text.length,
+        }, 'Received Gemini response for message enhancement');
 
         // Extract JSON from response
         let messageData;
@@ -69,8 +99,12 @@ export async function POST(request: NextRequest) {
                 }
             }
         } catch (parseError) {
-            console.error('Failed to parse response:', text);
-            console.error('Parse error:', parseError);
+            aiLogger.error({
+                action: 'message_enhancement_parse_error',
+                userId: user.id,
+                responsePreview: text.substring(0, 200),
+                err: parseError instanceof Error ? parseError : new Error(String(parseError)),
+            }, 'Failed to parse Gemini message enhancement response');
 
             // Fallback: Return the text as content
             return NextResponse.json({
@@ -86,9 +120,14 @@ export async function POST(request: NextRequest) {
             messageData.content = messageData.content || text || "Please review and pay your outstanding invoice.";
         }
 
-        return NextResponse.json(messageData);
+        // 4. Return response with rate limit headers
+        const jsonResponse = NextResponse.json(messageData);
+        return addRateLimitHeaders(jsonResponse, rateLimitResult);
     } catch (error) {
-        console.error('Error enhancing message:', error);
+        aiLogger.error({
+            action: 'message_enhancement_error',
+            err: error instanceof Error ? error : new Error(String(error)),
+        }, 'Error enhancing message');
         return NextResponse.json(
             { error: 'Failed to enhance message' },
             { status: 500 }

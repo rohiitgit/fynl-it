@@ -27,7 +27,6 @@ function AuthCallbackContent() {
                     setMessage(error.message || 'Authentication failed')
                 } else if (data.session && data.session.user) {
                     // User is successfully signed in
-                    console.log('✅ User signed in:', data.session.user.email)
                     setStatus('success')
                     setMessage('Successfully signed in! Redirecting to your dashboard...')
 
@@ -35,7 +34,6 @@ function AuthCallbackContent() {
                         router.push('/dashboard')
                     }, 2000)
                 } else {
-                    console.log('⚠️ No session found')
                     setStatus('error')
                     setMessage('Authentication failed. Please try signing in again.')
                 }

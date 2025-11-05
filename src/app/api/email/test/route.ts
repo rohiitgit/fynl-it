@@ -1,8 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { resend, DEFAULT_FROM_EMAIL } from '@/lib/email/resend-client';
+import { supabase } from '@/lib/supabase';
+import { applyRateLimit, addRateLimitHeaders } from '@/lib/rate-limit/rate-limiter';
+import { EMAIL_RATE_LIMIT } from '@/lib/rate-limit/config';
+import { createAuthRequiredResponse } from '@/lib/rate-limit/responses';
+import { emailLogger } from '@/lib/logger';
+import { maskEmail } from '@/lib/logger/redact';
 
 export async function POST(request: NextRequest) {
   try {
+    // 1. Check authentication
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return createAuthRequiredResponse();
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return createAuthRequiredResponse();
+    }
+
+    // 2. Check rate limit
+    const rateLimitResult = await applyRateLimit(request, user.id, EMAIL_RATE_LIMIT, 'email');
+    if (rateLimitResult.response) {
+      return rateLimitResult.response; // Rate limit exceeded
+    }
+
+    // 3. Process the request
     const { testEmail } = await request.json();
 
     if (!testEmail) {
@@ -31,20 +57,30 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      console.error('Resend error:', error); // Now using the error variable
+      emailLogger.error({
+        action: 'test_email_send_failed',
+        userId: user.id,
+        recipientMasked: maskEmail(testEmail),
+        err: error instanceof Error ? error : new Error(String(error)),
+      }, 'Resend error while sending test email');
       return NextResponse.json(
         { error: error.message || 'Failed to send test email' },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({
+    // 4. Return response with rate limit headers
+    const jsonResponse = NextResponse.json({
       success: true,
       messageId: data?.id,
       message: 'Test email sent successfully',
     });
+    return addRateLimitHeaders(jsonResponse, rateLimitResult);
   } catch (error) {
-    console.error('Test email error:', error);
+    emailLogger.error({
+      action: 'test_email_api_error',
+      err: error instanceof Error ? error : new Error(String(error)),
+    }, 'Test email API error');
     return NextResponse.json(
       { error: 'Failed to send test email' },
       { status: 500 }

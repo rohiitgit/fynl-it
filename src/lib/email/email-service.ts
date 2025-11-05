@@ -1,9 +1,11 @@
-// src/lib/email/email-service.ts
+// src/lib/email/email-service.ts - With structured logging
 import { render } from '@react-email/render';
 import { resend, DEFAULT_FROM_EMAIL } from './resend-client';
 import { InvoiceReminderEmail, ThankYouEmail, type EmailTemplateProps } from './templates';
 import { supabase } from '@/lib/supabase';
 import React from 'react';
+import { emailLogger } from '@/lib/logger';
+import { maskEmail } from '@/lib/logger/redact';
 
 // Constants
 const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -30,16 +32,17 @@ class EmailService {
    * Send an invoice reminder email
    */
   async sendInvoiceReminder(params: SendEmailParams): Promise<EmailResult> {
+    const {
+      to,
+      subject,
+      invoiceId,
+      userId,
+      templateProps,
+      fromEmail = DEFAULT_FROM_EMAIL,
+      replyTo,
+    } = params;
+
     try {
-      const {
-        to,
-        subject,
-        invoiceId,
-        userId,
-        templateProps,
-        fromEmail = DEFAULT_FROM_EMAIL,
-        replyTo,
-      } = params;
 
       // Render the email template with proper React element (async in newer versions)
       const emailHtml = await render(React.createElement(InvoiceReminderEmail, templateProps));
@@ -59,7 +62,13 @@ class EmailService {
       });
 
       if (error) {
-        console.error('Resend error:', error);
+        emailLogger.error({
+          action: 'reminder_email_send_failed',
+          recipientMasked: maskEmail(to),
+          invoiceId,
+          userId,
+          err: error instanceof Error ? error : new Error(String(error)),
+        }, 'Resend error sending reminder email');
         return {
           success: false,
           error: error.message ?? 'Failed to send email',
@@ -71,7 +80,13 @@ class EmailService {
         messageId: data?.id,
       };
     } catch (error) {
-      console.error('Email service error:', error);
+      emailLogger.error({
+        action: 'reminder_email_service_error',
+        recipientMasked: maskEmail(to),
+        invoiceId,
+        userId,
+        err: error instanceof Error ? error : new Error(String(error)),
+      }, 'Email service error sending reminder');
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -83,16 +98,17 @@ class EmailService {
    * Send a thank you email for payment received
    */
   async sendThankYouEmail(params: SendEmailParams): Promise<EmailResult> {
+    const {
+      to,
+      subject,
+      invoiceId,
+      userId,
+      templateProps,
+      fromEmail = DEFAULT_FROM_EMAIL,
+      replyTo,
+    } = params;
+
     try {
-      const {
-        to,
-        subject,
-        invoiceId,
-        userId,
-        templateProps,
-        fromEmail = DEFAULT_FROM_EMAIL,
-        replyTo,
-      } = params;
 
       // Render the email template with proper React element (async in newer versions)
       const emailHtml = await render(React.createElement(ThankYouEmail, templateProps));
@@ -112,7 +128,13 @@ class EmailService {
       });
 
       if (error) {
-        console.error('Resend error:', error);
+        emailLogger.error({
+          action: 'thank_you_email_send_failed',
+          recipientMasked: maskEmail(to),
+          invoiceId,
+          userId,
+          err: error instanceof Error ? error : new Error(String(error)),
+        }, 'Resend error sending thank you email');
         return {
           success: false,
           error: error.message ?? 'Failed to send email',
@@ -124,7 +146,13 @@ class EmailService {
         messageId: data?.id,
       };
     } catch (error) {
-      console.error('Email service error:', error);
+      emailLogger.error({
+        action: 'thank_you_email_service_error',
+        recipientMasked: maskEmail(to),
+        invoiceId,
+        userId,
+        err: error instanceof Error ? error : new Error(String(error)),
+      }, 'Email service error sending thank you email');
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -269,7 +297,11 @@ async sendFollowUpEmail(followUpId: string): Promise<EmailResult> {
 
     return result;
   } catch (error) {
-    console.error('Error sending follow-up email:', error);
+    emailLogger.error({
+      action: 'follow_up_email_error',
+      followUpId,
+      err: error instanceof Error ? error : new Error(String(error)),
+    }, 'Error sending follow-up email');
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

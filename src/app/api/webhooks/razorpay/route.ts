@@ -1,22 +1,13 @@
-// src/app/api/webhooks/razorpay/route.ts - TypeScript Compliant Version
+// src/app/api/webhooks/razorpay/route.ts - With structured logging
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import crypto from 'crypto';
+import { applyRateLimit } from '@/lib/rate-limit/rate-limiter';
+import { WEBHOOK_RATE_LIMIT } from '@/lib/rate-limit/config';
+import { paymentLogger, securityLogger } from '@/lib/logger';
+import { maskEmail } from '@/lib/logger/redact';
 
 export const runtime = 'nodejs';
-
-
-// Use service role key for server-side operations
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-);
 
 interface RazorpayCard {
   network: string;
@@ -100,13 +91,16 @@ function verifyRazorpaySignature(
       .createHmac('sha256', secret)
       .update(body)
       .digest('hex');
-    
+
     return crypto.timingSafeEqual(
       Buffer.from(signature, 'utf8'),
       Buffer.from(expectedSignature, 'utf8')
     );
   } catch (error) {
-    console.error('Signature verification error:', error);
+    securityLogger.error({
+      action: 'signature_verification_error',
+      err: error instanceof Error ? error : new Error(String(error)),
+    }, 'Webhook signature verification failed');
     return false;
   }
 }
@@ -153,21 +147,34 @@ function getPaymentMethodDetails(payment: RazorpayPaymentEntity): PaymentMethodD
 
 async function handlePaymentCaptured(event: RazorpayPaymentEvent): Promise<ProcessResult> {
   const payment = event.payload.payment.entity;
-  console.log(`💳 Payment captured: ${payment.id} for amount ₹${payment.amount/100} via ${payment.method || 'unknown'}`);
+  const paymentMethod = detectPaymentMethod(payment);
+
+  paymentLogger.info({
+    action: 'payment_captured',
+    paymentId: payment.id,
+    amount: payment.amount / 100,
+    currency: payment.currency,
+    method: paymentMethod,
+  }, 'Payment captured from Razorpay');
 
   // Find the invoice using payment metadata
   let invoice = null;
-  
+
   // Try to find invoice by notes (custom fields)
   if (payment.notes?.invoice_id) {
-    console.log(`🔍 Looking for invoice: ${payment.notes.invoice_id}`);
+    paymentLogger.debug({
+      action: 'invoice_lookup_by_id',
+      invoiceId: payment.notes.invoice_id,
+      paymentId: payment.id,
+    }, 'Looking for invoice by ID');
+
     const { data, error } = await supabaseAdmin
       .from('invoices')
       .select('*')
       .eq('id', payment.notes.invoice_id)
       .eq('status', 'pending')
       .single();
-    
+
     if (!error && data) {
       invoice = data;
     }
@@ -175,14 +182,19 @@ async function handlePaymentCaptured(event: RazorpayPaymentEvent): Promise<Proce
 
   // Fallback: Try to find by Razorpay link ID
   if (!invoice && payment.notes?.razorpay_link_id) {
-    console.log(`🔍 Looking for invoice by link ID: ${payment.notes.razorpay_link_id}`);
+    paymentLogger.debug({
+      action: 'invoice_lookup_by_link',
+      razorpayLinkId: payment.notes.razorpay_link_id,
+      paymentId: payment.id,
+    }, 'Looking for invoice by payment link ID');
+
     const { data, error } = await supabaseAdmin
       .from('invoices')
       .select('*')
       .eq('razorpay_link_id', payment.notes.razorpay_link_id)
       .eq('status', 'pending')
       .single();
-    
+
     if (!error && data) {
       invoice = data;
     }
@@ -190,7 +202,13 @@ async function handlePaymentCaptured(event: RazorpayPaymentEvent): Promise<Proce
 
   // Fallback: Try to find by amount and email
   if (!invoice) {
-    console.log(`🔍 Searching by amount (₹${payment.amount/100}) and email (${payment.email})`);
+    paymentLogger.debug({
+      action: 'invoice_lookup_by_amount_email',
+      amount: payment.amount / 100,
+      emailMasked: maskEmail(payment.email),
+      paymentId: payment.id,
+    }, 'Searching for invoice by amount and email');
+
     const { data, error } = await supabaseAdmin
       .from('invoices')
       .select('*')
@@ -206,19 +224,28 @@ async function handlePaymentCaptured(event: RazorpayPaymentEvent): Promise<Proce
   }
 
   if (!invoice) {
-    console.log(`⚠️ No matching invoice found for payment ${payment.id}`);
+    paymentLogger.warn({
+      action: 'invoice_not_found',
+      paymentId: payment.id,
+      amount: payment.amount / 100,
+      emailMasked: maskEmail(payment.email),
+    }, 'No matching invoice found for payment');
     return {
       success: false,
       message: 'Payment received but no matching invoice found',
-      payment_id: payment.id 
+      payment_id: payment.id
     };
   }
 
-  console.log(`✅ Found matching invoice: ${invoice.invoice_number}`);
+  paymentLogger.info({
+    action: 'invoice_matched',
+    invoiceId: invoice.id,
+    invoiceNumber: invoice.invoice_number,
+    paymentId: payment.id,
+  }, 'Successfully matched payment to invoice');
 
   // Get payment method details
   const paymentDetails = getPaymentMethodDetails(payment);
-  const paymentMethod = paymentDetails.method;
 
   // Update invoice status to paid with enhanced fields
   const { error: updateError } = await supabaseAdmin
@@ -234,7 +261,12 @@ async function handlePaymentCaptured(event: RazorpayPaymentEvent): Promise<Proce
     .eq('id', invoice.id);
 
   if (updateError) {
-    console.error('❌ Failed to update invoice:', updateError);
+    paymentLogger.error({
+      action: 'invoice_update_failed',
+      invoiceId: invoice.id,
+      paymentId: payment.id,
+      err: updateError,
+    }, 'Failed to update invoice status to paid');
     throw new Error('Failed to update invoice');
   }
 
@@ -246,9 +278,16 @@ async function handlePaymentCaptured(event: RazorpayPaymentEvent): Promise<Proce
     .eq('status', 'scheduled');
 
   if (cancelError) {
-    console.error('⚠️ Failed to cancel follow-ups:', cancelError);
+    paymentLogger.error({
+      action: 'followups_cancel_failed',
+      invoiceId: invoice.id,
+      err: cancelError,
+    }, 'Failed to cancel follow-ups');
   } else {
-    console.log('🛑 Cancelled pending follow-ups');
+    paymentLogger.info({
+      action: 'followups_cancelled',
+      invoiceId: invoice.id,
+    }, 'Cancelled pending follow-ups');
   }
 
   // Log the payment event with enhanced details
@@ -261,19 +300,29 @@ async function handlePaymentCaptured(event: RazorpayPaymentEvent): Promise<Proce
       amount: payment.amount / 100,
       currency: payment.currency,
       status: 'processed',
-      payment_method: paymentMethod,
-      webhook_data: {
+      payment_method: paymentDetails.method,
+      webhook_data: JSON.parse(JSON.stringify({
         event_data: event,
         payment_details: paymentDetails,
         fees: {
           fee: payment.fee ? payment.fee / 100 : 0,
           tax: payment.tax ? payment.tax / 100 : 0
         }
-      }
+      }))
     });
-    console.log(`📊 Payment event logged with method: ${paymentMethod}`);
+    paymentLogger.debug({
+      action: 'payment_event_logged',
+      invoiceId: invoice.id,
+      paymentId: payment.id,
+      method: paymentDetails.method,
+    }, 'Payment event logged to database');
   } catch (logError) {
-    console.error('⚠️ Failed to log payment event:', logError);
+    paymentLogger.error({
+      action: 'payment_event_log_failed',
+      invoiceId: invoice.id,
+      paymentId: payment.id,
+      err: logError instanceof Error ? logError : new Error(String(logError)),
+    }, 'Failed to log payment event');
     // Don't fail the webhook for logging issues
   }
 
@@ -286,10 +335,20 @@ async function handlePaymentCaptured(event: RazorpayPaymentEvent): Promise<Proce
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ invoiceId: invoice.id })
-      }).catch(err => console.error('Thank you email failed:', err));
+      }).catch(err => {
+        paymentLogger.error({
+          action: 'thank_you_email_failed',
+          invoiceId: invoice.id,
+          err: err instanceof Error ? err : new Error(String(err)),
+        }, 'Thank you email API call failed');
+      });
     }
   } catch (emailError) {
-    console.error('⚠️ Thank you email trigger failed:', emailError);
+    paymentLogger.error({
+      action: 'thank_you_email_trigger_failed',
+      invoiceId: invoice.id,
+      err: emailError instanceof Error ? emailError : new Error(String(emailError)),
+    }, 'Thank you email trigger failed');
   }
 
   return {
@@ -297,14 +356,20 @@ async function handlePaymentCaptured(event: RazorpayPaymentEvent): Promise<Proce
     message: 'Payment processed successfully',
     invoice_id: invoice.id,
     payment_id: payment.id,
-    payment_method: paymentMethod,
+    payment_method: paymentDetails.method,
     amount: payment.amount / 100
   };
 }
 
 async function handlePaymentLinkEvent(event: RazorpayPaymentLinkEvent): Promise<ProcessResult> {
   const paymentLink = event.payload.payment_link.entity;
-  console.log(`🔗 Payment link event: ${event.event} for link ${paymentLink.id}`);
+
+  paymentLogger.info({
+    action: 'payment_link_event',
+    event: event.event,
+    linkId: paymentLink.id,
+    status: paymentLink.status,
+  }, 'Payment link event received');
 
   // Handle payment link specific events
   if (event.event === 'payment_link.paid') {
@@ -316,46 +381,80 @@ async function handlePaymentLinkEvent(event: RazorpayPaymentLinkEvent): Promise<
       .single();
 
     if (error || !invoice) {
-      console.log(`⚠️ No invoice found for payment link ${paymentLink.id}`);
+      paymentLogger.warn({
+        action: 'payment_link_invoice_not_found',
+        linkId: paymentLink.id,
+      }, 'No invoice found for payment link');
       return { success: false, message: 'Invoice not found for payment link' };
     }
 
     // The actual payment details will come via payment.captured event
     // This is just for tracking link usage
-    console.log(`✅ Payment link ${paymentLink.id} was used for invoice ${invoice.invoice_number}`);
+    paymentLogger.info({
+      action: 'payment_link_used',
+      linkId: paymentLink.id,
+      invoiceId: invoice.id,
+      invoiceNumber: invoice.invoice_number,
+    }, 'Payment link was successfully used');
   }
 
   return { success: true, message: 'Payment link event processed' };
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  try {
-    console.log('🔔 Razorpay webhook received');
+  const startTime = Date.now();
 
-    // Get the raw body and signature
+  try {
+    paymentLogger.info({
+      action: 'webhook_received',
+      ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+    }, 'Razorpay webhook received');
+
+    // 1. Check rate limit first (by IP, no user authentication for webhooks)
+    const rateLimitResult = await applyRateLimit(request, null, WEBHOOK_RATE_LIMIT, 'webhook');
+    if (rateLimitResult.response) {
+      securityLogger.warn({
+        action: 'webhook_rate_limit_exceeded',
+        ip: request.headers.get('x-forwarded-for') || 'unknown',
+      }, 'Webhook rate limit exceeded');
+      return rateLimitResult.response; // Rate limit exceeded
+    }
+
+    // 2. Get the raw body and signature
     const body = await request.text();
     const signature = request.headers.get('x-razorpay-signature');
 
     if (!signature) {
-      console.error('❌ Missing Razorpay signature');
+      securityLogger.error({
+        action: 'webhook_missing_signature',
+      }, 'Webhook missing Razorpay signature');
       return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
     }
 
-    // Verify webhook signature
+    // 3. Verify webhook signature (primary security check)
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
     if (!webhookSecret) {
-      console.error('❌ Missing RAZORPAY_WEBHOOK_SECRET');
+      securityLogger.error({
+        action: 'webhook_secret_not_configured',
+      }, 'RAZORPAY_WEBHOOK_SECRET not configured');
       return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
     }
 
     if (!verifyRazorpaySignature(body, signature, webhookSecret)) {
-      console.error('❌ Invalid Razorpay signature');
+      securityLogger.error({
+        action: 'webhook_invalid_signature',
+        ip: request.headers.get('x-forwarded-for') || 'unknown',
+      }, 'Invalid Razorpay webhook signature');
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
     // Parse the webhook payload
     const event: RazorpayPaymentEvent | RazorpayPaymentLinkEvent = JSON.parse(body);
-    console.log(`📥 Processing event: ${event.event}`);
+
+    paymentLogger.info({
+      action: 'webhook_event_processing',
+      event: event.event,
+    }, 'Processing Razorpay webhook event');
 
     let result: ProcessResult;
 
@@ -364,30 +463,51 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       case 'payment.captured':
         result = await handlePaymentCaptured(event as RazorpayPaymentEvent);
         break;
-      
+
       case 'payment_link.paid':
       case 'payment_link.cancelled':
       case 'payment_link.expired':
         result = await handlePaymentLinkEvent(event as RazorpayPaymentLinkEvent);
         break;
-      
+
       default:
-        console.log(`ℹ️ Ignoring event: ${event.event}`);
+        paymentLogger.debug({
+          action: 'webhook_event_ignored',
+          event: event.event,
+        }, 'Webhook event ignored (not handled)');
         return NextResponse.json({ message: `Event ${event.event} ignored` });
     }
 
+    const duration = Date.now() - startTime;
+
     if (result.success) {
-      console.log(`🎉 Event processing completed: ${event.event}`);
+      paymentLogger.info({
+        action: 'webhook_processing_completed',
+        event: event.event,
+        duration,
+        paymentId: result.payment_id,
+        invoiceId: result.invoice_id,
+      }, 'Webhook event processing completed successfully');
       return NextResponse.json(result);
     } else {
-      console.log(`⚠️ Event processing failed: ${result.message}`);
+      paymentLogger.warn({
+        action: 'webhook_processing_failed',
+        event: event.event,
+        duration,
+        message: result.message,
+      }, 'Webhook event processing failed');
       return NextResponse.json(result, { status: 200 }); // Return 200 to avoid retries
     }
 
   } catch (error) {
-    console.error('💥 Webhook processing error:', error);
+    const duration = Date.now() - startTime;
+    paymentLogger.error({
+      action: 'webhook_processing_error',
+      duration,
+      err: error instanceof Error ? error : new Error(String(error)),
+    }, 'Webhook processing error');
     return NextResponse.json(
-      { 
+      {
         error: 'Webhook processing failed',
         details: error instanceof Error ? error.message : 'Unknown error'
       },

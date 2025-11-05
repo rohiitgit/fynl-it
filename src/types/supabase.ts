@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -148,6 +148,7 @@ export type Database = {
       invoices: {
         Row: {
           amount: number
+          auto_detected: boolean | null
           client_email: string
           client_name: string
           created_at: string
@@ -156,14 +157,25 @@ export type Database = {
           due_date: string
           id: string
           invoice_number: string
+          is_legacy: boolean | null
           paid_at: string | null
+          payment_instructions: string | null
           payment_link: string | null
+          payment_method_source: string | null
+          payment_provider: string | null
+          payment_reference: string | null
+          qr_code_url: string | null
+          razorpay_link_id: string | null
+          razorpay_payment_id: string | null
           status: string
           updated_at: string
+          upi_link: string | null
           user_id: string
+          user_payment_details: string | null
         }
         Insert: {
           amount: number
+          auto_detected?: boolean | null
           client_email: string
           client_name: string
           created_at?: string
@@ -172,14 +184,25 @@ export type Database = {
           due_date: string
           id?: string
           invoice_number: string
+          is_legacy?: boolean | null
           paid_at?: string | null
+          payment_instructions?: string | null
           payment_link?: string | null
+          payment_method_source?: string | null
+          payment_provider?: string | null
+          payment_reference?: string | null
+          qr_code_url?: string | null
+          razorpay_link_id?: string | null
+          razorpay_payment_id?: string | null
           status?: string
           updated_at?: string
+          upi_link?: string | null
           user_id: string
+          user_payment_details?: string | null
         }
         Update: {
           amount?: number
+          auto_detected?: boolean | null
           client_email?: string
           client_name?: string
           created_at?: string
@@ -188,13 +211,76 @@ export type Database = {
           due_date?: string
           id?: string
           invoice_number?: string
+          is_legacy?: boolean | null
           paid_at?: string | null
+          payment_instructions?: string | null
           payment_link?: string | null
+          payment_method_source?: string | null
+          payment_provider?: string | null
+          payment_reference?: string | null
+          qr_code_url?: string | null
+          razorpay_link_id?: string | null
+          razorpay_payment_id?: string | null
           status?: string
           updated_at?: string
+          upi_link?: string | null
           user_id?: string
+          user_payment_details?: string | null
         }
         Relationships: []
+      }
+      payment_events: {
+        Row: {
+          amount: number | null
+          created_at: string
+          currency: string | null
+          event_type: string
+          external_payment_id: string
+          id: string
+          invoice_id: string | null
+          payment_method: string | null
+          payment_provider: string
+          processed_at: string
+          status: string
+          webhook_data: Json | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          event_type: string
+          external_payment_id: string
+          id?: string
+          invoice_id?: string | null
+          payment_method?: string | null
+          payment_provider: string
+          processed_at?: string
+          status: string
+          webhook_data?: Json | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          event_type?: string
+          external_payment_id?: string
+          id?: string
+          invoice_id?: string | null
+          payment_method?: string | null
+          payment_provider?: string
+          processed_at?: string
+          status?: string
+          webhook_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_events_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -271,23 +357,43 @@ export type Database = {
       invoice_analytics: {
         Row: {
           avg_days_to_payment: number | null
+          direct_payment_amount: number | null
+          direct_payment_invoices: number | null
           overdue_invoices: number | null
           paid_amount: number | null
           paid_invoices: number | null
           pending_amount: number | null
           pending_invoices: number | null
+          platform_payment_amount: number | null
+          platform_payment_invoices: number | null
           total_amount: number | null
           total_invoices: number | null
           user_id: string | null
         }
         Relationships: []
       }
+      upi_payment_analytics: {
+        Row: {
+          avg_hours_to_payment: number | null
+          paid_upi_amount: number | null
+          paid_upi_invoices: number | null
+          total_upi_amount: number | null
+          total_upi_invoices: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      update_overdue_invoices: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
+      get_payment_details_for_invoice: {
+        Args: { invoice_row: Database["public"]["Tables"]["invoices"]["Row"] }
+        Returns: string
       }
+      is_direct_payment: {
+        Args: { invoice_row: Database["public"]["Tables"]["invoices"]["Row"] }
+        Returns: boolean
+      }
+      update_overdue_invoices: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

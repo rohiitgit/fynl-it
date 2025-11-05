@@ -1,23 +1,34 @@
-// src/app/api/payments/create-link/route.ts
+// src/app/api/payments/create-link/route.ts - With structured logging
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { razorpayUPIService } from '@/lib/payments/razorpay-upi';
+import { applyRateLimit, addRateLimitHeaders } from '@/lib/rate-limit/rate-limiter';
+import { PAYMENT_RATE_LIMIT } from '@/lib/rate-limit/config';
+import { createAuthRequiredResponse } from '@/lib/rate-limit/responses';
+import { paymentLogger, databaseLogger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
     try {
-        // Get current user
+        // 1. Check authentication
         const authHeader = request.headers.get('authorization');
         if (!authHeader) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+            return createAuthRequiredResponse();
         }
 
         const token = authHeader.replace('Bearer ', '');
         const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
         if (authError || !user) {
-            return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+            return createAuthRequiredResponse();
         }
 
+        // 2. Check rate limit
+        const rateLimitResult = await applyRateLimit(request, user.id, PAYMENT_RATE_LIMIT, 'payment');
+        if (rateLimitResult.response) {
+            return rateLimitResult.response; // Rate limit exceeded
+        }
+
+        // 3. Process the request
         const { invoiceId } = await request.json();
 
         if (!invoiceId) {
@@ -69,11 +80,17 @@ export async function POST(request: NextRequest) {
             .eq('id', invoiceId);
 
         if (updateError) {
-            console.error('Failed to update invoice with payment link:', updateError);
+            databaseLogger.error({
+                action: 'invoice_payment_link_update_failed',
+                invoiceId,
+                userId: user.id,
+                err: updateError,
+            }, 'Failed to update invoice with payment link');
             // Don't fail the request, payment link is still created
         }
 
-        return NextResponse.json({
+        // 4. Return response with rate limit headers
+        const jsonResponse = NextResponse.json({
             success: true,
             paymentLink: {
                 id: paymentLink.id,
@@ -82,9 +99,13 @@ export async function POST(request: NextRequest) {
                 qr_code: paymentLink.qr_code
             }
         });
+        return addRateLimitHeaders(jsonResponse, rateLimitResult);
 
     } catch (error) {
-        console.error('Error creating payment link:', error);
+        paymentLogger.error({
+            action: 'payment_link_api_error',
+            err: error instanceof Error ? error : new Error(String(error)),
+        }, 'Error creating payment link');
         return NextResponse.json(
             { error: 'Failed to create payment link' },
             { status: 500 }

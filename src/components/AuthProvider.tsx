@@ -54,11 +54,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (isProtectedRoute) {
       if (!currentUser || !currentSession) {
-        console.log('Redirecting to auth - user not authenticated')
         router.replace('/auth')
       }
     } else if (isAuthRoute && currentUser) {
-      console.log('Redirecting to dashboard - user already authenticated')
       router.replace('/dashboard')
     }
   }, [isProtectedRoute, isAuthRoute, isCallbackRoute, router, initialized])
@@ -66,8 +64,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initialize auth state
   const initializeAuth = useCallback(async () => {
     try {
-      console.log('🔐 Initializing auth state...')
-
       // Get initial session
       const { data: { session: initialSession }, error } = await supabase.auth.getSession()
 
@@ -76,7 +72,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null)
         setSession(null)
       } else {
-        console.log('Initial session:', initialSession?.user?.email || 'No session')
         setSession(initialSession)
         setUser(initialSession?.user ?? null)
 
@@ -85,7 +80,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           try {
             // Test the session with a simple call
             await supabase.from('profiles').select('id').limit(1)
-            console.log('✅ Session validated successfully')
           } catch (validationError) {
             console.warn('⚠️ Session validation failed, but continuing:', validationError)
           }
@@ -114,7 +108,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (refreshedSession) {
         setSession(refreshedSession)
         setUser(refreshedSession.user)
-        console.log('Session refreshed successfully')
       }
     } catch (error) {
       console.error('Session refresh error:', error)
@@ -148,8 +141,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
-        console.log(`🔄 Auth state changed: ${event}`, newSession?.user?.email || 'No user')
-
         // Update state
         setSession(newSession)
         setUser(newSession?.user ?? null)
@@ -157,22 +148,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Handle specific events
         switch (event) {
-          case 'SIGNED_IN':
-            console.log('✅ User signed in:', newSession?.user?.email)
-            break
           case 'SIGNED_OUT':
-            console.log('👋 User signed out')
             setUser(null)
             setSession(null)
-            break
-          case 'TOKEN_REFRESHED':
-            console.log('🔄 Token refreshed for:', newSession?.user?.email)
-            break
-          case 'PASSWORD_RECOVERY':
-            console.log('🔑 Password recovery initiated')
-            break
-          case 'USER_UPDATED':
-            console.log('👤 User updated:', newSession?.user?.email)
             break
         }
       }

@@ -1,5 +1,7 @@
-// src/lib/payments/razorpay-upi.ts - Fixed ESLint warnings
+// src/lib/payments/razorpay-upi.ts - With structured logging
 import Razorpay from 'razorpay';
+import { paymentLogger } from '@/lib/logger';
+import { maskEmail } from '@/lib/logger/redact';
 
 // Environment validation
 if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
@@ -133,7 +135,12 @@ export class RazorpayUPIService {
                 },
             };
 
-            console.log('Creating Razorpay payment link for invoice:', data.invoiceId);
+            paymentLogger.info({
+                action: 'payment_link_creating',
+                invoiceId: data.invoiceId,
+                amount: data.amount,
+                clientEmailMasked: maskEmail(data.clientEmail),
+            }, 'Creating Razorpay payment link for invoice');
 
             const paymentLink = await razorpay.paymentLink.create(paymentLinkData) as unknown as RazorpayPaymentLinkResponse;
 
@@ -161,11 +168,20 @@ export class RazorpayUPIService {
                     : paymentLink.created_at,
             };
 
-            console.log('Successfully created payment link:', response.id);
+            paymentLogger.info({
+                action: 'payment_link_created',
+                paymentLinkId: response.id,
+                invoiceId: data.invoiceId,
+                status: response.status,
+            }, 'Successfully created payment link');
             return response;
 
         } catch (error) {
-            console.error('Error creating UPI payment link:', error);
+            paymentLogger.error({
+                action: 'payment_link_creation_error',
+                invoiceId: data.invoiceId,
+                err: error instanceof Error ? error : new Error(String(error)),
+            }, 'Error creating UPI payment link');
 
             if (this.isRazorpayError(error)) {
                 const rzpError = error as RazorpayError;
@@ -193,7 +209,10 @@ export class RazorpayUPIService {
                 throw new RazorpayUPIError('Invalid payment link ID', 'INVALID_ID');
             }
 
-            console.log('Fetching payment link:', paymentLinkId);
+            paymentLogger.debug({
+                action: 'payment_link_fetching',
+                paymentLinkId,
+            }, 'Fetching payment link');
 
             const result = await razorpay.paymentLink.fetch(paymentLinkId) as unknown as RazorpayPaymentLinkResponse;
 
@@ -204,7 +223,11 @@ export class RazorpayUPIService {
             return result;
 
         } catch (error) {
-            console.error('Error fetching payment link:', error);
+            paymentLogger.error({
+                action: 'payment_link_fetch_error',
+                paymentLinkId,
+                err: error instanceof Error ? error : new Error(String(error)),
+            }, 'Error fetching payment link');
 
             if (this.isRazorpayError(error)) {
                 const rzpError = error as RazorpayError;
@@ -232,7 +255,10 @@ export class RazorpayUPIService {
                 throw new RazorpayUPIError('Invalid payment link ID', 'INVALID_ID');
             }
 
-            console.log('Cancelling payment link:', paymentLinkId);
+            paymentLogger.info({
+                action: 'payment_link_cancelling',
+                paymentLinkId,
+            }, 'Cancelling payment link');
 
             const result = await razorpay.paymentLink.cancel(paymentLinkId) as unknown as RazorpayPaymentLinkResponse;
 
@@ -240,11 +266,19 @@ export class RazorpayUPIService {
                 throw new RazorpayUPIError('Failed to cancel payment link', 'CANCEL_FAILED');
             }
 
-            console.log('Successfully cancelled payment link:', paymentLinkId);
+            paymentLogger.info({
+                action: 'payment_link_cancelled',
+                paymentLinkId,
+                status: result.status,
+            }, 'Successfully cancelled payment link');
             return result;
 
         } catch (error) {
-            console.error('Error cancelling payment link:', error);
+            paymentLogger.error({
+                action: 'payment_link_cancel_error',
+                paymentLinkId,
+                err: error instanceof Error ? error : new Error(String(error)),
+            }, 'Error cancelling payment link');
 
             if (this.isRazorpayError(error)) {
                 const rzpError = error as RazorpayError;
@@ -281,12 +315,20 @@ export class RazorpayUPIService {
             upiUrl.searchParams.set('tn', transactionNote || `Payment for Invoice ${invoiceNumber}`); // Transaction note
 
             const upiLink = upiUrl.toString();
-            console.log('Generated direct UPI link for invoice:', invoiceNumber);
+            paymentLogger.debug({
+                action: 'direct_upi_link_generated',
+                invoiceNumber,
+                amount,
+            }, 'Generated direct UPI link for invoice');
 
             return upiLink;
 
         } catch (error) {
-            console.error('Error creating direct UPI link:', error);
+            paymentLogger.error({
+                action: 'direct_upi_link_error',
+                invoiceNumber: data.invoiceNumber,
+                err: error instanceof Error ? error : new Error(String(error)),
+            }, 'Error creating direct UPI link');
             throw new RazorpayUPIError('Failed to create direct UPI link', 'DIRECT_UPI_ERROR');
         }
     }
@@ -301,7 +343,11 @@ export class RazorpayUPIService {
             }
 
             if (size < 100 || size > 500) {
-                console.warn('QR code size should be between 100-500px, using default:', this.defaultQRSize);
+                paymentLogger.warn({
+                    action: 'qr_code_size_adjusted',
+                    requestedSize: size,
+                    defaultSize: this.defaultQRSize,
+                }, 'QR code size should be between 100-500px, using default');
                 size = this.defaultQRSize;
             }
 
@@ -309,7 +355,10 @@ export class RazorpayUPIService {
             return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodedUpiLink}&format=png&margin=10`;
 
         } catch (error) {
-            console.error('Error generating QR code:', error);
+            paymentLogger.error({
+                action: 'qr_code_generation_error',
+                err: error instanceof Error ? error : new Error(String(error)),
+            }, 'Error generating QR code');
             throw new RazorpayUPIError('Failed to generate QR code', 'QR_GENERATION_ERROR');
         }
     }
@@ -346,7 +395,11 @@ export class RazorpayUPIService {
             };
 
         } catch (error) {
-            console.error('Error getting payment status:', error);
+            paymentLogger.error({
+                action: 'payment_status_check_error',
+                paymentLinkId,
+                err: error instanceof Error ? error : new Error(String(error)),
+            }, 'Error getting payment status');
             throw new RazorpayUPIError('Failed to get payment status', 'STATUS_CHECK_ERROR');
         }
     }
@@ -374,7 +427,11 @@ export class RazorpayUPIService {
             return await this.createUPIPaymentLink(advancedData);
 
         } catch (error) {
-            console.error('Error creating advanced UPI link:', error);
+            paymentLogger.error({
+                action: 'advanced_upi_link_error',
+                invoiceId: data.invoiceId,
+                err: error instanceof Error ? error : new Error(String(error)),
+            }, 'Error creating advanced UPI link');
             if (error instanceof RazorpayUPIError) {
                 throw error;
             }
@@ -479,7 +536,10 @@ export class RazorpayUPIService {
                 timestamp: new Date().toISOString(),
             };
         } catch (error) {
-            console.error('Razorpay health check failed:', error);
+            paymentLogger.error({
+                action: 'razorpay_health_check_failed',
+                err: error instanceof Error ? error : new Error(String(error)),
+            }, 'Razorpay health check failed');
             return {
                 status: 'unhealthy',
                 razorpay_connected: false,

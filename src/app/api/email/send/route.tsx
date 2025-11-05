@@ -1,8 +1,10 @@
-// src/app/api/email/send/route.tsx - Modern JSX approach (note .tsx extension)
+// src/app/api/email/send/route.tsx - Modern JSX approach with structured logging
 import { NextRequest, NextResponse } from 'next/server';
 import { render } from '@react-email/render';
 import { resend, DEFAULT_FROM_EMAIL } from '@/lib/email/resend-client';
 import { InvoiceReminderEmail, ThankYouEmail } from '@/lib/email/templates';
+import { emailLogger } from '@/lib/logger';
+import { maskEmail } from '@/lib/logger/redact';
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,7 +52,12 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      console.error('Resend error:', error);
+      emailLogger.error({
+        action: 'email_send_failed',
+        recipientMasked: maskEmail(to),
+        emailType: type,
+        err: error instanceof Error ? error : new Error(String(error)),
+      }, 'Resend error while sending email');
       return NextResponse.json(
         { error: error.message || 'Failed to send email' },
         { status: 500 }
@@ -63,7 +70,10 @@ export async function POST(request: NextRequest) {
       message: 'Email sent successfully',
     });
   } catch (error) {
-    console.error('Email API error:', error);
+    emailLogger.error({
+      action: 'email_api_error',
+      err: error instanceof Error ? error : new Error(String(error)),
+    }, 'Email API error');
     return NextResponse.json(
       { error: 'Failed to send email' },
       { status: 500 }

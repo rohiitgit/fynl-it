@@ -1,8 +1,9 @@
-// src/app/api/scheduler/send-due-emails/route.ts
+// src/app/api/scheduler/send-due-emails/route.ts - With structured logging
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import { emailService } from '@/lib/email/email-service';
-import type { Database } from '@/types/supabase';
+import { schedulerLogger, emailLogger } from '@/lib/logger';
+import { maskEmail } from '@/lib/logger/redact';
 
 export const runtime = 'nodejs';
 
@@ -39,27 +40,22 @@ interface ProcessingResult {
     error?: string;
 }
 
-// Use service role key for server-side operations
-const supabaseAdmin = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-        auth: {
-            autoRefreshToken: false,
-            persistSession: false
-        }
-    }
-);
-
 export async function POST(request: NextRequest) {
+    const startTime = Date.now();
+
     try {
         // Simple API key authentication
         const authHeader = request.headers.get('authorization');
         if (authHeader !== `Bearer ${process.env.SCHEDULER_API_KEY}`) {
+            schedulerLogger.warn({
+                action: 'scheduler_unauthorized',
+            }, 'Unauthorized scheduler API request');
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        console.log('🕐 Starting scheduled email check...');
+        schedulerLogger.info({
+            action: 'scheduler_job_started',
+        }, 'Starting scheduled email check');
 
         // Get all follow-ups that are due to be sent
         const now = new Date();
@@ -87,7 +83,10 @@ export async function POST(request: NextRequest) {
             .order('scheduled_for', { ascending: true });
 
         if (error) {
-            console.error('Error fetching due follow-ups:', error);
+            schedulerLogger.error({
+                action: 'scheduler_db_error',
+                err: error,
+            }, 'Failed to fetch due follow-ups');
             return NextResponse.json({ error: 'Database error' }, { status: 500 });
         }
 
@@ -98,7 +97,12 @@ export async function POST(request: NextRequest) {
         })).filter(item => item.invoices) as FollowUpWithInvoice[];
 
         if (dueFollowUps.length === 0) {
-            console.log('✅ No emails due to be sent');
+            const duration = Date.now() - startTime;
+            schedulerLogger.info({
+                action: 'scheduler_job_completed',
+                duration,
+                processed: 0,
+            }, 'No emails due to be sent');
             return NextResponse.json({
                 success: true,
                 message: 'No emails due',
@@ -106,7 +110,10 @@ export async function POST(request: NextRequest) {
             });
         }
 
-        console.log(`📧 Found ${dueFollowUps.length} emails to send`);
+        schedulerLogger.info({
+            action: 'scheduler_emails_found',
+            count: dueFollowUps.length,
+        }, `Found ${dueFollowUps.length} emails to send`);
 
         const results: ProcessingResult[] = [];
         let successCount = 0;
@@ -115,13 +122,24 @@ export async function POST(request: NextRequest) {
         // Process each due follow-up
         for (const followUp of dueFollowUps) {
             try {
-                console.log(`Sending follow-up ${followUp.id} for invoice ${followUp.invoice_id} to ${followUp.invoices.client_email}`);
+                emailLogger.info({
+                    action: 'scheduler_sending_email',
+                    followUpId: followUp.id,
+                    invoiceId: followUp.invoice_id,
+                    emailType: followUp.email_type,
+                    recipientMasked: maskEmail(followUp.invoices.client_email),
+                }, 'Sending scheduled follow-up email');
 
                 const result: EmailResult = await emailService.sendFollowUpEmail(followUp.id);
 
                 if (result.success) {
                     successCount++;
-                    console.log(`✅ Sent email for follow-up ${followUp.id}`);
+                    emailLogger.info({
+                        action: 'scheduler_email_sent',
+                        followUpId: followUp.id,
+                        invoiceId: followUp.invoice_id,
+                        messageId: result.messageId,
+                    }, 'Scheduled email sent successfully');
 
                     // Log the email send
                     await supabaseAdmin.from('email_logs').insert({
@@ -137,7 +155,12 @@ export async function POST(request: NextRequest) {
 
                 } else {
                     errorCount++;
-                    console.error(`❌ Failed to send follow-up ${followUp.id}:`, result.error);
+                    emailLogger.error({
+                        action: 'scheduler_email_failed',
+                        followUpId: followUp.id,
+                        invoiceId: followUp.invoice_id,
+                        error: result.error,
+                    }, 'Failed to send scheduled email');
 
                     // Log the failure
                     await supabaseAdmin.from('email_logs').insert({
@@ -166,7 +189,11 @@ export async function POST(request: NextRequest) {
             } catch (error) {
                 errorCount++;
                 const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-                console.error(`❌ Error processing follow-up ${followUp.id}:`, errorMessage);
+                emailLogger.error({
+                    action: 'scheduler_email_processing_error',
+                    followUpId: followUp.id,
+                    err: error instanceof Error ? error : new Error(String(error)),
+                }, 'Error processing scheduled follow-up');
                 results.push({
                     followUpId: followUp.id,
                     success: false,
@@ -175,7 +202,14 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        console.log(`🎉 Completed: ${successCount} sent, ${errorCount} failed`);
+        const duration = Date.now() - startTime;
+        schedulerLogger.info({
+            action: 'scheduler_job_completed',
+            duration,
+            processed: dueFollowUps.length,
+            successful: successCount,
+            failed: errorCount,
+        }, `Scheduler job completed: ${successCount} sent, ${errorCount} failed`);
 
         return NextResponse.json({
             success: true,
@@ -187,8 +221,13 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error) {
+        const duration = Date.now() - startTime;
         const errorMessage = error instanceof Error ? error.message : 'Scheduler failed';
-        console.error('Scheduler error:', errorMessage);
+        schedulerLogger.error({
+            action: 'scheduler_job_error',
+            duration,
+            err: error instanceof Error ? error : new Error(String(error)),
+        }, 'Scheduler job failed');
         return NextResponse.json(
             { error: errorMessage },
             { status: 500 }
