@@ -406,7 +406,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-4 sm:py-8 lg:px-8 lg:py-8 animate-fade-in">
+    <div className="w-full px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 max-w-7xl mx-auto animate-fade-in">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
 
           <TabsContent value="overview">

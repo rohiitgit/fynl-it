@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { DollarSign, Plus, Menu } from "lucide-react"
 import { useMobile } from "@/lib/hooks/use-mobile"
 import { mainNavItems, settingsNavItems } from "@/lib/navigation"
@@ -34,14 +34,14 @@ function SidebarContent({
   onItemClick,
 }: SidebarProps & { onItemClick?: () => void }) {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-card">
       {/* Logo Section */}
-      <div className="p-4 border-b border-border/50">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-            <DollarSign className="h-6 w-6 text-white" />
+      <div className="p-4 sm:p-5 border-b border-border/50">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+            <DollarSign className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
           </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">
+          <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">
             Fynl-It
           </span>
         </div>
@@ -49,13 +49,13 @@ function SidebarContent({
 
       {/* New Invoice Button */}
       {onNewInvoice && (
-        <div className="p-4">
+        <div className="p-4 sm:p-5">
           <Button
             variant="gradient"
-            className="w-full gap-2"
+            className="w-full gap-2 h-10 sm:h-11 text-sm sm:text-base"
             onClick={onNewInvoice}
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
             New Invoice
           </Button>
         </div>
@@ -63,9 +63,9 @@ function SidebarContent({
 
       {/* Navigation */}
       <ScrollArea className="flex-1 px-2">
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-4 sm:py-5">
           <div>
-            <h4 className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+            <h4 className="px-4 text-xs sm:text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 sm:mb-3">
               Main
             </h4>
             <SidebarNav items={mainNavItems} onItemClick={onItemClick} />
@@ -74,7 +74,7 @@ function SidebarContent({
           <Separator className="my-4 mx-4" />
 
           <div>
-            <h4 className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+            <h4 className="px-4 text-xs sm:text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 sm:mb-3">
               Settings
             </h4>
             <SidebarNav items={settingsNavItems} onItemClick={onItemClick} />
@@ -92,22 +92,33 @@ export function Sidebar({ user, onSignOut, onNewInvoice }: SidebarProps) {
   const isMobile = useMobile()
   const [open, setOpen] = useState(false)
 
+  // Close mobile menu when switching to desktop
+  useEffect(() => {
+    if (!isMobile && open) {
+      setOpen(false)
+    }
+  }, [isMobile, open])
+
   if (isMobile) {
     return (
       <>
-        {/* Mobile: Hamburger Menu */}
+        {/* Mobile/Tablet: Hamburger Menu */}
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="fixed top-4 left-4 z-40 lg:hidden"
+              className="fixed top-4 left-4 z-50 lg:hidden bg-card/80 backdrop-blur-sm hover:bg-card shadow-md"
+              aria-label="Toggle navigation menu"
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
               <span className="sr-only">Toggle navigation menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[280px] p-0">
+          <SheetContent
+            side="left"
+            className="w-[280px] sm:w-[320px] p-0 border-r border-border/50"
+          >
             <SheetHeader className="sr-only">
               <SheetTitle>Navigation Menu</SheetTitle>
             </SheetHeader>
@@ -124,7 +135,7 @@ export function Sidebar({ user, onSignOut, onNewInvoice }: SidebarProps) {
   }
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 border-r border-border/50 bg-card shadow-sm z-40">
+    <aside className="fixed left-0 top-0 h-screen w-64 border-r border-border/50 bg-card shadow-sm z-40 hidden lg:block">
       <SidebarContent
         user={user}
         onSignOut={onSignOut}

@@ -66,6 +66,8 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto lg:ml-64 bg-gradient-to-br from-background to-secondary">
+        {/* Mobile header spacing - accounts for hamburger menu */}
+        <div className="lg:hidden h-16" />
         {children}
       </main>
     </div>

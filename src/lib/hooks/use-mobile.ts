@@ -18,6 +18,17 @@ export function useMediaQuery(query: string) {
   return matches
 }
 
+// Mobile: < 1024px (matches lg breakpoint in Tailwind)
 export function useMobile() {
-  return useMediaQuery("(max-width: 768px)")
+  return useMediaQuery("(max-width: 1023px)")
+}
+
+// Tablet: 768px - 1023px
+export function useTablet() {
+  return useMediaQuery("(min-width: 768px) and (max-width: 1023px)")
+}
+
+// Desktop: >= 1024px
+export function useDesktop() {
+  return useMediaQuery("(min-width: 1024px)")
 }
