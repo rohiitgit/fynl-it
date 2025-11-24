@@ -206,8 +206,8 @@ const DynamicNavbar = () => {
                     <Link href="/dashboard">
                       <Button
                         size={isScrolled ? "sm" : "default"}
-                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-300 ease-[cubic-bezier(0.4,0.0,0.2,1)] transform-gpu hover:scale-105 active:scale-95 shadow-lg shadow-green-500/20 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0
-                          }`}
+                        variant="gradient"
+                        className="text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-300 ease-[cubic-bezier(0.4,0.0,0.2,1)] transform-gpu hover:scale-105 active:scale-95"
                       >
                         Dashboard
                       </Button>
@@ -239,8 +239,8 @@ const DynamicNavbar = () => {
                     <Link href="/auth">
                       <Button
                         size={isScrolled ? "sm" : "default"}
-                        className={`text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-300 ease-[cubic-bezier(0.4,0.0,0.2,1)] transform-gpu hover:scale-105 active:scale-95 shadow-lg shadow-green-500/20 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0
-                          }`}
+                        variant="gradient"
+                        className="text-xs sm:text-sm px-2 sm:px-3 lg:px-4 transition-all duration-300 ease-[cubic-bezier(0.4,0.0,0.2,1)] transform-gpu hover:scale-105 active:scale-95"
                       >
                         Get Started
                       </Button>
@@ -652,7 +652,8 @@ export default function HomePage() {
                     <Link href="/dashboard">
                       <Button
                         size="lg"
-                        className="w-full sm:w-auto gap-2 text-lg px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-primary/20 hover:shadow-primary/30"
+                        variant="gradient"
+                        className="w-full sm:w-auto gap-2 text-lg px-8 py-4"
                       >
                         Go to Dashboard
                         <ArrowRight className="h-5 w-5" />
@@ -665,7 +666,8 @@ export default function HomePage() {
                     <Link href="/auth">
                       <Button
                         size="lg"
-                        className="w-full sm:w-auto gap-2 text-lg px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-primary/20 hover:shadow-primary/30"
+                        variant="gradient"
+                        className="w-full sm:w-auto gap-2 text-lg px-8 py-4"
                       >
                         Get Started Free
                         <ArrowRight className="h-5 w-5" />
@@ -708,7 +710,7 @@ export default function HomePage() {
                 {user ? (
                   <div className="flex flex-col gap-4">
                     <Link href="/dashboard">
-                      <Button size="lg" className="gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-primary/20 hover:shadow-primary/30">
+                      <Button size="lg" variant="gradient" className="gap-2 text-lg px-12 py-4">
                         Go to Dashboard
                         <ArrowRight className="h-5 w-5" />
                       </Button>
@@ -718,7 +720,7 @@ export default function HomePage() {
                   <div className="flex flex-col gap-4">
                     {/* Primary CTA */}
                     <Link href="/auth">
-                      <Button size="lg" className="gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-primary/20 hover:shadow-primary/30">
+                      <Button size="lg" variant="gradient" className="gap-2 text-lg px-12 py-4">
                         Get Started Free
                         <ArrowRight className="h-5 w-5" />
                       </Button>
@@ -851,60 +853,60 @@ export default function HomePage() {
               <div className="relative order-2 lg:order-2">
                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-3 sm:space-y-4">
-                    <div className="bg-card/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg hover:shadow-primary/30 shadow-primary/20 transition-all duration-300">
+                    <div className="bg-gradient-to-br from-green-50 to-white dark:from-green-950/20 dark:to-background backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-green-200 dark:border-green-800 hover:shadow-lg hover:shadow-success shadow-success transition-all duration-300">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
-                          <Star className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                          <Star className="h-3 w-3 sm:h-4 sm:w-4 text-green-700 dark:text-green-300" />
                         </div>
                         <span className="font-semibold text-xs sm:text-sm bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">
                           85% Faster
                         </span>
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-green-600 dark:text-green-400">
                         Payment collection compared to manual follow-ups
                       </p>
                     </div>
 
-                    <div className="bg-card/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg hover:shadow-primary/30 shadow-primary/20 transition-all duration-300">
+                    <div className="bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-background backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-blue-200 dark:border-blue-800 hover:shadow-lg hover:shadow-info shadow-info transition-all duration-300">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                          <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                          <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-blue-700 dark:text-blue-300" />
                         </div>
-                        <span className="font-semibold text-xs sm:text-sm">
+                        <span className="font-semibold text-xs sm:text-sm text-blue-700 dark:text-blue-300">
                           10 Hours
                         </span>
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-blue-600 dark:text-blue-400">
                         Saved per month per freelancer
                       </p>
                     </div>
                   </div>
 
                   <div className="space-y-3 sm:space-y-4 pt-6 sm:pt-8">
-                    <div className="bg-card/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg hover:shadow-primary/30 shadow-primary/20 transition-all duration-300">
+                    <div className="bg-gradient-to-br from-purple-50 to-white dark:from-purple-950/20 dark:to-background backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-purple-200 dark:border-purple-800 hover:shadow-lg hover:shadow-premium shadow-premium transition-all duration-300">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                          <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                          <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-purple-700 dark:text-purple-300" />
                         </div>
-                        <span className="font-semibold text-xs sm:text-sm">
+                        <span className="font-semibold text-xs sm:text-sm text-purple-700 dark:text-purple-300">
                           99.9%
                         </span>
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-purple-600 dark:text-purple-400">
                         Uptime with reliable email delivery
                       </p>
                     </div>
 
-                    <div className="bg-card/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:shadow-lg hover:shadow-primary/30 shadow-primary/20 transition-all duration-300">
+                    <div className="bg-gradient-to-br from-orange-50 to-white dark:from-orange-950/20 dark:to-background backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-orange-200 dark:border-orange-800 hover:shadow-lg hover:shadow-warning shadow-warning transition-all duration-300">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-orange-500/20 rounded-lg flex items-center justify-center">
-                          <Target className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                          <Target className="h-3 w-3 sm:h-4 sm:w-4 text-orange-700 dark:text-orange-300" />
                         </div>
-                        <span className="font-semibold text-xs sm:text-sm">
+                        <span className="font-semibold text-xs sm:text-sm text-orange-700 dark:text-orange-300">
                           Zero Effort
                         </span>
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-orange-600 dark:text-orange-400">
                         Set once, works automatically forever
                       </p>
                     </div>
@@ -1042,7 +1044,8 @@ export default function HomePage() {
                   <Link href="/dashboard">
                     <Button
                       size="lg"
-                      className="w-full lg:w-auto gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-300"
+                      variant="gradient"
+                      className="w-full lg:w-auto gap-2 text-lg px-12 py-4"
                     >
                       Go to Dashboard
                       <ArrowRight className="h-5 w-5" />
@@ -1053,7 +1056,8 @@ export default function HomePage() {
                     <Link href="/auth">
                       <Button
                         size="lg"
-                        className="w-full lg:w-auto gap-2 text-lg px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-300"
+                        variant="gradient"
+                        className="w-full lg:w-auto gap-2 text-lg px-12 py-4"
                       >
                         Get Started Free
                         <ArrowRight className="h-5 w-5" />

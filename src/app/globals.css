@@ -72,12 +72,12 @@
   --accent: oklch(0.91 0.012 142);
   --accent-foreground: oklch(0.22 0.008 142);
 
-  /* Status colors with proper contrast */
-  --destructive: oklch(0.55 0.24 27);
+  /* Status colors - improved lightness differentiation for colorblind users */
+  --destructive: oklch(0.60 0.24 27);       /* Lighter (was 0.55) - better distinction */
   --destructive-foreground: oklch(0.99 0.002 142);
-  --success: oklch(0.45 0.15 142);          /* Success green */
+  --success: oklch(0.45 0.15 142);          /* Success green - unchanged (darkest) */
   --success-foreground: oklch(0.99 0.002 142);
-  --warning: oklch(0.65 0.18 85);           /* Accessible orange */
+  --warning: oklch(0.68 0.18 85);           /* Lighter (was 0.65) - clear middle value */
   --warning-foreground: oklch(0.16 0.004 142);
 
   /* Border and input colors */
@@ -113,6 +113,52 @@
   --green-700: oklch(0.35 0.13 142);
   --green-800: oklch(0.25 0.10 142);
   --green-900: oklch(0.18 0.08 142);
+
+  /* Blue scale for informational states (PayPal-inspired) */
+  --blue-50: oklch(0.97 0.02 220);
+  --blue-100: oklch(0.92 0.05 220);
+  --blue-200: oklch(0.85 0.08 220);
+  --blue-300: oklch(0.75 0.12 220);
+  --blue-400: oklch(0.64 0.14 220);
+  --blue-500: oklch(0.55 0.15 220);         /* Info state base - #0079C1 inspired */
+  --blue-600: oklch(0.45 0.13 220);
+  --blue-700: oklch(0.35 0.11 220);
+  --blue-800: oklch(0.25 0.08 220);
+  --blue-900: oklch(0.18 0.06 220);
+
+  /* Purple scale for premium/upsell features */
+  --purple-50: oklch(0.97 0.02 280);
+  --purple-100: oklch(0.92 0.05 280);
+  --purple-200: oklch(0.85 0.08 280);
+  --purple-300: oklch(0.75 0.10 280);
+  --purple-400: oklch(0.64 0.12 280);
+  --purple-500: oklch(0.55 0.14 280);       /* Premium feature base */
+  --purple-600: oklch(0.45 0.12 280);
+  --purple-700: oklch(0.35 0.10 280);
+  --purple-800: oklch(0.25 0.08 280);
+  --purple-900: oklch(0.18 0.06 280);
+
+  /* Neutral gray scale (USWDS/Atlassian-inspired) */
+  --gray-0: oklch(1.0 0 0);                 /* Pure white */
+  --gray-5: oklch(0.98 0 0);
+  --gray-10: oklch(0.95 0 0);
+  --gray-20: oklch(0.90 0 0);
+  --gray-30: oklch(0.82 0 0);
+  --gray-40: oklch(0.72 0 0);
+  --gray-50: oklch(0.60 0 0);               /* AA contrast against white & black */
+  --gray-60: oklch(0.48 0 0);
+  --gray-70: oklch(0.38 0 0);
+  --gray-80: oklch(0.28 0 0);
+  --gray-90: oklch(0.18 0 0);
+  --gray-100: oklch(0.0 0 0);               /* Pure black */
+
+  /* Semantic info color (blue-based) */
+  --info: oklch(0.55 0.15 220);
+  --info-foreground: oklch(0.99 0.002 142);
+
+  /* Semantic premium color (purple-based) */
+  --premium: oklch(0.55 0.14 280);
+  --premium-foreground: oklch(0.99 0.002 142);
 }
 
 .dark {
@@ -124,15 +170,15 @@
   --popover: oklch(0.18 0.008 142);
   --popover-foreground: oklch(0.95 0.002 142);
 
-  /* Vibrant green colors for dark mode */
-  --primary: oklch(0.65 0.17 142);          /* Lighter green for dark backgrounds */
+  /* Refined green colors for dark mode - desaturated for better readability */
+  --primary: oklch(0.68 0.14 142);          /* Lighter + desaturated (was C:0.17) */
   --primary-foreground: oklch(0.13 0.006 142);  /* Dark background for contrast */
-  --primary-light: oklch(0.58 0.17 155);    /* Emerald tone for gradients */
-  --primary-dark: oklch(0.55 0.15 142);     /* Darker variant */
+  --primary-light: oklch(0.72 0.14 155);    /* Emerald tone - desaturated */
+  --primary-dark: oklch(0.60 0.13 142);     /* Darker variant - desaturated */
 
-  /* Dark mode green shades */
-  --green-500: oklch(0.65 0.17 142);
-  --emerald-600: oklch(0.58 0.17 155);
+  /* Dark mode green shades - desaturated for readability */
+  --green-500: oklch(0.68 0.14 142);        /* Reduced chroma from 0.17 to 0.14 */
+  --emerald-600: oklch(0.72 0.14 155);      /* Desaturated for gradients */
 
   /* Dark mode secondary colors */
   --secondary: oklch(0.25 0.008 142);
@@ -142,12 +188,12 @@
   --accent: oklch(0.28 0.012 142);
   --accent-foreground: oklch(0.95 0.002 142);
 
-  /* Dark mode status colors */
-  --destructive: oklch(0.68 0.20 27);
+  /* Dark mode status colors - desaturated for better readability */
+  --destructive: oklch(0.68 0.16 27);       /* Reduced chroma from 0.20 to 0.16 */
   --destructive-foreground: oklch(0.13 0.006 142);
-  --success: oklch(0.65 0.17 142);
+  --success: oklch(0.68 0.14 142);          /* Desaturated, matches primary */
   --success-foreground: oklch(0.13 0.006 142);
-  --warning: oklch(0.75 0.18 85);
+  --warning: oklch(0.75 0.14 85);           /* Reduced chroma from 0.18 to 0.14 */
   --warning-foreground: oklch(0.13 0.006 142);
 
   /* Dark borders and inputs */
@@ -183,6 +229,51 @@
   --green-700: oklch(0.82 0.16 142);
   --green-800: oklch(0.88 0.12 142);
   --green-900: oklch(0.93 0.08 142);
+
+  /* Dark mode blue scale - desaturated for readability */
+  --blue-50: oklch(0.13 0.006 220);
+  --blue-100: oklch(0.18 0.008 220);
+  --blue-200: oklch(0.25 0.010 220);
+  --blue-300: oklch(0.35 0.012 220);
+  --blue-400: oklch(0.55 0.11 220);         /* Desaturated */
+  --blue-500: oklch(0.68 0.12 220);         /* Reduced chroma from 0.15 to 0.12 */
+  --blue-600: oklch(0.78 0.11 220);         /* Desaturated */
+  --blue-700: oklch(0.85 0.10 220);         /* Desaturated */
+  --blue-800: oklch(0.90 0.07 220);         /* Desaturated */
+  --blue-900: oklch(0.95 0.05 220);         /* Desaturated */
+
+  /* Dark mode purple scale - desaturated for readability */
+  --purple-50: oklch(0.13 0.006 280);
+  --purple-100: oklch(0.18 0.008 280);
+  --purple-200: oklch(0.25 0.010 280);
+  --purple-300: oklch(0.35 0.012 280);
+  --purple-400: oklch(0.55 0.10 280);       /* Desaturated */
+  --purple-500: oklch(0.70 0.11 280);       /* Reduced chroma from 0.14 to 0.11 */
+  --purple-600: oklch(0.78 0.10 280);       /* Desaturated */
+  --purple-700: oklch(0.85 0.09 280);       /* Desaturated */
+  --purple-800: oklch(0.90 0.06 280);       /* Desaturated */
+  --purple-900: oklch(0.95 0.05 280);       /* Desaturated */
+
+  /* Dark mode gray scale (inverted) */
+  --gray-0: oklch(0.0 0 0);                 /* Pure black */
+  --gray-5: oklch(0.08 0 0);
+  --gray-10: oklch(0.15 0 0);
+  --gray-20: oklch(0.22 0 0);
+  --gray-30: oklch(0.30 0 0);
+  --gray-40: oklch(0.40 0 0);
+  --gray-50: oklch(0.50 0 0);               /* Mid gray */
+  --gray-60: oklch(0.60 0 0);
+  --gray-70: oklch(0.72 0 0);
+  --gray-80: oklch(0.82 0 0);
+  --gray-90: oklch(0.90 0 0);
+  --gray-100: oklch(1.0 0 0);               /* Pure white */
+
+  /* Dark mode semantic colors - desaturated */
+  --info: oklch(0.68 0.12 220);             /* Reduced chroma from 0.15 to 0.12 */
+  --info-foreground: oklch(0.13 0.006 142);
+
+  --premium: oklch(0.70 0.11 280);          /* Reduced chroma from 0.14 to 0.11 */
+  --premium-foreground: oklch(0.13 0.006 142);
 }
 
 @layer base {
@@ -220,6 +311,56 @@
     font-size: clamp(1.125rem, 1rem + 0.625vw, 1.25rem); /* 18px to 20px */
     line-height: 1.4;
     font-weight: 500;
+  }
+
+  h5 {
+    font-size: clamp(1rem, 0.9375rem + 0.3125vw, 1.125rem); /* 16px to 18px */
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  h6 {
+    font-size: clamp(0.875rem, 0.8125rem + 0.3125vw, 1rem); /* 14px to 16px */
+    line-height: 1.5;
+    font-weight: 500;
+  }
+
+  /* Body text variants */
+  .body-sm {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.43; /* 20px */
+  }
+
+  .body-lg {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.56; /* 28px */
+  }
+
+  /* Utility text styles */
+  .caption {
+    font-size: 0.75rem; /* 12px */
+    line-height: 1.33; /* 16px */
+    color: var(--muted-foreground);
+  }
+
+  .overline {
+    font-size: 0.75rem; /* 12px */
+    line-height: 2; /* 24px */
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .label {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.43; /* 20px */
+    font-weight: 500;
+  }
+
+  /* Small text (legal, meta info) */
+  small {
+    font-size: 0.75rem; /* 12px */
+    line-height: 1.33; /* 16px */
   }
 
   /* Accessible focus styles */
@@ -288,6 +429,136 @@
   90% {
     transform: translate3d(0, -2px, 0);
   }
+}
+
+/* Additional fintech-appropriate animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes success-checkmark {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes processing-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translate3d(30px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translate3d(-30px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Animation utility classes */
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-slide-down {
+  animation: slide-down 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+}
+
+.animate-pulse {
+  animation: processing-pulse 1.5s ease-in-out infinite;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* GPU-accelerated elements */
@@ -360,6 +631,62 @@
 
 .focus-ring:focus-visible {
   box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* Color-tinted shadows for premium feel */
+.shadow-primary {
+  box-shadow:
+    0 4px 6px -1px oklch(0.55 0.16 142 / 0.15),
+    0 2px 4px -2px oklch(0.55 0.16 142 / 0.1);
+}
+
+.shadow-primary-lg {
+  box-shadow:
+    0 10px 25px -5px oklch(0.55 0.16 142 / 0.2),
+    0 8px 10px -6px oklch(0.55 0.16 142 / 0.1);
+}
+
+.shadow-success {
+  box-shadow:
+    0 4px 6px -1px oklch(0.45 0.15 142 / 0.15),
+    0 2px 4px -2px oklch(0.45 0.15 142 / 0.1);
+}
+
+.shadow-destructive {
+  box-shadow:
+    0 4px 6px -1px oklch(0.60 0.24 27 / 0.15),
+    0 2px 4px -2px oklch(0.60 0.24 27 / 0.1);
+}
+
+.shadow-warning {
+  box-shadow:
+    0 4px 6px -1px oklch(0.68 0.18 85 / 0.15),
+    0 2px 4px -2px oklch(0.68 0.18 85 / 0.1);
+}
+
+.shadow-info {
+  box-shadow:
+    0 4px 6px -1px oklch(0.55 0.15 220 / 0.15),
+    0 2px 4px -2px oklch(0.55 0.15 220 / 0.1);
+}
+
+.shadow-premium {
+  box-shadow:
+    0 4px 6px -1px oklch(0.55 0.14 280 / 0.15),
+    0 2px 4px -2px oklch(0.55 0.14 280 / 0.1);
+}
+
+/* Card shadows with subtle warmth */
+.card-shadow {
+  box-shadow:
+    0 1px 3px 0 oklch(0.18 0 0 / 0.08),
+    0 1px 2px -1px oklch(0.18 0 0 / 0.06);
+}
+
+.card-shadow-hover {
+  box-shadow:
+    0 10px 25px -5px oklch(0.18 0 0 / 0.1),
+    0 10px 10px -5px oklch(0.18 0 0 / 0.04);
 }
 
 /* Color blind accessibility patterns */

@@ -1,33 +1,32 @@
 // src/app/dashboard/page.tsx - Fully Responsive Version
 'use client'
 
-import { 
-  DollarSign, 
-  MoreVertical, 
-  CheckCircle2, 
-  AlertCircle, 
-  Clock,
+import {
+  MoreVertical,
+  CheckCircle2,
   Mail,
   Send,
   Heart as ThankYou,
   TrendingUp,
   FileText,
   Edit,
-  LogOut,
   User,
+  DollarSign,
   Plus,
 } from "lucide-react";
 
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge, StatusBadge } from "@/components/ui/badge";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { InvoiceCardSkeleton, CardSkeleton } from "@/components/ui/skeleton";
+import { InvoiceEmptyState } from "@/components/ui/empty-state";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/lib/supabase";
@@ -90,13 +89,13 @@ const InvoiceActionsDropdown = ({
 };
 
 // Mobile-optimized Invoice Card Component
-const InvoiceCard = ({ 
-  invoice, 
-  onMarkPaid, 
-  onSendReminder, 
-  onSendThankYou, 
+const InvoiceCard = ({
+  invoice,
+  onMarkPaid,
+  onSendReminder,
+  onSendThankYou,
   onEditInvoice,
-  getStatusBadgeWithEmail 
+  getStatusBadgeWithEmail
 }: {
   invoice: Invoice;
   onMarkPaid: (id: string) => void;
@@ -104,8 +103,23 @@ const InvoiceCard = ({
   onSendThankYou: (id: string) => void;
   onEditInvoice: (id: string) => void;
   getStatusBadgeWithEmail: (invoice: Invoice) => React.ReactNode;
-}) => (
-  <div className="group relative rounded-xl border transition-all duration-300 bg-card hover:shadow-md hover:shadow-green-500/20 border-border/50 hover:border-border">
+}) => {
+  // Get left border color based on status
+  const getBorderColor = (status: string) => {
+    switch (status) {
+      case 'paid':
+        return 'border-l-green-500 dark:border-l-green-400'
+      case 'overdue':
+        return 'border-l-red-500 dark:border-l-red-400'
+      case 'pending':
+        return 'border-l-orange-500 dark:border-l-orange-400'
+      default:
+        return 'border-l-blue-500 dark:border-l-blue-400'
+    }
+  }
+
+  return (
+    <div className={`group relative rounded-xl border border-l-4 transition-all duration-300 bg-card hover:shadow-md border-border/50 hover:border-border ${getBorderColor(invoice.status)}`}>
     <div className="p-4 sm:p-6">
       {/* Mobile: Stacked layout, Desktop: Horizontal layout */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
@@ -154,15 +168,28 @@ const InvoiceCard = ({
       </div>
     </div>
   </div>
-);
+  )
+}
 
 export default function Dashboard() {
-  const { user, session, signOut, loading: authLoading } = useAuth();
+  const searchParams = useSearchParams();
+  const { user, session, loading: authLoading } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("overview");
   const { error, success } = useToast();
   const { sendReminder, sendThankYou } = useEmail();
+
+  // Update active tab based on URL query parameter
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && ["overview", "invoices", "emails", "settings"].includes(tab)) {
+      setActiveTab(tab);
+    } else {
+      setActiveTab("overview");
+    }
+  }, [searchParams]);
 
   // Get user display name
   const getUserDisplayName = () => {
@@ -288,39 +315,22 @@ export default function Dashboard() {
     fetchInvoices();
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid': 
-        return 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-950/20 dark:text-green-400 dark:border-green-800';
-      case 'overdue': 
-        return 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-800';
-      case 'pending': 
-        return 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 dark:bg-orange-950/20 dark:text-orange-400 dark:border-orange-800';
-      default: 
-        return 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 dark:bg-gray-950/20 dark:text-gray-400 dark:border-gray-800';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'paid': return <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />;
-      case 'overdue': return <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />;
-      case 'pending': return <Clock className="h-3 w-3 sm:h-4 sm:w-4" />;
-      default: return <Clock className="h-3 w-3 sm:h-4 sm:w-4" />;
-    }
-  };
-
   const getStatusBadgeWithEmail = (invoice: Invoice) => {
+    // Map invoice status to StatusBadge variants
+    const statusMap: Record<string, 'paid' | 'pending' | 'overdue'> = {
+      'paid': 'paid',
+      'pending': 'pending',
+      'overdue': 'overdue',
+    };
+
+    const status = statusMap[invoice.status] || 'pending';
+
     const baseStatusElement = (
-      <Badge
-        variant="outline"
-        className={`${getStatusColor(invoice.status)} flex items-center gap-1 text-xs sm:text-sm`}
-      >
-        {getStatusIcon(invoice.status)}
+      <StatusBadge status={status} className="text-xs sm:text-sm">
         <span className="hidden xs:inline">
           {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
         </span>
-      </Badge>
+      </StatusBadge>
     );
 
     if (invoice.status !== 'paid') {
@@ -350,12 +360,32 @@ export default function Dashboard() {
   // Loading states
   if (authLoading || (loading && !user)) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 relative">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500/20 border-t-green-500"></div>
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary p-4 sm:p-6 lg:p-8 animate-fade-in">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Header Skeleton */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <div className="h-8 w-48 bg-muted rounded animate-shimmer" />
+              <div className="h-4 w-72 bg-muted rounded animate-shimmer" />
+            </div>
+            <div className="h-10 w-32 bg-muted rounded animate-shimmer" />
           </div>
-          <p className="text-muted-foreground">Loading your dashboard...</p>
+
+          {/* Stats Cards Skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+
+          {/* Invoice List Skeleton */}
+          <div className="space-y-4">
+            <div className="h-6 w-32 bg-muted rounded animate-shimmer" />
+            <InvoiceCardSkeleton />
+            <InvoiceCardSkeleton />
+            <InvoiceCardSkeleton />
+          </div>
         </div>
       </div>
     );
@@ -376,163 +406,74 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary">
-      {/* Fixed Responsive Header */}
-      <nav className="border-b border-border bg-card/50 backdrop-blur-lg sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center space-x-2 flex-shrink-0">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-              </div>
-              <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">Fynl-It</span>
-            </div>
-            
-            {/* Desktop: Right side - User info and actions */}
-            <div className="hidden sm:flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground truncate max-w-[200px]">
-                Welcome back, {getUserDisplayName()}!
-              </span>
-              <NewInvoiceModal onSuccess={fetchInvoices}>
-                <Button size="sm" className="gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 border-0">
-                  <Plus className="h-4 w-4" />
-                  <span className="hidden md:inline">New Invoice</span>
-                </Button>
-              </NewInvoiceModal>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={signOut}
-                className="gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden lg:inline">Sign Out</span>
-              </Button>
-            </div>
-
-            {/* Mobile: Dropdown menu */}
-            <div className="sm:hidden">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    <User className="h-4 w-4" />
-                    <span className="text-sm font-medium truncate max-w-[80px]">
-                      {getUserDisplayName()}
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="px-2 py-1.5 text-sm font-medium">
-                    {getUserDisplayName()}
-                  </div>
-                  <div className="px-2 pb-2 text-xs text-muted-foreground truncate">
-                    {user?.email}
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <NewInvoiceModal onSuccess={fetchInvoices}>
-                      <div className="w-full flex items-center cursor-pointer">
-                        <Plus className="h-4 w-4 mr-2" />
-                        New Invoice
-                      </div>
-                    </NewInvoiceModal>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={signOut} className="text-red-600">
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-
-          {/* Mobile: Welcome message below main navbar */}
-          <div className="sm:hidden mt-3 pt-3 border-t border-border/50">
-            <p className="text-xs text-muted-foreground text-center">
-              Welcome back! You have {stats.pending + stats.overdue} pending invoice{(stats.pending + stats.overdue) !== 1 ? 's' : ''}
-            </p>
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-4 sm:py-8">
-        <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
-          {/* Mobile-optimized Tabs */}
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
-            <TabsTrigger value="overview" className="text-xs sm:text-sm py-2 sm:py-3">Overview</TabsTrigger>
-            <TabsTrigger value="invoices" className="text-xs sm:text-sm py-2 sm:py-3">Invoices</TabsTrigger>
-            <TabsTrigger value="emails" className="text-xs sm:text-sm py-2 sm:py-3">Emails</TabsTrigger>
-            <TabsTrigger value="settings" className="text-xs sm:text-sm py-2 sm:py-3">Settings</TabsTrigger>
-          </TabsList>
+    <div className="container mx-auto px-4 py-4 sm:py-8 lg:px-8 lg:py-8 animate-fade-in">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
 
           <TabsContent value="overview">
             {/* Responsive Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
-              <Card className="border-0 shadow-lg shadow-green-500/20 bg-gradient-to-br from-card to-card/50 hover:shadow-xl hover:shadow-green-500/30 transition-all duration-300 group">
+              <Card className="bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-background border-blue-200 dark:border-blue-800 shadow-info hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Total Invoices</CardTitle>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-500/10 rounded-full flex items-center justify-center group-hover:bg-green-500/20 transition-colors">
-                    <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-70 dark:text-gray-30">Total Invoices</CardTitle>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors">
+                    <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-700 dark:text-blue-300" />
                   </div>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 pt-0">
-                  <div className="text-2xl sm:text-3xl font-bold">{stats.total}</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-700 dark:text-blue-300">{stats.total}</div>
                   <div className="flex items-center gap-1 mt-1">
-                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full" />
-                    <p className="text-xs text-muted-foreground">All invoices</p>
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full" />
+                    <p className="text-xs text-blue-600 dark:text-blue-400">All invoices</p>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-lg shadow-green-500/20 bg-gradient-to-br from-card to-card/50 hover:shadow-xl hover:shadow-green-500/30 transition-all duration-300 group">
+              <Card className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-background border-emerald-200 dark:border-emerald-800 shadow-primary hover:shadow-primary-lg hover:-translate-y-0.5 transition-all duration-300 group">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Total Amount</CardTitle>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-full flex items-center justify-center group-hover:bg-gradient-to-br group-hover:from-green-500/20 group-hover:to-emerald-500/20 transition-all">
-                    <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-70 dark:text-gray-30">Total Amount</CardTitle>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30 rounded-full flex items-center justify-center group-hover:from-emerald-200 group-hover:to-green-200 dark:group-hover:from-emerald-900/50 dark:group-hover:to-green-900/50 transition-all">
+                    <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-700 dark:text-emerald-300" />
                   </div>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 pt-0">
-                  <div className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">${stats.totalAmount.toFixed(0)}</div>
+                  <div className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-emerald-700 to-green-700 dark:from-emerald-300 dark:to-green-300 bg-clip-text text-transparent">${stats.totalAmount.toFixed(0)}</div>
                   <div className="flex items-center gap-1 mt-1">
-                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" />
-                    <p className="text-xs text-muted-foreground">Invoice value</p>
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full" />
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400">Invoice value</p>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-lg shadow-green-500/20 bg-gradient-to-br from-card to-card/50 hover:shadow-xl hover:shadow-green-500/30 transition-all duration-300 group">
+              <Card className="bg-gradient-to-br from-green-50 to-white dark:from-green-950/20 dark:to-background border-green-200 dark:border-green-800 shadow-success hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Paid</CardTitle>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-full flex items-center justify-center group-hover:bg-gradient-to-br group-hover:from-green-500/20 group-hover:to-emerald-500/20 transition-all">
-                    <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-70 dark:text-gray-30">Paid</CardTitle>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center group-hover:bg-green-200 dark:group-hover:bg-green-900/50 transition-colors">
+                    <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-700 dark:text-green-300" />
                   </div>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 pt-0">
-                  <div className="text-xl sm:text-3xl font-bold text-green-600">${stats.paidAmount.toFixed(0)}</div>
+                  <div className="text-xl sm:text-3xl font-bold text-green-700 dark:text-green-300">${stats.paidAmount.toFixed(0)}</div>
                   <div className="flex items-center gap-1 mt-1">
                     <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full" />
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-green-600 dark:text-green-400">
                       {stats.paid} collected
                     </p>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-lg shadow-green-500/20 bg-gradient-to-br from-card to-card/50 hover:shadow-xl hover:shadow-green-500/30 transition-all duration-300 group">
+              <Card className="bg-gradient-to-br from-orange-50 to-white dark:from-orange-950/20 dark:to-background border-orange-200 dark:border-orange-800 shadow-warning hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Pending</CardTitle>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-500/10 rounded-full flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
-                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
+                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-70 dark:text-gray-30">Pending</CardTitle>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center group-hover:bg-orange-200 dark:group-hover:bg-orange-900/50 transition-colors">
+                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-orange-700 dark:text-orange-300" />
                   </div>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 pt-0">
-                  <div className="text-xl sm:text-3xl font-bold text-orange-600">${(stats.totalAmount - stats.paidAmount).toFixed(0)}</div>
+                  <div className="text-xl sm:text-3xl font-bold text-orange-700 dark:text-orange-300">${(stats.totalAmount - stats.paidAmount).toFixed(0)}</div>
                   <div className="flex items-center gap-1 mt-1">
                     <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-orange-500 rounded-full" />
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-orange-600 dark:text-orange-400">
                       {stats.pending + stats.overdue} awaiting
                     </p>
                   </div>
@@ -550,19 +491,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent className="p-4 sm:p-6 pt-0">
                 {invoices.length === 0 ? (
-                  <div className="text-center py-8 sm:py-12">
-                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No invoices yet</h3>
-                    <p className="text-muted-foreground mb-4 text-sm sm:text-base max-w-md mx-auto">
-                      Create your first invoice to start getting paid faster
-                    </p>
-                    <NewInvoiceModal onSuccess={fetchInvoices}>
-                      <Button className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 border-0">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create First Invoice
-                      </Button>
-                    </NewInvoiceModal>
-                  </div>
+                  <InvoiceEmptyState onCreateInvoice={() => setEditingInvoiceId("new")} />
                 ) : (
                   <div className="space-y-3 sm:space-y-4">
                     {invoices.slice(0, 5).map((invoice) => (
@@ -594,7 +523,7 @@ export default function Dashboard() {
                   </div>
                   <div className="sm:hidden">
                     <NewInvoiceModal onSuccess={fetchInvoices}>
-                      <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 border-0">
+                      <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-primary hover:shadow-primary-lg hover:-translate-y-0.5 transition-all border-0 text-white">
                         <Plus className="h-4 w-4 mr-2" />
                         New Invoice
                       </Button>
@@ -604,19 +533,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent className="p-4 sm:p-6 pt-0">
                 {invoices.length === 0 ? (
-                  <div className="text-center py-8 sm:py-12">
-                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No invoices yet</h3>
-                    <p className="text-muted-foreground mb-4 text-sm sm:text-base max-w-md mx-auto">
-                      Create your first invoice to start getting paid faster
-                    </p>
-                    <NewInvoiceModal onSuccess={fetchInvoices}>
-                      <Button className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 border-0">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create First Invoice
-                      </Button>
-                    </NewInvoiceModal>
-                  </div>
+                  <InvoiceEmptyState onCreateInvoice={() => setEditingInvoiceId("new")} />
                 ) : (
                   <div className="space-y-3 sm:space-y-4">
                     {invoices.map((invoice) => (
@@ -716,16 +633,15 @@ export default function Dashboard() {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
 
-      {/* Edit Invoice Modal - Always render but control with open prop */}
-      <NewInvoiceModal
-        mode="edit"
-        invoiceId={editingInvoiceId || undefined}
-        open={!!editingInvoiceId}
-        onSuccess={handleEditSuccess}
-        onClose={() => setEditingInvoiceId(null)}
-      />
-    </div>
-  );
-}
+        {/* Edit Invoice Modal - Always render but control with open prop */}
+        <NewInvoiceModal
+          mode="edit"
+          invoiceId={editingInvoiceId || undefined}
+          open={!!editingInvoiceId}
+          onSuccess={handleEditSuccess}
+          onClose={() => setEditingInvoiceId(null)}
+        />
+      </div>
+    );
+  }
