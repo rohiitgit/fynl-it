@@ -48,18 +48,16 @@ function SidebarContent({
       </div>
 
       {/* New Invoice Button */}
-      {onNewInvoice && (
-        <div className="p-4 sm:p-5">
-          <Button
-            variant="gradient"
-            className="w-full gap-2 h-10 sm:h-11 text-sm sm:text-base"
-            onClick={onNewInvoice}
-          >
-            <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
-            New Invoice
-          </Button>
-        </div>
-      )}
+      <div className="p-4 sm:p-5">
+        <Button
+          variant="gradient"
+          className="w-full gap-2 h-10 sm:h-11 text-sm sm:text-base"
+          onClick={onNewInvoice}
+        >
+          <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+          New Invoice
+        </Button>
+      </div>
 
       {/* Navigation */}
       <ScrollArea className="flex-1 px-2">
@@ -99,16 +97,16 @@ export function Sidebar({ user, onSignOut, onNewInvoice }: SidebarProps) {
     }
   }, [isMobile, open])
 
-  if (isMobile) {
-    return (
-      <>
-        {/* Mobile/Tablet: Hamburger Menu */}
+  return (
+    <>
+      {/* Mobile/Tablet: Hamburger Menu - Only visible on mobile */}
+      {isMobile && (
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="fixed top-4 left-4 z-50 lg:hidden bg-card/80 backdrop-blur-sm hover:bg-card shadow-md"
+              className="fixed top-4 left-4 z-50 bg-card/80 backdrop-blur-sm hover:bg-card shadow-md"
               aria-label="Toggle navigation menu"
             >
               <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -130,17 +128,18 @@ export function Sidebar({ user, onSignOut, onNewInvoice }: SidebarProps) {
             />
           </SheetContent>
         </Sheet>
-      </>
-    )
-  }
+      )}
 
-  return (
-    <aside className="fixed left-0 top-0 h-screen w-64 border-r border-border/50 bg-card shadow-sm z-40 hidden lg:block">
-      <SidebarContent
-        user={user}
-        onSignOut={onSignOut}
-        onNewInvoice={onNewInvoice}
-      />
-    </aside>
+      {/* Desktop: Fixed Sidebar - Only visible on desktop */}
+      {!isMobile && (
+        <aside className="fixed left-0 top-0 h-screen w-64 border-r border-border/50 bg-card shadow-sm z-40">
+          <SidebarContent
+            user={user}
+            onSignOut={onSignOut}
+            onNewInvoice={onNewInvoice}
+          />
+        </aside>
+      )}
+    </>
   )
 }

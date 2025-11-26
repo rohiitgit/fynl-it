@@ -514,22 +514,10 @@ export default function Dashboard() {
           <TabsContent value="invoices">
             <Card>
               <CardHeader className="p-4 sm:p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-                  <div>
-                    <CardTitle className="text-lg sm:text-xl">All Invoices</CardTitle>
-                    <CardDescription className="text-sm sm:text-base">
-                      Manage your invoices and payment reminders
-                    </CardDescription>
-                  </div>
-                  <div className="sm:hidden">
-                    <NewInvoiceModal onSuccess={fetchInvoices}>
-                      <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-primary hover:shadow-primary-lg hover:-translate-y-0.5 transition-all border-0 text-white">
-                        <Plus className="h-4 w-4 mr-2" />
-                        New Invoice
-                      </Button>
-                    </NewInvoiceModal>
-                  </div>
-                </div>
+                <CardTitle className="text-lg sm:text-xl">All Invoices</CardTitle>
+                <CardDescription className="text-sm sm:text-base">
+                  Manage your invoices and payment reminders
+                </CardDescription>
               </CardHeader>
               <CardContent className="p-4 sm:p-6 pt-0">
                 {invoices.length === 0 ? (

@@ -2,8 +2,9 @@
 
 import { useAuth } from "@/components/AuthProvider"
 import { Sidebar } from "@/components/Sidebar/Sidebar"
+import NewInvoiceModal from "@/components/NewInvoiceModal"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState, useRef } from "react"
 
 export default function DashboardLayout({
   children,
@@ -12,6 +13,8 @@ export default function DashboardLayout({
 }) {
   const { user, signOut, loading } = useAuth()
   const router = useRouter()
+  const [showNewInvoice, setShowNewInvoice] = useState(false)
+  const modalTriggerRef = useRef<HTMLButtonElement>(null)
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -59,10 +62,15 @@ export default function DashboardLayout({
     initial: getUserInitial(),
   }
 
+  const handleNewInvoice = () => {
+    // Click the hidden modal trigger button
+    modalTriggerRef.current?.click()
+  }
+
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
-      <Sidebar user={userData} onSignOut={signOut} />
+      <Sidebar user={userData} onSignOut={signOut} onNewInvoice={handleNewInvoice} />
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto lg:ml-64 bg-gradient-to-br from-background to-secondary">
@@ -70,6 +78,22 @@ export default function DashboardLayout({
         <div className="lg:hidden h-16" />
         {children}
       </main>
+
+      {/* New Invoice Modal - Hidden trigger controlled by sidebar button */}
+      <div className="fixed -left-[9999px] -top-[9999px] pointer-events-none">
+        <NewInvoiceModal
+          onSuccess={() => {
+            // Invoice list refresh is handled by the dashboard page component
+            // via its own effect watching for invoice changes
+          }}
+        >
+          <button
+            ref={modalTriggerRef}
+            className="pointer-events-auto"
+            aria-hidden="true"
+          />
+        </NewInvoiceModal>
+      </div>
     </div>
   )
 }
