@@ -4,7 +4,7 @@ import { useAuth } from "@/components/AuthProvider"
 import { Sidebar } from "@/components/Sidebar/Sidebar"
 import NewInvoiceModal from "@/components/NewInvoiceModal"
 import { useRouter } from "next/navigation"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useRef } from "react"
 
 export default function DashboardLayout({
   children,
@@ -13,7 +13,6 @@ export default function DashboardLayout({
 }) {
   const { user, signOut, loading } = useAuth()
   const router = useRouter()
-  const [showNewInvoice, setShowNewInvoice] = useState(false)
   const modalTriggerRef = useRef<HTMLButtonElement>(null)
 
   // Redirect to auth if not logged in

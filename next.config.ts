@@ -1,5 +1,6 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
     remotePatterns: [
@@ -23,6 +24,31 @@ const nextConfig = {
     ],
     unoptimized: false,
   },
+  webpack: (config, { isServer }) => {
+    // Suppress warnings for Supabase realtime-js in Edge Runtime
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+      };
+    }
+
+    // Suppress Edge Runtime compatibility warnings for Supabase
+    config.ignoreWarnings = [
+      { module: /node_modules\/@supabase\/realtime-js/ },
+      { module: /node_modules\/@supabase\/supabase-js/ },
+    ];
+
+    return config;
+  },
+  // Suppress specific webpack warnings
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
 }
 
-module.exports = nextConfig
+export default nextConfig
