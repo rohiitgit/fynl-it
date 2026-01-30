@@ -5,6 +5,19 @@ import { applyRateLimit, addRateLimitHeaders } from '@/lib/rate-limit/rate-limit
 import { AI_RATE_LIMIT } from '@/lib/rate-limit/config';
 import { createAuthRequiredResponse } from '@/lib/rate-limit/responses';
 import { aiLogger } from '@/lib/logger';
+import { extractJsonFromText } from '@/lib/json-parser';
+import { processInvoiceSchema, formatValidationErrors } from '@/lib/validation/schemas';
+
+interface InvoiceData {
+    clientName?: string;
+    clientEmail?: string;
+    invoiceNumber?: string;
+    amount?: string;
+    currency?: string;
+    dueDate?: string;
+    paymentLink?: string;
+    description?: string;
+}
 
 // Initialize the Gemini API with the API key
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
@@ -30,18 +43,21 @@ export async function POST(request: NextRequest) {
             return rateLimitResult.response; // Rate limit exceeded
         }
 
-        // 3. Process the request
-        const { file, mimeType } = await request.json();
+        // 3. Validate and process the request
+        const body = await request.json();
+        const validation = processInvoiceSchema.safeParse(body);
 
-        if (!file || !mimeType) {
+        if (!validation.success) {
             return NextResponse.json(
-                { error: 'Missing file or mimeType' },
+                { error: 'Validation failed', details: formatValidationErrors(validation.error) },
                 { status: 400 }
             );
         }
 
-        // Remove data URL prefix to get base64
-        const base64Data = file.split(',')[1];
+        const { file, mimeType } = validation.data;
+
+        // Remove data URL prefix to get base64 (handle both with and without prefix)
+        const base64Data = file.includes(',') ? file.split(',')[1] : file;
 
         // Create the prompt
         const prompt = `
@@ -100,13 +116,10 @@ export async function POST(request: NextRequest) {
         }
 
         // Extract JSON from the response
-        let invoiceData;
+        let invoiceData: InvoiceData | null;
         try {
-            // Try to find JSON in the response
-            const jsonMatch = text.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                invoiceData = JSON.parse(jsonMatch[0]);
-            } else {
+            invoiceData = extractJsonFromText<InvoiceData>(text);
+            if (!invoiceData) {
                 throw new Error('No JSON found in response');
             }
         } catch (parseError) {

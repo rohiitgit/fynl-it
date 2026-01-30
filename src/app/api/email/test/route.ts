@@ -6,6 +6,7 @@ import { EMAIL_RATE_LIMIT } from '@/lib/rate-limit/config';
 import { createAuthRequiredResponse } from '@/lib/rate-limit/responses';
 import { emailLogger } from '@/lib/logger';
 import { maskEmail } from '@/lib/logger/redact';
+import { testEmailSchema, formatValidationErrors } from '@/lib/validation/schemas';
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,15 +29,18 @@ export async function POST(request: NextRequest) {
       return rateLimitResult.response; // Rate limit exceeded
     }
 
-    // 3. Process the request
-    const { testEmail } = await request.json();
+    // 3. Validate the request body
+    const body = await request.json();
+    const validation = testEmailSchema.safeParse(body);
 
-    if (!testEmail) {
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Test email address is required' },
+        { error: 'Validation failed', details: formatValidationErrors(validation.error) },
         { status: 400 }
       );
     }
+
+    const { testEmail } = validation.data;
 
     const { data, error } = await resend.emails.send({
       from: DEFAULT_FROM_EMAIL,

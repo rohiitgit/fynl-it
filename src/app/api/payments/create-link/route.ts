@@ -6,6 +6,7 @@ import { applyRateLimit, addRateLimitHeaders } from '@/lib/rate-limit/rate-limit
 import { PAYMENT_RATE_LIMIT } from '@/lib/rate-limit/config';
 import { createAuthRequiredResponse } from '@/lib/rate-limit/responses';
 import { paymentLogger, databaseLogger } from '@/lib/logger';
+import { createPaymentLinkSchema, formatValidationErrors } from '@/lib/validation/schemas';
 
 export async function POST(request: NextRequest) {
     try {
@@ -28,12 +29,18 @@ export async function POST(request: NextRequest) {
             return rateLimitResult.response; // Rate limit exceeded
         }
 
-        // 3. Process the request
-        const { invoiceId } = await request.json();
+        // 3. Validate and process the request
+        const body = await request.json();
+        const validation = createPaymentLinkSchema.safeParse(body);
 
-        if (!invoiceId) {
-            return NextResponse.json({ error: 'Invoice ID required' }, { status: 400 });
+        if (!validation.success) {
+            return NextResponse.json(
+                { error: 'Validation failed', details: formatValidationErrors(validation.error) },
+                { status: 400 }
+            );
         }
+
+        const { invoiceId } = validation.data;
 
         // Get invoice details
         const { data: invoice, error: invoiceError } = await supabase
@@ -75,6 +82,7 @@ export async function POST(request: NextRequest) {
             .from('invoices')
             .update({
                 payment_link: paymentLink.short_url,
+                razorpay_link_id: paymentLink.id,
                 payment_provider: 'razorpay'
             })
             .eq('id', invoiceId);

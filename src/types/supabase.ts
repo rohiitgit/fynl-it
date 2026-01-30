@@ -241,6 +241,7 @@ export type Database = {
           payment_method: string | null
           payment_provider: string
           processed_at: string
+          razorpay_event_id: string | null
           status: string
           webhook_data: Json | null
         }
@@ -255,6 +256,7 @@ export type Database = {
           payment_method?: string | null
           payment_provider: string
           processed_at?: string
+          razorpay_event_id?: string | null
           status: string
           webhook_data?: Json | null
         }
@@ -269,6 +271,7 @@ export type Database = {
           payment_method?: string | null
           payment_provider?: string
           processed_at?: string
+          razorpay_event_id?: string | null
           status?: string
           webhook_data?: Json | null
         }

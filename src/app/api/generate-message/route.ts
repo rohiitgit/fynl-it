@@ -5,6 +5,13 @@ import { applyRateLimit, addRateLimitHeaders } from '@/lib/rate-limit/rate-limit
 import { AI_RATE_LIMIT } from '@/lib/rate-limit/config';
 import { createAuthRequiredResponse } from '@/lib/rate-limit/responses';
 import { aiLogger } from '@/lib/logger';
+import { extractJsonFromText } from '@/lib/json-parser';
+import { messagePromptSchema, formatValidationErrors } from '@/lib/validation/schemas';
+
+interface MessageData {
+    subject?: string;
+    content?: string;
+}
 
 // Initialize the Gemini API with the API key
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
@@ -30,15 +37,18 @@ export async function POST(request: NextRequest) {
             return rateLimitResult.response; // Rate limit exceeded
         }
 
-        // 3. Process the request
-        const { prompt } = await request.json();
+        // 3. Validate and process the request
+        const body = await request.json();
+        const validation = messagePromptSchema.safeParse(body);
 
-        if (!prompt) {
+        if (!validation.success) {
             return NextResponse.json(
-                { error: 'Missing prompt' },
+                { error: 'Validation failed', details: formatValidationErrors(validation.error) },
                 { status: 400 }
             );
         }
+
+        const { prompt } = validation.data;
 
         // For testing the endpoint directly, ensure we ask for JSON format
         const fullPrompt = typeof prompt === 'string'
@@ -77,20 +87,18 @@ export async function POST(request: NextRequest) {
         }, 'Received Gemini response for message generation');
 
         // Extract JSON from response
-        let messageData;
+        let messageData: MessageData | null = null;
         try {
             // Try to clean the response and find JSON
             const cleanedText = text.trim();
 
             // Try direct parse first
             try {
-                messageData = JSON.parse(cleanedText);
+                messageData = JSON.parse(cleanedText) as MessageData;
             } catch {
                 // If that fails, try to extract JSON from the text
-                const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
-                if (jsonMatch) {
-                    messageData = JSON.parse(jsonMatch[0]);
-                } else {
+                messageData = extractJsonFromText<MessageData>(cleanedText);
+                if (!messageData) {
                     // If no JSON found, create a structured response from the text
                     return NextResponse.json({
                         subject: "Payment Reminder",

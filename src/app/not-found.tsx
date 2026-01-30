@@ -3,15 +3,20 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import * as Sentry from "@sentry/nextjs";
 
 export default function NotFound() {
   const pathname = usePathname();
 
   useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      pathname
-    );
+    // Log 404 to Sentry for tracking dead links
+    Sentry.captureMessage(`404 Not Found: ${pathname}`, {
+      level: 'warning',
+      tags: {
+        type: '404',
+        path: pathname,
+      },
+    });
   }, [pathname]);
 
   return (

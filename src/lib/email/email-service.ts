@@ -1,14 +1,11 @@
-// src/lib/email/email-service.ts - With structured logging
-import { render } from '@react-email/render';
+// src/lib/email/email-service.ts - Refactored with shared utilities
+import React from 'react';
 import { resend, DEFAULT_FROM_EMAIL } from './resend-client';
 import { InvoiceReminderEmail, ThankYouEmail, type EmailTemplateProps } from './templates';
 import { supabase } from '@/lib/supabase';
-import React from 'react';
 import { emailLogger } from '@/lib/logger';
-import { maskEmail } from '@/lib/logger/redact';
-
-// Constants
-const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
+import { sendEmail } from './send-email';
+import { prepareTemplateProps, type InvoiceData, type ProfileData } from './format-utils';
 
 export interface SendEmailParams {
   to: string;
@@ -32,127 +29,154 @@ class EmailService {
    * Send an invoice reminder email
    */
   async sendInvoiceReminder(params: SendEmailParams): Promise<EmailResult> {
-    const {
+    const { to, subject, invoiceId, userId, templateProps, fromEmail, replyTo } = params;
+
+    return sendEmail({
       to,
       subject,
+      template: React.createElement(InvoiceReminderEmail, templateProps),
       invoiceId,
       userId,
-      templateProps,
-      fromEmail = DEFAULT_FROM_EMAIL,
+      emailType: 'reminder',
+      fromEmail,
       replyTo,
-    } = params;
-
-    try {
-
-      // Render the email template with proper React element (async in newer versions)
-      const emailHtml = await render(React.createElement(InvoiceReminderEmail, templateProps));
-
-      // Send email via Resend
-      const { data, error } = await resend.emails.send({
-        from: fromEmail,
-        to,
-        subject,
-        html: emailHtml,
-        replyTo: replyTo ?? fromEmail,
-        tags: [
-          { name: 'type', value: 'invoice-reminder' },
-          { name: 'invoice-id', value: invoiceId },
-          { name: 'user-id', value: userId },
-        ],
-      });
-
-      if (error) {
-        emailLogger.error({
-          action: 'reminder_email_send_failed',
-          recipientMasked: maskEmail(to),
-          invoiceId,
-          userId,
-          err: error instanceof Error ? error : new Error(String(error)),
-        }, 'Resend error sending reminder email');
-        return {
-          success: false,
-          error: error.message ?? 'Failed to send email',
-        };
-      }
-
-      return {
-        success: true,
-        messageId: data?.id,
-      };
-    } catch (error) {
-      emailLogger.error({
-        action: 'reminder_email_service_error',
-        recipientMasked: maskEmail(to),
-        invoiceId,
-        userId,
-        err: error instanceof Error ? error : new Error(String(error)),
-      }, 'Email service error sending reminder');
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
-    }
+    });
   }
 
   /**
    * Send a thank you email for payment received
    */
   async sendThankYouEmail(params: SendEmailParams): Promise<EmailResult> {
-    const {
+    const { to, subject, invoiceId, userId, templateProps, fromEmail, replyTo } = params;
+
+    return sendEmail({
       to,
       subject,
+      template: React.createElement(ThankYouEmail, templateProps),
       invoiceId,
       userId,
-      templateProps,
-      fromEmail = DEFAULT_FROM_EMAIL,
+      emailType: 'thank_you',
+      fromEmail,
       replyTo,
-    } = params;
+    });
+  }
 
+  /**
+   * Send a follow-up email based on database record
+   */
+  async sendFollowUpEmail(followUpId: string): Promise<EmailResult> {
     try {
+      // Get follow-up details from database
+      const { data: followUp, error: followUpError } = await supabase
+        .from('follow_ups')
+        .select(`
+          *,
+          invoices (
+            id,
+            client_name,
+            client_email,
+            invoice_number,
+            amount,
+            currency,
+            due_date,
+            payment_link,
+            description,
+            status
+          )
+        `)
+        .eq('id', followUpId)
+        .eq('status', 'scheduled')
+        .single();
 
-      // Render the email template with proper React element (async in newer versions)
-      const emailHtml = await render(React.createElement(ThankYouEmail, templateProps));
-
-      // Send email via Resend
-      const { data, error } = await resend.emails.send({
-        from: fromEmail,
-        to,
-        subject,
-        html: emailHtml,
-        replyTo: replyTo ?? fromEmail,
-        tags: [
-          { name: 'type', value: 'thank-you' },
-          { name: 'invoice-id', value: invoiceId },
-          { name: 'user-id', value: userId },
-        ],
-      });
-
-      if (error) {
-        emailLogger.error({
-          action: 'thank_you_email_send_failed',
-          recipientMasked: maskEmail(to),
-          invoiceId,
-          userId,
-          err: error instanceof Error ? error : new Error(String(error)),
-        }, 'Resend error sending thank you email');
+      if (followUpError || !followUp) {
         return {
           success: false,
-          error: error.message ?? 'Failed to send email',
+          error: 'Follow-up not found or already processed',
         };
       }
 
-      return {
-        success: true,
-        messageId: data?.id,
-      };
+      // Handle the case where invoices might be an array or single object
+      const invoice = Array.isArray(followUp.invoices)
+        ? followUp.invoices[0]
+        : followUp.invoices;
+
+      if (!invoice) {
+        return {
+          success: false,
+          error: 'Invoice data not found',
+        };
+      }
+
+      // Check if invoice is still unpaid
+      if (invoice.status !== 'pending') {
+        // Update follow-up status to cancelled since invoice is no longer pending
+        await supabase
+          .from('follow_ups')
+          .update({ status: 'cancelled' })
+          .eq('id', followUpId);
+
+        return {
+          success: false,
+          error: 'Invoice is no longer pending - follow-up cancelled',
+        };
+      }
+
+      // Get user profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, business_name, email')
+        .eq('user_id', followUp.user_id)
+        .single();
+
+      if (profileError || !profile) {
+        return {
+          success: false,
+          error: 'User profile not found',
+        };
+      }
+
+      // Use shared utility to prepare template props
+      const templateProps = prepareTemplateProps(
+        invoice as InvoiceData,
+        profile as ProfileData,
+        { customMessage: followUp.content }
+      );
+
+      // Send the email
+      const result = await this.sendInvoiceReminder({
+        to: invoice.client_email,
+        subject: followUp.subject,
+        invoiceId: invoice.id,
+        userId: followUp.user_id,
+        emailType: 'reminder',
+        templateProps,
+        replyTo: profile.email ?? undefined,
+      });
+
+      // Update follow-up status in database
+      if (result.success) {
+        await supabase
+          .from('follow_ups')
+          .update({
+            status: 'sent',
+            sent_at: new Date().toISOString(),
+            message_id: result.messageId || null,
+          })
+          .eq('id', followUpId);
+      } else {
+        await supabase
+          .from('follow_ups')
+          .update({ status: 'failed' })
+          .eq('id', followUpId);
+      }
+
+      return result;
     } catch (error) {
       emailLogger.error({
-        action: 'thank_you_email_service_error',
-        recipientMasked: maskEmail(to),
-        invoiceId,
-        userId,
+        action: 'follow_up_email_error',
+        followUpId,
         err: error instanceof Error ? error : new Error(String(error)),
-      }, 'Email service error sending thank you email');
+      }, 'Error sending follow-up email');
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -161,153 +185,65 @@ class EmailService {
   }
 
   /**
-   * Send a follow-up email based on database record
+   * Send a follow-up email using pre-fetched data (optimized for batch processing)
+   * This method does NOT fetch from database - all data must be provided
    */
-  /**
- * Send a follow-up email based on database record
- */
-async sendFollowUpEmail(followUpId: string): Promise<EmailResult> {
-  try {
-    // Get follow-up details from database
-    const { data: followUp, error: followUpError } = await supabase
-      .from('follow_ups')
-      .select(`
-        *,
-        invoices (
-          id,
-          client_name,
-          client_email,
-          invoice_number,
-          amount,
-          currency,
-          due_date,
-          payment_link,
-          description,
-          status
-        )
-      `)
-      .eq('id', followUpId)
-      .eq('status', 'scheduled')
-      .single();
-
-    if (followUpError || !followUp) {
-      return {
-        success: false,
-        error: 'Follow-up not found or already processed',
-      };
-    }
-
-    // Handle the case where invoices might be an array or single object
-    const invoice = Array.isArray(followUp.invoices) 
-      ? followUp.invoices[0] 
-      : followUp.invoices;
-
-    if (!invoice) {
-      return {
-        success: false,
-        error: 'Invoice data not found',
-      };
-    }
-
-    // Check if invoice is still unpaid
-    if (invoice.status !== 'pending') {
-      // Update follow-up status to cancelled since invoice is no longer pending
-      await supabase
-        .from('follow_ups')
-        .update({ status: 'cancelled' })
-        .eq('id', followUpId);
-        
-      return {
-        success: false,
-        error: 'Invoice is no longer pending - follow-up cancelled',
-      };
-    }
-
-    // Get user profile
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('first_name, last_name, business_name, email')
-      .eq('user_id', followUp.user_id)
-      .single();
-
-    if (profileError || !profile) {
-      return {
-        success: false,
-        error: 'User profile not found',
-      };
-    }
-
-    // Calculate days overdue
-    const dueDate = new Date(invoice.due_date);
-    const today = new Date();
-    const diffTime = today.getTime() - dueDate.getTime();
-    const daysOverdue = Math.max(0, Math.floor(diffTime / MILLISECONDS_PER_DAY));
-
-    // Currency symbol mapping
-    const currencySymbol = invoice.currency === 'USD' ? '$' : invoice.currency;
-    const formattedAmount = `${currencySymbol}${invoice.amount.toFixed(2)}`;
-
-    // Format user name
-    const userName = `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim();
-
-    // Prepare template props
-    const templateProps: EmailTemplateProps = {
-      clientName: invoice.client_name,
-      invoiceNumber: invoice.invoice_number,
-      amount: formattedAmount,
-      dueDate: dueDate.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      }),
-      daysOverdue,
-      paymentLink: invoice.payment_link ?? undefined,
-      userName,
-      businessName: profile.business_name ?? undefined,
-      customMessage: followUp.content, // Use the stored message content
+  async sendFollowUpEmailWithData(params: {
+    followUp: {
+      id: string;
+      user_id: string;
+      subject: string;
+      content: string;
     };
-
-    // Send the email
-    const result = await this.sendInvoiceReminder({
-      to: invoice.client_email,
-      subject: followUp.subject,
-      invoiceId: invoice.id,
-      userId: followUp.user_id,
-      emailType: 'reminder',
-      templateProps,
-      replyTo: profile.email ?? undefined,
-    });
-
-    // Update follow-up status in database
-    if (result.success) {
-      await supabase
-        .from('follow_ups')
-        .update({ 
-          status: 'sent', 
-          sent_at: new Date().toISOString(),
-          message_id: result.messageId || null
-        })
-        .eq('id', followUpId);
-    } else {
-      await supabase
-        .from('follow_ups')
-        .update({ status: 'failed' })
-        .eq('id', followUpId);
-    }
-
-    return result;
-  } catch (error) {
-    emailLogger.error({
-      action: 'follow_up_email_error',
-      followUpId,
-      err: error instanceof Error ? error : new Error(String(error)),
-    }, 'Error sending follow-up email');
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+    invoice: {
+      id: string;
+      client_name: string;
+      client_email: string;
+      invoice_number: string;
+      amount: number;
+      currency: string;
+      due_date: string;
+      payment_link: string | null;
     };
+    profile: {
+      first_name: string | null;
+      last_name: string | null;
+      business_name: string | null;
+      email: string | null;
+    };
+  }): Promise<EmailResult> {
+    const { followUp, invoice, profile } = params;
+
+    try {
+      // Use shared utility to prepare template props
+      const templateProps = prepareTemplateProps(
+        invoice as InvoiceData,
+        profile as ProfileData,
+        { customMessage: followUp.content }
+      );
+
+      // Send the email using existing method
+      return await this.sendInvoiceReminder({
+        to: invoice.client_email,
+        subject: followUp.subject,
+        invoiceId: invoice.id,
+        userId: followUp.user_id,
+        emailType: 'reminder',
+        templateProps,
+        replyTo: profile.email ?? undefined,
+      });
+    } catch (error) {
+      emailLogger.error({
+        action: 'follow_up_email_with_data_error',
+        followUpId: followUp.id,
+        err: error instanceof Error ? error : new Error(String(error)),
+      }, 'Error sending follow-up email with pre-fetched data');
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
   }
-}
 
   /**
    * Test email configuration

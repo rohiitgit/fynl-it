@@ -1,0 +1,72 @@
+'use client';
+
+import * as Sentry from '@sentry/nextjs';
+import { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    // Log the error to Sentry
+    Sentry.captureException(error);
+  }, [error]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full px-6 py-8 bg-white rounded-lg shadow-md text-center">
+        <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+          <svg
+            className="w-8 h-8 text-red-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+        </div>
+
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          Something went wrong
+        </h1>
+
+        <p className="text-gray-600 mb-6">
+          We&apos;ve been notified about this issue and are working to fix it.
+          Please try again.
+        </p>
+
+        {error.digest && (
+          <p className="text-xs text-gray-400 mb-4">
+            Error ID: {error.digest}
+          </p>
+        )}
+
+        <div className="space-y-3">
+          <Button
+            onClick={reset}
+            className="w-full"
+          >
+            Try again
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={() => window.location.href = '/'}
+            className="w-full"
+          >
+            Go to homepage
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

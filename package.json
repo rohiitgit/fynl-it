@@ -26,6 +26,7 @@
     "@radix-ui/react-tooltip": "^1.2.7",
     "@react-email/components": "^0.3.2",
     "@react-email/render": "^1.1.3",
+    "@sentry/nextjs": "^10.38.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.52.1",
     "@tanstack/react-query": "^5.83.0",
@@ -49,7 +50,8 @@
     "resend": "^4.7.0",
     "sonner": "^2.0.6",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.1.3",
