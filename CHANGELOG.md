@@ -96,3 +96,6 @@
 - 9 green ₹500 bills continuously launch from the barrel in staggered parabolas across the hero (CSS keyframes bill-fly in globals.css, per-bill travel/peak/rotation via custom properties). Whole layer is absolute inset-0 z-0 + pointer-events-none, so bills always stay behind the hero's text, clouds, and banners (z-10+).
 - prefers-reduced-motion: bills hidden, machine static.
 - Verified: eslint + tsc clean; two timed screenshots confirm motion + correct layering (bills render behind cloud/text).
+
+## [2026-07-12] Founder photo URL updated
+- Replaced dead twimg profile URL (404) with the current one; photo now renders in the founder card.

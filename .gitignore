@@ -57,3 +57,7 @@ branch_structure.json
 /backups
 *.backup.gz
 cluster_dump.sql
+
+# Local safety backups (Claude sessions)
+*.backup.*
+/archive/
