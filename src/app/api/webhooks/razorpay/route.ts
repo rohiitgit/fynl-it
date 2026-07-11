@@ -1,4 +1,3 @@
-// src/app/api/webhooks/razorpay/route.ts - Refactored with service layer
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { applyRateLimit } from '@/lib/rate-limit/rate-limiter';
@@ -72,45 +71,32 @@ function verifyRazorpaySignature(
   }
 }
 
-/**
- * Handle payment.captured event using the service layer
- */
 async function handlePaymentCaptured(
   event: RazorpayPaymentEvent,
   razorpayEventId: string | null
 ): Promise<ProcessResult> {
   const payment = event.payload.payment.entity;
 
-  // Use the payment processor service to handle the payment
   const result = await paymentProcessorService.processPaymentCaptured(
     payment,
     razorpayEventId,
     event
   );
 
-  // Trigger thank you email asynchronously (fire-and-forget)
   if (result.success && result.invoiceId && !result.isDuplicate) {
-    try {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-      if (appUrl) {
-        fetch(`${appUrl}/api/email/send-thank-you`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ invoiceId: result.invoiceId }),
-        }).catch((err) => {
-          paymentLogger.error({
-            action: 'thank_you_email_failed',
-            invoiceId: result.invoiceId,
-            err: err instanceof Error ? err : new Error(String(err)),
-          }, 'Thank you email API call failed');
-        });
-      }
-    } catch (emailError) {
-      paymentLogger.error({
-        action: 'thank_you_email_trigger_failed',
-        invoiceId: result.invoiceId,
-        err: emailError instanceof Error ? emailError : new Error(String(emailError)),
-      }, 'Thank you email trigger failed');
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (appUrl) {
+      fetch(`${appUrl}/api/email/send-thank-you`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoiceId: result.invoiceId }),
+      }).catch((err) => {
+        paymentLogger.error({
+          action: 'thank_you_email_failed',
+          invoiceId: result.invoiceId,
+          err: err instanceof Error ? err : new Error(String(err)),
+        }, 'Thank you email API call failed');
+      });
     }
   }
 
@@ -124,9 +110,6 @@ async function handlePaymentCaptured(
   };
 }
 
-/**
- * Handle payment link events using the service layer
- */
 async function handlePaymentLinkEvent(
   event: RazorpayPaymentLinkEvent
 ): Promise<ProcessResult> {
@@ -139,9 +122,7 @@ async function handlePaymentLinkEvent(
     status: paymentLink.status,
   }, 'Payment link event received');
 
-  // Handle payment link specific events
   if (event.event === 'payment_link.paid') {
-    // Use invoice service to find invoice by payment link ID
     const invoice = await invoiceService.findAnyByRazorpayLinkId(paymentLink.id);
 
     if (!invoice) {
@@ -152,8 +133,6 @@ async function handlePaymentLinkEvent(
       return { success: false, message: 'Invoice not found for payment link' };
     }
 
-    // The actual payment details will come via payment.captured event
-    // This is just for tracking link usage
     paymentLogger.info({
       action: 'payment_link_used',
       linkId: paymentLink.id,
@@ -175,11 +154,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       ip: clientIp,
     }, 'Razorpay webhook received');
 
-    // 1. Get the raw body and signature FIRST (before any rate limiting)
     const body = await request.text();
     const signature = request.headers.get('x-razorpay-signature');
 
-    // 2. Handle missing signature - rate limit unsigned requests to prevent probing
+    // rate-limit unsigned requests to prevent endpoint probing
     if (!signature) {
       const rateLimitResult = await applyRateLimit(request, null, WEBHOOK_RATE_LIMIT, 'webhook');
       if (rateLimitResult.response) {
@@ -196,7 +174,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
     }
 
-    // 3. Check webhook secret configuration
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
     if (!webhookSecret) {
       securityLogger.error({
@@ -205,10 +182,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
     }
 
-    // 4. Verify signature - valid signatures bypass rate limiting entirely
-    //    This ensures legitimate Razorpay webhooks are never blocked during high volume
+    // Valid signatures bypass rate limiting; failed signatures are rate-limited to prevent brute-force
     if (!verifyRazorpaySignature(body, signature, webhookSecret)) {
-      // Rate limit failed signature attempts to prevent brute-force attacks
       const rateLimitResult = await applyRateLimit(request, null, WEBHOOK_RATE_LIMIT, 'webhook');
       if (rateLimitResult.response) {
         securityLogger.warn({
@@ -225,13 +200,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
-    // 5. Valid signature - proceed without rate limiting
-    //    Legitimate webhooks from Razorpay are cryptographically verified
-
-    // Parse the webhook payload
     const event: RazorpayPaymentEvent | RazorpayPaymentLinkEvent = JSON.parse(body);
-
-    // Extract Razorpay event ID for idempotency tracking
     const razorpayEventId = request.headers.get('x-razorpay-event-id');
 
     paymentLogger.info({
@@ -242,7 +211,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     let result: ProcessResult;
 
-    // Handle different event types - routing to service layer
     switch (event.event) {
       case 'payment.captured':
         result = await handlePaymentCaptured(event as RazorpayPaymentEvent, razorpayEventId);
@@ -280,7 +248,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         duration,
         message: result.message,
       }, 'Webhook event processing failed');
-      return NextResponse.json(result, { status: 200 }); // Return 200 to avoid retries
+      return NextResponse.json(result, { status: 200 }); // 200 prevents Razorpay retry storms
     }
   } catch (error) {
     const duration = Date.now() - startTime;

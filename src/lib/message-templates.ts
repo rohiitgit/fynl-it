@@ -1,4 +1,3 @@
-// Message template types and configurations
 export type MessageTone = 'friendly' | 'professional' | 'firm' | 'urgent' | 'final';
 export type MessageType = 'initial' | 'reminder' | 'follow_up' | 'urgent' | 'final' | 'thank_you';
 
@@ -12,27 +11,7 @@ export interface MessageTemplate {
     variables: string[]; // Variables that can be replaced in the template
 }
 
-export interface TemplateVariable {
-    key: string;
-    description: string;
-    example: string;
-}
-
-// Available variables for templates
-export const TEMPLATE_VARIABLES: TemplateVariable[] = [
-    { key: '{clientName}', description: 'Client\'s name', example: 'John Doe' },
-    { key: '{invoiceNumber}', description: 'Invoice number', example: 'INV-001' },
-    { key: '{amount}', description: 'Invoice amount', example: '$1,000' },
-    { key: '{dueDate}', description: 'Due date', example: 'January 15, 2024' },
-    { key: '{daysOverdue}', description: 'Days overdue', example: '5' },
-    { key: '{paymentLink}', description: 'Payment link', example: 'https://pay.me/...' },
-    { key: '{businessName}', description: 'Your business name', example: 'Acme Design Co.' },
-    { key: '{userName}', description: 'Your name', example: 'Jane Smith' },
-];
-
-// Default message templates
 export const DEFAULT_TEMPLATES: MessageTemplate[] = [
-    // Initial friendly reminder (on due date)
     {
         id: 'initial-friendly',
         type: 'initial',
@@ -52,7 +31,6 @@ Thanks so much!
         variables: ['clientName', 'invoiceNumber', 'amount', 'dueDate', 'paymentLink', 'userName']
     },
 
-    // Professional reminder (3 days overdue)
     {
         id: 'reminder-professional',
         type: 'reminder',
@@ -75,7 +53,6 @@ Best regards,
         variables: ['clientName', 'invoiceNumber', 'amount', 'dueDate', 'daysOverdue', 'paymentLink', 'userName', 'businessName']
     },
 
-    // Firm follow-up (7 days overdue)
     {
         id: 'followup-firm',
         type: 'follow_up',
@@ -102,7 +79,6 @@ I need to receive payment within 48 hours to avoid further action.
         variables: ['clientName', 'invoiceNumber', 'amount', 'dueDate', 'daysOverdue', 'paymentLink', 'userName', 'businessName']
     },
 
-    // Urgent notice (14 days overdue)
     {
         id: 'urgent-notice',
         type: 'urgent',
@@ -129,7 +105,6 @@ You have 24 hours to respond before I proceed with formal collection procedures.
         variables: ['clientName', 'invoiceNumber', 'amount', 'dueDate', 'daysOverdue', 'paymentLink', 'userName', 'businessName']
     },
 
-    // Final notice (21 days overdue)
     {
         id: 'final-notice',
         type: 'final',
@@ -161,7 +136,6 @@ Original Due: {dueDate}`,
         variables: ['clientName', 'invoiceNumber', 'amount', 'dueDate', 'daysOverdue', 'userName', 'businessName']
     },
 
-    // Thank you message (payment received)
     {
         id: 'thank-you',
         type: 'thank_you',
@@ -183,31 +157,22 @@ Best regards,
     }
 ];
 
-// Helper function to get template by type and tone
-export function getTemplateByTypeAndTone(type: MessageType, tone: MessageTone): MessageTemplate | undefined {
-    return DEFAULT_TEMPLATES.find(t => t.type === type && t.tone === tone);
-}
-
-// Helper function to get templates for a timeline
 export function getTemplatesForTimeline(): MessageTemplate[] {
     return DEFAULT_TEMPLATES
         .filter(t => t.type !== 'thank_you')
         .sort((a, b) => a.dayOffset - b.dayOffset);
 }
 
-// Replace variables in template
 export function replaceTemplateVariables(
     template: string,
     variables: Record<string, string | undefined>
 ): string {
     let result = template;
 
-    // Handle conditional content (e.g., {paymentLink ? 'text' : 'alt text'})
     result = result.replace(/\{(\w+)\s*\?\s*'([^']+)'\s*:\s*'([^']*)'\}/g, (match, varName, truePart, falsePart) => {
         return variables[varName] ? truePart : falsePart;
     });
 
-    // Replace simple variables
     Object.entries(variables).forEach(([key, value]) => {
         const regex = new RegExp(`\\{${key}\\}`, 'g');
         result = result.replace(regex, value || '');

@@ -75,15 +75,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(initialSession)
         setUser(initialSession?.user ?? null)
 
-        // If we have a session, validate it's working
-        if (initialSession?.user) {
-          try {
-            // Test the session with a simple call
-            await supabase.from('profiles').select('id').limit(1)
-          } catch (validationError) {
-            console.warn('⚠️ Session validation failed, but continuing:', validationError)
-          }
-        }
       }
     } catch (error) {
       console.error('Auth initialization error:', error)

@@ -1,40 +1,11 @@
-// src/lib/hooks/use-email.ts - Fixed ESLint errors
 import { useState, useCallback } from 'react';
 import { useToast } from '@/lib/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+import { formatAmount, calculateDaysOverdue, type ProfileData } from '@/lib/email/format-utils';
+import type { EmailTemplateProps } from '@/lib/email/templates';
+import type { EmailResult } from '@/lib/email/send-email';
 
-// Constants
-const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
-
-// Type definitions
-export interface EmailResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
-}
-
-interface UserProfile {
-  first_name: string | null;
-  last_name: string | null;
-  business_name: string | null;
-  email: string | null;
-}
-
-interface EmailTemplateProps {
-  clientName: string;
-  invoiceNumber: string;
-  amount: string;
-  dueDate: string;
-  daysOverdue?: number;
-  paymentLink?: string;
-  upiLink?: string;
-  qrCode?: string;
-  userName: string;
-  businessName?: string;
-  customMessage?: string;
-}
-
-type UrgencyLevel = 'gentle' | 'standard' | 'urgent';
+type UserProfile = Pick<ProfileData, 'first_name' | 'last_name' | 'business_name' | 'email'>;
 
 // Supabase query result types (only the fields we actually select)
 interface FollowUpQueryResult {
@@ -61,25 +32,6 @@ export function useEmail() {
   const [error, setError] = useState<string | null>(null);
   const { success, error: showError } = useToast();
 
-  // Utility functions
-  const getCurrencySymbol = useCallback((currency: string): string => {
-    const symbols: Record<string, string> = {
-      INR: '₹',
-      USD: '$',
-      EUR: '€',
-      GBP: '£',
-      JPY: '¥',
-      CAD: 'C$',
-      AUD: 'A$',
-    };
-    return symbols[currency.toUpperCase()] || currency;
-  }, []);
-
-  const formatAmount = useCallback((amount: number, currency: string): string => {
-    const symbol = getCurrencySymbol(currency);
-    return `${symbol}${amount.toFixed(2)}`;
-  }, [getCurrencySymbol]);
-
   const formatUserName = useCallback((profile: UserProfile): string => {
     const firstName = profile.first_name?.trim() || '';
     const lastName = profile.last_name?.trim() || '';
@@ -91,7 +43,6 @@ export function useEmail() {
     return emailPattern.test(email);
   }, []);
 
-  // Main send reminder function
   const sendReminder = async (followUpId: string): Promise<EmailResult> => {
     if (!followUpId) {
       const errorMessage = 'Follow-up ID is required';
@@ -104,13 +55,11 @@ export function useEmail() {
     setError(null);
 
     try {
-      // Get current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) {
         throw new Error('Not authenticated');
       }
 
-      // Get follow-up details with invoice data
       const { data: followUp, error: followUpError } = await supabase
         .from('follow_ups')
         .select(`
@@ -161,9 +110,7 @@ export function useEmail() {
 
       // Calculate days overdue
       const dueDate = new Date(invoice.due_date);
-      const today = new Date();
-      const diffTime = today.getTime() - dueDate.getTime();
-      const daysOverdue = Math.max(0, Math.floor(diffTime / MILLISECONDS_PER_DAY));
+      const daysOverdue = calculateDaysOverdue(dueDate);
 
       // Prepare template props
       const templateProps: EmailTemplateProps = {
@@ -177,9 +124,7 @@ export function useEmail() {
         }),
         daysOverdue,
         paymentLink: invoice.payment_link || undefined,
-        // UPI fields - use payment_link as fallback until UPI columns are added
         upiLink: invoice.payment_link || undefined,
-        qrCode: undefined, // Will be undefined until qr_code_url column exists
         userName: formatUserName(profile),
         businessName: profile.business_name || undefined,
         customMessage: typedFollowUp.content,
@@ -431,141 +376,10 @@ export function useEmail() {
     }
   };
 
-  // Enhanced UPI reminder function
-  const sendUPIReminder = async (
-    invoiceId: string,
-    urgency: UrgencyLevel = 'standard'
-  ): Promise<EmailResult> => {
-    if (!invoiceId) {
-      const errorMessage = 'Invoice ID is required';
-      setError(errorMessage);
-      showError('Invalid request', errorMessage);
-      return { success: false, error: errorMessage };
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) {
-        throw new Error('Not authenticated');
-      }
-
-      // Get invoice data
-      const { data: invoice, error: invoiceError } = await supabase
-        .from('invoices')
-        .select('*')
-        .eq('id', invoiceId)
-        .eq('user_id', user.id)
-        .single();
-
-      if (invoiceError || !invoice) {
-        throw new Error('Invoice not found');
-      }
-
-      // Get user profile
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('first_name, last_name, business_name, email')
-        .eq('user_id', user.id)
-        .single();
-
-      if (profileError || !profile) {
-        throw new Error('User profile not found');
-      }
-
-      // Calculate days overdue
-      const dueDate = new Date(invoice.due_date);
-      const today = new Date();
-      const diffTime = today.getTime() - dueDate.getTime();
-      const daysOverdue = Math.max(0, Math.floor(diffTime / MILLISECONDS_PER_DAY));
-
-      // UPI-focused subject lines
-      const subjects: Record<UrgencyLevel, string> = {
-        gentle: `Friendly reminder: Invoice ${invoice.invoice_number} - Pay instantly via UPI`,
-        standard: `Payment due: Invoice ${invoice.invoice_number} - Quick UPI payment available`,
-        urgent: `URGENT: Invoice ${invoice.invoice_number} overdue - Pay now via UPI`
-      };
-
-      const templateProps: EmailTemplateProps = {
-        clientName: invoice.client_name,
-        invoiceNumber: invoice.invoice_number,
-        amount: formatAmount(invoice.amount, invoice.currency),
-        dueDate: dueDate.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        }),
-        daysOverdue,
-        paymentLink: invoice.payment_link || undefined,
-        // UPI fields - use payment_link as fallback until UPI columns are added
-        upiLink: invoice.payment_link || undefined,
-        qrCode: undefined, // Will be undefined until qr_code_url column exists
-        userName: formatUserName(profile),
-        businessName: profile.business_name || undefined,
-        customMessage: undefined,
-      };
-
-      const response = await fetch('/api/email/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'reminder',
-          to: invoice.client_email,
-          subject: subjects[urgency],
-          templateProps,
-          replyTo: profile.email || undefined,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || 'Failed to send UPI reminder');
-      }
-
-      const result = await response.json();
-
-      // Log email
-      const { error: logError } = await supabase
-        .from('email_logs')
-        .insert({
-          user_id: user.id,
-          invoice_id: invoiceId,
-          follow_up_id: null,
-          email_type: 'reminder',
-          recipient_email: invoice.client_email,
-          subject: subjects[urgency],
-          message_id: result.messageId || null,
-          status: 'sent'
-        });
-
-      if (logError) {
-        console.error('Failed to log email:', logError);
-      }
-
-      success('UPI reminder sent!', `${urgency} reminder sent with UPI payment options.`);
-
-      return {
-        success: true,
-        messageId: result.messageId,
-      };
-
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to send UPI reminder';
-      setError(errorMessage);
-      showError('UPI reminder failed', errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return {
     sendReminder,
     sendThankYou,
     sendTestEmail,
-    sendUPIReminder,
     loading,
     error,
   };

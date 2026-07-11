@@ -25,14 +25,12 @@ export default function DashboardLayout({
   // Show loading state
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center">
+      <div className="min-h-screen bg-paper comic-paper-bg flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-12 h-12 mx-auto relative">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500/20 border-t-green-500"></div>
-          </div>
+          <div className="w-12 h-12 mx-auto border-[3px] border-ink bg-yellow animate-spin [animation-duration:1.2s]" />
           <div>
-            <h3 className="font-semibold text-lg text-green-600">Loading...</h3>
-            <p className="text-muted-foreground">Setting up your dashboard</p>
+            <h3 className="font-display font-bold text-lg text-ink">Loading...</h3>
+            <p className="font-mono text-sm text-muted-foreground">Setting up your dashboard</p>
           </div>
         </div>
       </div>
@@ -72,7 +70,7 @@ export default function DashboardLayout({
       <Sidebar user={userData} onSignOut={signOut} onNewInvoice={handleNewInvoice} />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto lg:ml-64 bg-gradient-to-br from-background to-secondary">
+      <main className="flex-1 overflow-auto lg:ml-64 bg-paper">
         {/* Mobile header spacing - accounts for hamburger menu */}
         <div className="lg:hidden h-16" />
         {children}

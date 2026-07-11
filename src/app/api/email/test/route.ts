@@ -10,7 +10,6 @@ import { testEmailSchema, formatValidationErrors } from '@/lib/validation/schema
 
 export async function POST(request: NextRequest) {
   try {
-    // 1. Check authentication
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return createAuthRequiredResponse();
@@ -23,13 +22,11 @@ export async function POST(request: NextRequest) {
       return createAuthRequiredResponse();
     }
 
-    // 2. Check rate limit
     const rateLimitResult = await applyRateLimit(request, user.id, EMAIL_RATE_LIMIT, 'email');
     if (rateLimitResult.response) {
-      return rateLimitResult.response; // Rate limit exceeded
+      return rateLimitResult.response;
     }
 
-    // 3. Validate the request body
     const body = await request.json();
     const validation = testEmailSchema.safeParse(body);
 
@@ -73,7 +70,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Return response with rate limit headers
     const jsonResponse = NextResponse.json({
       success: true,
       messageId: data?.id,

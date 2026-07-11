@@ -39,25 +39,20 @@ export default function EmailSettings() {
     }
 
     setLoading(true);
-    try {
-      // TODO: Send test email via your backend API
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulated delay
-      success("Test Email Sent", "Check your inbox - reminder preview sent!");
-    } catch {
-      error("Failed to Send", "Could not send test email. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    // TODO: Send test email via your backend API
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Simulated delay
+    success("Test Email Sent", "Check your inbox - reminder preview sent!");
+    setLoading(false);
   };
 
   return (
     <div className="space-y-6">
       {/* Email Personalization */}
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/50">
+      <Card>
         <CardHeader>
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-green-500/10 rounded-full flex items-center justify-center">
-              <User className="h-5 w-5 text-green-600" />
+            <div className="w-10 h-10 bg-yellow border-2 border-ink flex items-center justify-center">
+              <User className="h-5 w-5 text-ink" />
             </div>
             <div>
               <CardTitle className="text-xl">Email Personalization</CardTitle>
@@ -149,7 +144,7 @@ export default function EmailSettings() {
             >
               {loading ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin text-green-600" />
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Sending...
                 </>
               ) : (
@@ -179,23 +174,23 @@ export default function EmailSettings() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 border rounded-lg">
-              <h4 className="font-medium mb-2">Payment Reminders</h4>
+            <div className="p-4 border-2 border-ink bg-paper-panel">
+              <h4 className="font-bold mb-2">Payment Reminders</h4>
               <p className="text-sm text-muted-foreground">
                 Gentle → Professional → Firm progression that automatically adjusts based on how overdue the invoice is
               </p>
             </div>
             
-            <div className="p-4 border rounded-lg">
-              <h4 className="font-medium mb-2">Thank You Messages</h4>
+            <div className="p-4 border-2 border-ink bg-paper-panel">
+              <h4 className="font-bold mb-2">Thank You Messages</h4>
               <p className="text-sm text-muted-foreground">
                 Automatically sent when you mark invoices as paid - builds client relationships
               </p>
             </div>
           </div>
 
-          <div className="p-4 bg-muted rounded-lg">
-            <h4 className="font-medium mb-2">Template Features</h4>
+          <div className="p-4 bg-gray-panel border-2 border-ink">
+            <h4 className="font-bold mb-2">Template Features</h4>
             <ul className="text-sm text-muted-foreground space-y-1">
               <li>• Mobile-friendly design that looks great everywhere</li>
               <li>• Automatically includes client name, invoice details, and amount</li>

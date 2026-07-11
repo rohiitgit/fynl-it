@@ -52,3 +52,8 @@ storybook-static
 temp_auto_push.bat
 temp_interactive_push.bat
 branch_structure.json
+
+# Database backups (contain encrypted passwords, auth tokens, PII — never commit)
+/backups
+*.backup.gz
+cluster_dump.sql

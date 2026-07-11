@@ -41,13 +41,6 @@ export const testEmailSchema = z.object({
     .max(254, 'Email must be less than 254 characters'),
 });
 
-// Helper type exports for use in route handlers
-export type MessagePromptInput = z.infer<typeof messagePromptSchema>;
-export type ProcessInvoiceInput = z.infer<typeof processInvoiceSchema>;
-export type CreatePaymentLinkInput = z.infer<typeof createPaymentLinkSchema>;
-export type ThankYouEmailInput = z.infer<typeof thankYouEmailSchema>;
-export type TestEmailInput = z.infer<typeof testEmailSchema>;
-
 // Validation helper that returns a standardized error response
 export function validateRequest<T>(
   schema: z.ZodSchema<T>,

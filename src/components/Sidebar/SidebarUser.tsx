@@ -22,12 +22,12 @@ interface SidebarUserProps {
 
 export function SidebarUser({ user, onSignOut }: SidebarUserProps) {
   return (
-    <div className="mt-auto p-4 sm:p-5 border-t border-border/50 bg-card">
+    <div className="mt-auto p-4 sm:p-5 border-t-[2.5px] border-ink bg-card">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="w-full flex items-center gap-3 p-3 sm:p-3.5 hover:bg-accent rounded-lg transition-colors cursor-pointer min-h-[56px] sm:min-h-[60px] active:bg-accent/80">
-            <Avatar className="h-10 w-10 sm:h-11 sm:w-11 ring-2 ring-green-500/20 flex-shrink-0">
-              <AvatarFallback className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 text-green-700 dark:text-green-300 font-semibold text-base sm:text-lg">
+          <button className="w-full flex items-center gap-3 p-3 sm:p-3.5 border-2 border-transparent hover:border-ink hover:bg-gray-panel rounded-none transition-colors cursor-pointer min-h-[56px] sm:min-h-[60px] active:bg-yellow">
+            <Avatar className="h-10 w-10 sm:h-11 sm:w-11 rounded-none border-2 border-ink flex-shrink-0">
+              <AvatarFallback className="rounded-none bg-yellow text-ink font-display font-extrabold text-base sm:text-lg">
                 {user.initial}
               </AvatarFallback>
             </Avatar>
@@ -47,7 +47,7 @@ export function SidebarUser({ user, onSignOut }: SidebarUserProps) {
             <span className="text-sm sm:text-base">Profile</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onSignOut} className="text-red-600 py-2 sm:py-2.5 cursor-pointer">
+          <DropdownMenuItem onClick={onSignOut} className="text-overdue py-2 sm:py-2.5 cursor-pointer">
             <LogOut className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
             <span className="text-sm sm:text-base">Sign Out</span>
           </DropdownMenuItem>

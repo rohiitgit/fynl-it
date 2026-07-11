@@ -48,23 +48,21 @@ function AuthCallbackContent() {
     }, [router])
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center p-4">
-            <Card className="w-full max-w-md shadow-lg">
+        <div className="min-h-screen bg-paper comic-paper-bg flex items-center justify-center p-4">
+            <Card className="w-full max-w-md">
                 <CardHeader className="text-center">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center">
                         {status === 'loading' && (
-                            <div className="w-8 h-8 relative">
-                                <div className="animate-spin rounded-full h-8 w-8 border-4 border-green-500/20 border-t-green-500"></div>
-                            </div>
+                            <div className="w-8 h-8 border-[3px] border-ink bg-yellow animate-spin [animation-duration:1.2s]" />
                         )}
                         {status === 'success' && (
-                            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                                <CheckCircle className="h-8 w-8 text-green-600" />
+                            <div className="w-16 h-16 bg-[#C9F2CF] border-2 border-ink flex items-center justify-center">
+                                <CheckCircle className="h-8 w-8 text-ink" />
                             </div>
                         )}
                         {status === 'error' && (
-                            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-                                <AlertCircle className="h-8 w-8 text-red-600" />
+                            <div className="w-16 h-16 bg-[#FFD9CF] border-2 border-ink flex items-center justify-center">
+                                <AlertCircle className="h-8 w-8 text-ink" />
                             </div>
                         )}
                     </div>
@@ -77,8 +75,8 @@ function AuthCallbackContent() {
                 </CardHeader>
 
                 <CardContent className="text-center space-y-4">
-                    <p className={`text-sm ${status === 'success' ? 'text-green-800 dark:text-green-200' :
-                            status === 'error' ? 'text-red-800 dark:text-red-200' :
+                    <p className={`text-sm ${status === 'success' ? 'text-[#0F5A28]' :
+                            status === 'error' ? 'text-overdue' :
                                 'text-muted-foreground'
                         }`}>
                         {message}
@@ -113,8 +111,8 @@ function AuthCallbackContent() {
                     {status === 'success' && (
                         <div className="pt-4">
                             <div className="flex items-center justify-center space-x-2">
-                                <Loader2 className="h-4 w-4 animate-spin text-green-600" />
-                                <p className="text-xs text-green-600">
+                                <Loader2 className="h-4 w-4 animate-spin text-ink" />
+                                <p className="font-mono text-xs text-muted-foreground">
                                     Redirecting to dashboard...
                                 </p>
                             </div>
@@ -129,8 +127,8 @@ function AuthCallbackContent() {
 // Loading fallback component
 function AuthCallbackLoading() {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center p-4">
-            <Card className="w-full max-w-md shadow-lg">
+        <div className="min-h-screen bg-paper comic-paper-bg flex items-center justify-center p-4">
+            <Card className="w-full max-w-md">
                 <CardHeader className="text-center">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center">
                         <div className="w-8 h-8 relative">

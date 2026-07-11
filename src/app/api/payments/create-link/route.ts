@@ -1,4 +1,3 @@
-// src/app/api/payments/create-link/route.ts - With structured logging
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { razorpayUPIService } from '@/lib/payments/razorpay-upi';
@@ -10,7 +9,6 @@ import { createPaymentLinkSchema, formatValidationErrors } from '@/lib/validatio
 
 export async function POST(request: NextRequest) {
     try {
-        // 1. Check authentication
         const authHeader = request.headers.get('authorization');
         if (!authHeader) {
             return createAuthRequiredResponse();
@@ -23,13 +21,11 @@ export async function POST(request: NextRequest) {
             return createAuthRequiredResponse();
         }
 
-        // 2. Check rate limit
         const rateLimitResult = await applyRateLimit(request, user.id, PAYMENT_RATE_LIMIT, 'payment');
         if (rateLimitResult.response) {
-            return rateLimitResult.response; // Rate limit exceeded
+            return rateLimitResult.response;
         }
 
-        // 3. Validate and process the request
         const body = await request.json();
         const validation = createPaymentLinkSchema.safeParse(body);
 
@@ -42,7 +38,6 @@ export async function POST(request: NextRequest) {
 
         const { invoiceId } = validation.data;
 
-        // Get invoice details
         const { data: invoice, error: invoiceError } = await supabase
             .from('invoices')
             .select(`
@@ -57,13 +52,11 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
         }
 
-        // Get user profile
         const profile = Array.isArray(invoice.profiles) ? invoice.profiles[0] : invoice.profiles;
         const businessName = profile?.business_name ||
             `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() ||
             'Your Business';
 
-        // Create UPI payment link
         const paymentLink = await razorpayUPIService.createUPIPaymentLink({
             invoiceId: invoice.id,
             clientName: invoice.client_name,
@@ -77,7 +70,6 @@ export async function POST(request: NextRequest) {
             }
         });
 
-        // Update invoice with payment link
         const { error: updateError } = await supabase
             .from('invoices')
             .update({
@@ -97,7 +89,6 @@ export async function POST(request: NextRequest) {
             // Don't fail the request, payment link is still created
         }
 
-        // 4. Return response with rate limit headers
         const jsonResponse = NextResponse.json({
             success: true,
             paymentLink: {

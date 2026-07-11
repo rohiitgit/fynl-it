@@ -396,6 +396,28 @@ export type Database = {
         Args: { invoice_row: Database["public"]["Tables"]["invoices"]["Row"] }
         Returns: boolean
       }
+      process_payment_captured: {
+        Args: {
+          p_invoice_id: string
+          p_payment_id: string
+          p_payment_provider: string
+          p_paid_at: string
+          p_event_type: string
+          p_razorpay_event_id: string | null
+          p_amount: number
+          p_currency: string
+          p_payment_method: string
+          p_webhook_data: Json
+        }
+        Returns: {
+          success: boolean
+          is_duplicate: boolean
+          cancelled_followups: number
+          existing_event_id: string | null
+          error_message: string | null
+          message: string | null
+        }
+      }
       update_overdue_invoices: { Args: never; Returns: undefined }
     }
     Enums: {

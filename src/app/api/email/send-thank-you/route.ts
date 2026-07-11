@@ -1,5 +1,3 @@
-// src/app/api/email/send-thank-you/route.ts
-// Handles thank you email sending triggered by payment webhooks
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { emailService } from '@/lib/email/email-service';
@@ -29,7 +27,6 @@ export async function POST(request: NextRequest) {
       invoiceId,
     }, 'Processing thank you email request');
 
-    // Fetch invoice with client details
     const { data: invoice, error: invoiceError } = await supabaseAdmin
       .from('invoices')
       .select('id, client_email, client_name, invoice_number, amount, user_id, status')
@@ -48,7 +45,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate invoice is paid
     if (invoice.status !== 'paid') {
       emailLogger.warn({
         action: 'thank_you_email_invoice_not_paid',
@@ -61,7 +57,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if a thank you email was already sent for this invoice (idempotency)
     const { data: existingEmail } = await supabaseAdmin
       .from('email_logs')
       .select('id, message_id, sent_at')
@@ -85,7 +80,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Fetch user profile for sender info
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('first_name, last_name, business_name, preferred_from_email, preferred_from_name')
@@ -105,15 +99,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Format amount for display using shared utility
     const formattedAmount = formatAmount(invoice.amount, 'INR');
 
-    // Build user name from first/last name or preferred_from_name
     const userName = profile.preferred_from_name
       || [profile.first_name, profile.last_name].filter(Boolean).join(' ')
       || 'Your Service Provider';
 
-    // Send the thank you email
     const result = await emailService.sendThankYouEmail({
       to: invoice.client_email,
       subject: `Payment Received - Thank You! (${invoice.invoice_number})`,
@@ -132,7 +123,6 @@ export async function POST(request: NextRequest) {
       replyTo: profile.preferred_from_email || undefined,
     });
 
-    // Log to email_logs table
     const subject = `Payment Received - Thank You! (${invoice.invoice_number})`;
     const { error: logError } = await supabaseAdmin
       .from('email_logs')

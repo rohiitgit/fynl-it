@@ -1,6 +1,3 @@
-// src/lib/services/payment-events-service.ts
-// Service layer for payment event idempotency and tracking
-
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { paymentLogger } from '@/lib/logger';
 import type { Json } from '@/types/supabase';
@@ -18,10 +15,7 @@ export interface PaymentEventData {
 }
 
 class PaymentEventsService {
-  /**
-   * Check if a webhook event has already been processed and record it if new.
-   * Uses database unique constraint to handle race conditions from concurrent webhook delivery.
-   */
+  // Uses DB unique constraint to handle concurrent duplicate delivery atomically
   async recordIfNew(
     eventData: PaymentEventData
   ): Promise<{ isNew: boolean; existingId?: string }> {
@@ -37,7 +31,6 @@ class PaymentEventsService {
       webhookData,
     } = eventData;
 
-    // Check if this event was already processed
     const { data: existing, error: checkError } = await supabaseAdmin
       .from('payment_events')
       .select('id')
@@ -66,8 +59,6 @@ class PaymentEventsService {
       return { isNew: false, existingId: existing.id };
     }
 
-    // Attempt to insert a new record
-    // The unique constraint will reject duplicates from concurrent requests
     const { data: inserted, error: insertError } = await supabaseAdmin
       .from('payment_events')
       .insert({
@@ -86,8 +77,7 @@ class PaymentEventsService {
       .single();
 
     if (insertError) {
-      // Check if this is a unique constraint violation (code 23505)
-      if (insertError.code === '23505') {
+      if (insertError.code === '23505') { // unique constraint — concurrent duplicate
         paymentLogger.info({
           action: 'concurrent_duplicate_rejected',
           paymentId: externalPaymentId,
@@ -96,7 +86,6 @@ class PaymentEventsService {
         return { isNew: false };
       }
 
-      // Other database errors should be thrown
       paymentLogger.error({
         action: 'payment_event_insert_failed',
         paymentId: externalPaymentId,
@@ -116,32 +105,6 @@ class PaymentEventsService {
     return { isNew: true };
   }
 
-  /**
-   * Update the invoice_id on a payment event record after invoice is identified
-   */
-  async updateWithInvoice(
-    externalPaymentId: string,
-    eventType: string,
-    invoiceId: string
-  ): Promise<boolean> {
-    const { error } = await supabaseAdmin
-      .from('payment_events')
-      .update({ invoice_id: invoiceId })
-      .eq('external_payment_id', externalPaymentId)
-      .eq('event_type', eventType);
-
-    if (error) {
-      paymentLogger.error({
-        action: 'payment_event_invoice_update_failed',
-        paymentId: externalPaymentId,
-        invoiceId,
-        err: error,
-      }, 'Failed to update payment event with invoice ID');
-      return false;
-    }
-
-    return true;
-  }
 }
 
 export const paymentEventsService = new PaymentEventsService();

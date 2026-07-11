@@ -1,11 +1,35 @@
 // src/app/layout.tsx - Updated with AuthProvider for session management
 import { Analytics } from "@vercel/analytics/next";
-import { Inter } from "next/font/google";
+import { Bangers, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import { Providers } from "./providers";
 import { AuthProvider } from "@/components/AuthProvider";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+// Comic display face — classic comic-book cover lettering.
+// Bangers ships a single 400 weight; font-synthesis is disabled in
+// globals.css so bold utilities don't smear it with faux bold.
+const bangers = Bangers({
+  subsets: ["latin"],
+  variable: "--font-display",
+  weight: "400",
+  display: "swap",
+});
+
+// Body face — geometric, clean, not generic.
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-body",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+// Utility labels / captions.
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  weight: ["400", "500", "700"],
+  display: "swap",
+});
 
 export const metadata = {
   title: "Fynl.it - Get Paid Without the Awkward Chase",
@@ -19,8 +43,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html
+      lang="en"
+      className={`${bangers.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}
+    >
+      <body className="font-body antialiased">
         <Providers>
           <AuthProvider>
             {children}

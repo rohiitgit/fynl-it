@@ -118,43 +118,6 @@ export const WEBHOOK_RATE_LIMIT: RateLimitConfig = {
 }
 
 /**
- * Tier 5: Scheduler Routes (INTERNAL ONLY)
- *
- * Routes: /api/scheduler/send-due-emails
- *
- * Scheduler routes are:
- * - Called by Vercel Cron (once daily at 9 AM UTC)
- * - Protected by API key authentication
- * - Should rarely be called manually
- *
- * Limits:
- * - 10 requests per hour (generous for daily cron + manual triggers)
- */
-export const SCHEDULER_RATE_LIMIT: RateLimitConfig = {
-  authenticated: {
-    requests: 10,
-    window: '1 h',
-  },
-}
-
-/**
- * Default Rate Limit (FALLBACK)
- *
- * Used for routes without specific configuration.
- * Conservative limits to prevent abuse.
- */
-export const DEFAULT_RATE_LIMIT: RateLimitConfig = {
-  authenticated: {
-    requests: 30,
-    window: '1 h',
-  },
-  anonymous: {
-    requests: 10,
-    window: '1 h',
-  },
-}
-
-/**
  * Rate limit bypass token (for testing/admin purposes)
  * Set via RATE_LIMIT_BYPASS_TOKEN environment variable
  */
@@ -168,10 +131,3 @@ export const RATE_LIMITING_ENABLED =
   process.env.UPSTASH_REDIS_REST_URL &&
   process.env.UPSTASH_REDIS_REST_TOKEN
 
-/**
- * Get rate limit identifier suffix for different tiers
- * Helps separate rate limit buckets by route category
- */
-export const getRateLimitSuffix = (tier: 'ai' | 'email' | 'payment' | 'webhook' | 'scheduler' | 'default') => {
-  return `:${tier}`
-}

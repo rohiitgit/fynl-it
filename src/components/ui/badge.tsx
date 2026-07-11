@@ -5,29 +5,30 @@ import { cn } from "@/lib/utils"
 import { CheckCircle2, AlertCircle, XCircle, Info, Crown } from "lucide-react"
 
 const badgeVariants = cva(
-  "inline-flex items-center justify-center rounded-lg border px-3 py-1 text-xs font-semibold w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1.5 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-all duration-200 overflow-hidden shadow-sm",
+  // Comic sticker: square, ink border, mono uppercase, small hard shadow.
+  "inline-flex items-center justify-center rounded-none border-2 border-ink px-2.5 py-1 font-mono text-[0.72rem] font-bold uppercase tracking-wide leading-none w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1.5 [&>svg]:pointer-events-none focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ink transition-transform duration-150 overflow-hidden shadow-[2px_2px_0_0_var(--ink)]",
   {
     variants: {
       variant: {
         default:
-          "border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90 hover:shadow-md",
+          "bg-yellow text-ink [a&]:hover:-translate-y-0.5",
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90 hover:shadow-md",
+          "bg-gray-panel text-ink [a&]:hover:-translate-y-0.5",
         destructive:
-          "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 hover:shadow-md",
+          "bg-overdue text-white [a&]:hover:-translate-y-0.5",
         outline:
-          "text-foreground border-border [a&]:hover:bg-accent [a&]:hover:text-accent-foreground hover:shadow-md",
-        // Status-specific variants (these are the new additions)
+          "bg-paper-panel text-ink [a&]:hover:-translate-y-0.5",
+        // Status stickers
         paid:
-          "bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-950/20 dark:text-green-400 dark:border-green-800 hover:shadow-md",
+          "bg-[#C9F2CF] text-[#0F5A28] [a&]:hover:-translate-y-0.5",
         pending:
-          "bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 dark:bg-orange-950/20 dark:text-orange-400 dark:border-orange-800 hover:shadow-md",
+          "bg-[#FFE9A8] text-[#7A4E00] [a&]:hover:-translate-y-0.5",
         overdue:
-          "bg-red-50 text-red-700 border-red-200 hover:bg-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-800 hover:shadow-md",
+          "bg-overdue text-white [a&]:hover:-translate-y-0.5",
         info:
-          "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-800 hover:shadow-md",
+          "bg-[#CFE4FF] text-[#0A3A7A] [a&]:hover:-translate-y-0.5",
         premium:
-          "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-950/20 dark:text-purple-400 dark:border-purple-800 hover:shadow-md",
+          "bg-[#E6D6FF] text-[#3A1A7A] [a&]:hover:-translate-y-0.5",
       },
     },
     defaultVariants: {

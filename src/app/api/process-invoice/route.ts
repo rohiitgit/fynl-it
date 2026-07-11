@@ -19,12 +19,10 @@ interface InvoiceData {
     description?: string;
 }
 
-// Initialize the Gemini API with the API key
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
 export async function POST(request: NextRequest) {
     try {
-        // 1. Check authentication
         const authHeader = request.headers.get('authorization');
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return createAuthRequiredResponse();
@@ -37,13 +35,11 @@ export async function POST(request: NextRequest) {
             return createAuthRequiredResponse();
         }
 
-        // 2. Check rate limit
         const rateLimitResult = await applyRateLimit(request, user.id, AI_RATE_LIMIT, 'ai');
         if (rateLimitResult.response) {
-            return rateLimitResult.response; // Rate limit exceeded
+            return rateLimitResult.response;
         }
 
-        // 3. Validate and process the request
         const body = await request.json();
         const validation = processInvoiceSchema.safeParse(body);
 
@@ -56,10 +52,9 @@ export async function POST(request: NextRequest) {
 
         const { file, mimeType } = validation.data;
 
-        // Remove data URL prefix to get base64 (handle both with and without prefix)
+        // Strip data URL prefix if present (e.g. "data:image/png;base64,...")
         const base64Data = file.includes(',') ? file.split(',')[1] : file;
 
-        // Create the prompt
         const prompt = `
       Analyze this invoice image and extract the following information:
       1. Client Name (person or company being billed)
@@ -87,7 +82,6 @@ export async function POST(request: NextRequest) {
       For the due date, convert to YYYY-MM-DD format.
     `;
 
-        // Generate content with image using the correct API format
         const response = await ai.models.generateContent({
             model: "gemini-2.0-flash-exp",
             contents: [
@@ -105,7 +99,6 @@ export async function POST(request: NextRequest) {
             ]
         });
 
-        // Get the text from the response
         const text = response.text;
 
         if (!text) {
@@ -115,7 +108,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Extract JSON from the response
         let invoiceData: InvoiceData | null;
         try {
             invoiceData = extractJsonFromText<InvoiceData>(text);
@@ -135,7 +127,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Validate and clean the data
         const cleanedData = {
             clientName: invoiceData.clientName || '',
             clientEmail: invoiceData.clientEmail || '',
@@ -154,7 +145,6 @@ export async function POST(request: NextRequest) {
             currency: cleanedData.currency,
         }, 'Invoice successfully processed by AI');
 
-        // 4. Return response with rate limit headers
         const jsonResponse = NextResponse.json(cleanedData);
         return addRateLimitHeaders(jsonResponse, rateLimitResult);
     } catch (error) {

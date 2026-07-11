@@ -1,4 +1,3 @@
-// src/app/api/email/send/route.tsx - Modern JSX approach with structured logging
 import { NextRequest, NextResponse } from 'next/server';
 import { render } from '@react-email/render';
 import { resend, DEFAULT_FROM_EMAIL } from '@/lib/email/resend-client';
@@ -24,7 +23,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Modern JSX way - much cleaner! 🎉
     let emailHtml: string;
     
     if (type === 'reminder') {
@@ -38,7 +36,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send email via Resend
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to,

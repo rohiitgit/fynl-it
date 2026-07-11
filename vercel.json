@@ -3,6 +3,10 @@
     {
       "path": "/api/scheduler/send-due-emails",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/health",
+      "schedule": "0 6 */2 * *"
     }
   ]
 }

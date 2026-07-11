@@ -1,4 +1,3 @@
-// src/lib/email/templates.tsx - Complete UPI-Enhanced Version
 import React from 'react';
 import {
   Html,
@@ -12,7 +11,6 @@ import {
   Img,
 } from '@react-email/components';
 
-// Design system colors (matching your Tailwind theme)
 const colors = {
   primary: '#2563eb',      // blue-600
   background: '#ffffff',   // white
@@ -28,7 +26,6 @@ const colors = {
   upiBorder: '#16a34a',   // green-600
 } as const;
 
-// Email template props interface
 export interface EmailTemplateProps {
   clientName: string;
   invoiceNumber: string;
@@ -43,7 +40,6 @@ export interface EmailTemplateProps {
   customMessage?: string;
 }
 
-// Base email layout component
 const EmailLayout: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => (
@@ -51,14 +47,12 @@ const EmailLayout: React.FC<{
     <Head />
     <Body style={styles.main}>
       <Container style={styles.container}>
-        {/* Header */}
         <Section style={styles.header}>
           <Text style={styles.headerText}>💌 Nudgr</Text>
         </Section>
         
         {children}
         
-        {/* Footer */}
         <Hr style={styles.hr} />
         <Section style={styles.footer}>
           <Text style={styles.footerText}>
@@ -70,7 +64,6 @@ const EmailLayout: React.FC<{
   </Html>
 );
 
-// UPI-Enhanced Invoice Reminder Email
 export const InvoiceReminderEmail: React.FC<EmailTemplateProps> = ({
   clientName,
   invoiceNumber,
@@ -116,7 +109,6 @@ export const InvoiceReminderEmail: React.FC<EmailTemplateProps> = ({
         </>
       )}
 
-      {/* Invoice Details Card */}
       <Section style={styles.invoiceCard}>
         <Text style={styles.invoiceCardTitle}>Invoice Details</Text>
         <Text style={styles.invoiceDetail}>
@@ -139,7 +131,6 @@ export const InvoiceReminderEmail: React.FC<EmailTemplateProps> = ({
         )}
       </Section>
 
-      {/* Payment Section */}
       {(upiLink || paymentLink) && (
         <Section style={styles.paymentSection}>
           <Text style={styles.paymentSectionTitle}>
@@ -148,7 +139,6 @@ export const InvoiceReminderEmail: React.FC<EmailTemplateProps> = ({
              '🚨 URGENT: Pay Now to Avoid Escalation'}
           </Text>
           
-          {/* UPI Priority Section */}
           {(upiLink || paymentLink) && (
             <Section style={{
               ...styles.upiSection,
@@ -172,7 +162,7 @@ export const InvoiceReminderEmail: React.FC<EmailTemplateProps> = ({
               
               <Section style={styles.upiOptions}>
                 <div style={styles.upiOption}>
-                  <Text style={styles.upiOptionTitle}>📱 On Mobile:</Text>
+                  <Text style={styles.upiOptionTitle}>On Mobile:</Text>
                   <Button 
                     style={{
                       ...styles.upiButton,
@@ -186,7 +176,7 @@ export const InvoiceReminderEmail: React.FC<EmailTemplateProps> = ({
                 
                 {qrCode && (
                   <div style={styles.upiOption}>
-                    <Text style={styles.upiOptionTitle}>💻 On Desktop:</Text>
+                    <Text style={styles.upiOptionTitle}>On Desktop:</Text>
                     <Text style={styles.upiOptionSubtitle}>Scan QR code with your phone</Text>
                     <Img 
                       src={qrCode} 
@@ -212,7 +202,6 @@ export const InvoiceReminderEmail: React.FC<EmailTemplateProps> = ({
             </Section>
           )}
           
-          {/* Alternative Payment Methods */}
           {paymentLink && paymentLink !== upiLink && (
             <Section style={styles.alternativeSection}>
               <Hr style={styles.paymentSeparator} />
@@ -227,7 +216,6 @@ export const InvoiceReminderEmail: React.FC<EmailTemplateProps> = ({
         </Section>
       )}
 
-      {/* Context-aware closing message */}
       {daysOverdue === 0 ? (
         <Text style={styles.paragraph}>
           If you&apos;ve already sent the payment, please disregard this message. 
@@ -264,7 +252,6 @@ export const InvoiceReminderEmail: React.FC<EmailTemplateProps> = ({
   </EmailLayout>
 );
 
-// Thank you email template (enhanced)
 export const ThankYouEmail: React.FC<EmailTemplateProps> = ({
   clientName,
   invoiceNumber,
@@ -281,7 +268,6 @@ export const ThankYouEmail: React.FC<EmailTemplateProps> = ({
         invoice <strong>{invoiceNumber}</strong>. Thank you so much!
       </Text>
 
-      {/* Payment Confirmation Card */}
       <Section style={styles.successCard}>
         <Text style={styles.successIcon}>✅</Text>
         <Text style={styles.successText}>Payment Confirmed</Text>
@@ -317,7 +303,6 @@ export const ThankYouEmail: React.FC<EmailTemplateProps> = ({
   </EmailLayout>
 );
 
-// Comprehensive styles with UPI enhancements
 const styles = {
   main: {
     backgroundColor: colors.muted,
@@ -377,7 +362,6 @@ const styles = {
     color: colors.mutedForeground,
   },
   
-  // Payment section styles
   paymentSection: {
     backgroundColor: '#f8fafc',
     border: `2px solid ${colors.border}`,
@@ -393,7 +377,6 @@ const styles = {
     textAlign: 'center' as const,
   },
   
-  // UPI section styles
   upiSection: {
     backgroundColor: colors.upiBackground,
     border: `2px solid ${colors.upiBorder}`,
@@ -466,7 +449,6 @@ const styles = {
     lineHeight: '16px',
   },
   
-  // Alternative payment section
   alternativeSection: {
     textAlign: 'center' as const,
   },
@@ -491,7 +473,6 @@ const styles = {
     margin: '16px 0',
   },
   
-  // Success card styles (for thank you email)
   successCard: {
     backgroundColor: '#f0fdf4', // green-50
     border: '1px solid #bbf7d0', // green-200
@@ -521,7 +502,6 @@ const styles = {
     fontStyle: 'italic',
   },
   
-  // Common elements
   signature: {
     fontSize: '16px',
     lineHeight: '24px',

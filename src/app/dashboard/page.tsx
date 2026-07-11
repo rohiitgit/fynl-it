@@ -103,36 +103,36 @@ const InvoiceCard = ({
   onEditInvoice: (id: string) => void;
   getStatusBadgeWithEmail: (invoice: Invoice) => React.ReactNode;
 }) => {
-  // Get left border color based on status
+  // Left status stripe — comic flat colors
   const getBorderColor = (status: string) => {
     switch (status) {
       case 'paid':
-        return 'border-l-green-500 dark:border-l-green-400'
+        return 'border-l-[#1F7A3D]'
       case 'overdue':
-        return 'border-l-red-500 dark:border-l-red-400'
+        return 'border-l-overdue'
       case 'pending':
-        return 'border-l-orange-500 dark:border-l-orange-400'
+        return 'border-l-yellow-deep'
       default:
-        return 'border-l-blue-500 dark:border-l-blue-400'
+        return 'border-l-ink'
     }
   }
 
   return (
-    <div className={`group relative rounded-xl border border-l-4 transition-all duration-300 bg-card hover:shadow-md border-border/50 hover:border-border ${getBorderColor(invoice.status)}`}>
+    <div className={`group relative border-2 border-ink border-l-[6px] bg-card comic-interactive comic-shadow-sm ${getBorderColor(invoice.status)}`}>
     <div className="p-4 sm:p-6">
       {/* Mobile: Stacked layout, Desktop: Horizontal layout */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         {/* Client Info */}
         <div className="flex items-start space-x-3 sm:space-x-4 min-w-0 flex-1">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-full flex items-center justify-center flex-shrink-0 group-hover:from-green-500/20 group-hover:to-emerald-500/20 transition-all">
-            <User className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow border-2 border-ink flex items-center justify-center flex-shrink-0">
+            <User className="h-5 w-5 sm:h-6 sm:w-6 text-ink" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-base sm:text-lg truncate">{invoice.client_name}</p>
+            <p className="font-display font-bold text-base sm:text-lg truncate">{invoice.client_name}</p>
             <p className="text-sm text-muted-foreground truncate">
               {invoice.client_email}
             </p>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+            <p className="font-mono text-xs text-muted-foreground mt-1">
               Invoice #{invoice.invoice_number}
             </p>
           </div>
@@ -142,8 +142,8 @@ const InvoiceCard = ({
         <div className="flex items-center justify-between sm:justify-end space-x-4 sm:space-x-6">
           {/* Amount & Due Date */}
           <div className="text-left sm:text-right">
-            <p className="text-lg sm:text-xl font-bold">${invoice.amount.toFixed(2)}</p>
-            <p className="text-xs sm:text-sm text-muted-foreground">
+            <p className="font-display text-lg sm:text-xl font-extrabold">${invoice.amount.toFixed(2)}</p>
+            <p className="font-mono text-xs text-muted-foreground">
               Due: {new Date(invoice.due_date).toLocaleDateString()}
             </p>
           </div>
@@ -281,23 +281,24 @@ export default function Dashboard() {
   };
 
   const handleSendReminder = async (invoiceId: string) => {
-    try {
-      const { data: followUps } = await supabase
-        .from('follow_ups')
-        .select('id')
-        .eq('invoice_id', invoiceId)
-        .eq('status', 'scheduled')
-        .order('scheduled_for', { ascending: true })
-        .limit(1);
+    const { data: followUps, error: followUpsError } = await supabase
+      .from('follow_ups')
+      .select('id')
+      .eq('invoice_id', invoiceId)
+      .eq('status', 'scheduled')
+      .order('scheduled_for', { ascending: true })
+      .limit(1);
 
-      if (followUps && followUps.length > 0) {
-        await sendReminder(followUps[0].id);
-        fetchInvoices();
-      } else {
-        error("No reminders scheduled", "Set up follow-up messages for this invoice first.");
-      }
-    } catch (err) {
-      console.error('Error sending reminder:', err);
+    if (followUpsError) {
+      error("Error", "Failed to load reminders for this invoice.");
+      return;
+    }
+
+    if (followUps && followUps.length > 0) {
+      await sendReminder(followUps[0].id);
+      fetchInvoices();
+    } else {
+      error("No reminders scheduled", "Set up follow-up messages for this invoice first.");
     }
   };
 
@@ -359,15 +360,15 @@ export default function Dashboard() {
   // Loading states
   if (authLoading || (loading && !user)) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary p-4 sm:p-6 lg:p-8 animate-fade-in">
+      <div className="min-h-screen bg-paper p-4 sm:p-6 lg:p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header Skeleton */}
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <div className="h-8 w-48 bg-muted rounded animate-shimmer" />
-              <div className="h-4 w-72 bg-muted rounded animate-shimmer" />
+              <div className="h-8 w-48 bg-gray-panel border-2 border-ink/20 animate-shimmer" />
+              <div className="h-4 w-72 bg-gray-panel border-2 border-ink/20 animate-shimmer" />
             </div>
-            <div className="h-10 w-32 bg-muted rounded animate-shimmer" />
+            <div className="h-10 w-32 bg-gray-panel border-2 border-ink/20 animate-shimmer" />
           </div>
 
           {/* Stats Cards Skeleton */}
@@ -380,7 +381,7 @@ export default function Dashboard() {
 
           {/* Invoice List Skeleton */}
           <div className="space-y-4">
-            <div className="h-6 w-32 bg-muted rounded animate-shimmer" />
+            <div className="h-6 w-32 bg-gray-panel border-2 border-ink/20 animate-shimmer" />
             <InvoiceCardSkeleton />
             <InvoiceCardSkeleton />
             <InvoiceCardSkeleton />
@@ -392,7 +393,7 @@ export default function Dashboard() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center p-4">
+      <div className="min-h-screen bg-paper comic-paper-bg flex items-center justify-center p-4">
         <div className="text-center">
           <h2 className="text-xl sm:text-2xl font-bold mb-4">Authentication Required</h2>
           <p className="text-muted-foreground mb-4">Please sign in to access your dashboard</p>
@@ -409,73 +410,61 @@ export default function Dashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
 
           <TabsContent value="overview">
-            {/* Responsive Stats Cards */}
+            {/* Stats — flat comic panels */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
-              <Card className="bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-background border-blue-200 dark:border-blue-800 shadow-info hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group">
+              <Card className="gap-0 comic-interactive">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-70 dark:text-gray-30">Total Invoices</CardTitle>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors">
-                    <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-700 dark:text-blue-300" />
+                  <CardTitle className="font-mono text-[0.68rem] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">Total Invoices</CardTitle>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-panel border-2 border-ink flex items-center justify-center">
+                    <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-ink" />
                   </div>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 pt-0">
-                  <div className="text-2xl sm:text-3xl font-bold text-blue-700 dark:text-blue-300">{stats.total}</div>
-                  <div className="flex items-center gap-1 mt-1">
-                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full" />
-                    <p className="text-xs text-blue-600 dark:text-blue-400">All invoices</p>
-                  </div>
+                  <div className="font-display text-2xl sm:text-3xl font-extrabold text-ink">{stats.total}</div>
+                  <p className="font-mono text-[0.65rem] text-muted-foreground mt-1">All invoices</p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-background border-emerald-200 dark:border-emerald-800 shadow-primary hover:shadow-primary-lg hover:-translate-y-0.5 transition-all duration-300 group">
+              <Card className="gap-0 comic-interactive bg-yellow">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-70 dark:text-gray-30">Total Amount</CardTitle>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30 rounded-full flex items-center justify-center group-hover:from-emerald-200 group-hover:to-green-200 dark:group-hover:from-emerald-900/50 dark:group-hover:to-green-900/50 transition-all">
-                    <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-700 dark:text-emerald-300" />
+                  <CardTitle className="font-mono text-[0.68rem] sm:text-xs font-bold uppercase tracking-wider text-ink">Total Amount</CardTitle>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-paper-panel border-2 border-ink flex items-center justify-center">
+                    <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-ink" />
                   </div>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 pt-0">
-                  <div className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-emerald-700 to-green-700 dark:from-emerald-300 dark:to-green-300 bg-clip-text text-transparent">${stats.totalAmount.toFixed(0)}</div>
-                  <div className="flex items-center gap-1 mt-1">
-                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full" />
-                    <p className="text-xs text-emerald-600 dark:text-emerald-400">Invoice value</p>
-                  </div>
+                  <div className="font-display text-xl sm:text-3xl font-extrabold text-ink">${stats.totalAmount.toFixed(0)}</div>
+                  <p className="font-mono text-[0.65rem] text-ink mt-1">Invoice value</p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-green-50 to-white dark:from-green-950/20 dark:to-background border-green-200 dark:border-green-800 shadow-success hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group">
+              <Card className="gap-0 comic-interactive bg-[#C9F2CF]">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-70 dark:text-gray-30">Paid</CardTitle>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center group-hover:bg-green-200 dark:group-hover:bg-green-900/50 transition-colors">
-                    <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-700 dark:text-green-300" />
+                  <CardTitle className="font-mono text-[0.68rem] sm:text-xs font-bold uppercase tracking-wider text-[#0F5A28]">Paid</CardTitle>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-paper-panel border-2 border-ink flex items-center justify-center">
+                    <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-ink" />
                   </div>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 pt-0">
-                  <div className="text-xl sm:text-3xl font-bold text-green-700 dark:text-green-300">${stats.paidAmount.toFixed(0)}</div>
-                  <div className="flex items-center gap-1 mt-1">
-                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full" />
-                    <p className="text-xs text-green-600 dark:text-green-400">
-                      {stats.paid} collected
-                    </p>
-                  </div>
+                  <div className="font-display text-xl sm:text-3xl font-extrabold text-[#0F5A28]">${stats.paidAmount.toFixed(0)}</div>
+                  <p className="font-mono text-[0.65rem] text-[#0F5A28] mt-1">
+                    {stats.paid} collected
+                  </p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-orange-50 to-white dark:from-orange-950/20 dark:to-background border-orange-200 dark:border-orange-800 shadow-warning hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group">
+              <Card className="gap-0 comic-interactive bg-[#FFE9A8]">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-70 dark:text-gray-30">Pending</CardTitle>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center group-hover:bg-orange-200 dark:group-hover:bg-orange-900/50 transition-colors">
-                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-orange-700 dark:text-orange-300" />
+                  <CardTitle className="font-mono text-[0.68rem] sm:text-xs font-bold uppercase tracking-wider text-[#7A4E00]">Pending</CardTitle>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-paper-panel border-2 border-ink flex items-center justify-center">
+                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-ink" />
                   </div>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 pt-0">
-                  <div className="text-xl sm:text-3xl font-bold text-orange-700 dark:text-orange-300">${(stats.totalAmount - stats.paidAmount).toFixed(0)}</div>
-                  <div className="flex items-center gap-1 mt-1">
-                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-orange-500 rounded-full" />
-                    <p className="text-xs text-orange-600 dark:text-orange-400">
-                      {stats.pending + stats.overdue} awaiting
-                    </p>
-                  </div>
+                  <div className="font-display text-xl sm:text-3xl font-extrabold text-[#7A4E00]">${(stats.totalAmount - stats.paidAmount).toFixed(0)}</div>
+                  <p className="font-mono text-[0.65rem] text-[#7A4E00] mt-1">
+                    {stats.pending + stats.overdue} awaiting
+                  </p>
                 </CardContent>
               </Card>
             </div>

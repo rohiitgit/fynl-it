@@ -15,14 +15,16 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-bg": "var(--popover)",
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
-          "--success-bg": "rgb(34 197 94 / 0.1)",
-          "--success-border": "rgb(34 197 94 / 0.3)",
-          "--success-text": "rgb(21 128 61)",
+          "--success-bg": "#C9F2CF",
+          "--success-border": "var(--ink)",
+          "--success-text": "#0F5A28",
+          "--border-radius": "0px",
         } as React.CSSProperties
       }
       toastOptions={{
         classNames: {
-          success: "border-green-500/20 bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-300 dark:border-green-500/30",
+          toast: "rounded-none border-2 border-ink shadow-[4px_4px_0_0_var(--ink)]",
+          success: "border-ink bg-[#C9F2CF] text-[#0F5A28]",
         },
       }}
       {...props}

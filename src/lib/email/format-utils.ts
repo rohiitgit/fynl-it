@@ -1,14 +1,7 @@
-// src/lib/email/format-utils.ts
-// Shared formatting utilities for email templates
-
 import type { EmailTemplateProps } from './templates';
 
 const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
 
-/**
- * Format currency amount for display
- * Uses INR locale for Indian Rupees, otherwise uses currency code as prefix
- */
 export function formatAmount(amount: number, currency: string): string {
   if (currency === 'INR') {
     return new Intl.NumberFormat('en-IN', {
@@ -28,18 +21,12 @@ export function formatAmount(amount: number, currency: string): string {
   return `${symbol}${amount.toFixed(2)}`;
 }
 
-/**
- * Calculate days overdue from a due date
- */
 export function calculateDaysOverdue(dueDate: Date): number {
   const today = new Date();
   const diffTime = today.getTime() - dueDate.getTime();
   return Math.max(0, Math.floor(diffTime / MILLISECONDS_PER_DAY));
 }
 
-/**
- * Format date for display in emails
- */
 export function formatDueDate(dueDate: Date): string {
   return dueDate.toLocaleDateString('en-US', {
     year: 'numeric',
@@ -48,9 +35,6 @@ export function formatDueDate(dueDate: Date): string {
   });
 }
 
-/**
- * Build user display name from profile fields
- */
 export function buildUserName(firstName: string | null, lastName: string | null): string {
   return `${firstName ?? ''} ${lastName ?? ''}`.trim();
 }
@@ -73,10 +57,6 @@ export interface ProfileData {
   preferred_from_name?: string | null;
 }
 
-/**
- * Prepare template props from invoice and profile data
- * Single source of truth for template data preparation
- */
 export function prepareTemplateProps(
   invoice: InvoiceData,
   profile: ProfileData,

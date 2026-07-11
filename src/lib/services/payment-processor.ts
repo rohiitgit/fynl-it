@@ -1,6 +1,3 @@
-// src/lib/services/payment-processor.ts
-// Orchestration service for payment processing workflow
-
 import { invoiceService } from './invoice-service';
 import { paymentEventsService, type PaymentEventData } from './payment-events-service';
 import { paymentLogger } from '@/lib/logger';
@@ -56,21 +53,17 @@ interface TransactionResult {
   success: boolean;
   is_duplicate: boolean;
   cancelled_followups: number;
-  existing_event_id?: string;
-  error_message?: string;
-  message?: string;
+  existing_event_id: string | null;
+  error_message: string | null;
+  message: string | null;
 }
 
 class PaymentProcessorService {
-  /**
-   * Detect payment method from Razorpay payment entity
-   */
   detectPaymentMethod(payment: RazorpayPaymentEntity): string {
     if (payment.method) {
       return payment.method.toLowerCase();
     }
 
-    // Fallback detection based on available fields
     if (payment.vpa) return 'upi';
     if (payment.card) return 'card';
     if (payment.bank) return 'netbanking';
@@ -78,9 +71,6 @@ class PaymentProcessorService {
     return 'other';
   }
 
-  /**
-   * Extract payment method details from Razorpay payment entity
-   */
   getPaymentMethodDetails(payment: RazorpayPaymentEntity): PaymentMethodDetails {
     const method = this.detectPaymentMethod(payment);
     const details: PaymentMethodDetails = { method };
@@ -108,15 +98,7 @@ class PaymentProcessorService {
     return details;
   }
 
-  /**
-   * Process a captured payment from Razorpay using atomic transaction
-   * This method uses a database function to ensure all updates happen atomically:
-   * 1. Record payment event (with idempotency check)
-   * 2. Mark invoice as paid
-   * 3. Cancel all pending follow-ups
-   *
-   * If any step fails, the entire transaction is rolled back.
-   */
+  // Atomic DB transaction: record event + mark invoice paid + cancel follow-ups (all or nothing)
   async processPaymentCaptured(
     payment: RazorpayPaymentEntity,
     razorpayEventId: string | null,
@@ -134,8 +116,6 @@ class PaymentProcessorService {
       method: paymentMethod,
     }, 'Payment captured from Razorpay');
 
-    // Find the invoice using payment metadata FIRST
-    // We need the invoice ID for the atomic transaction
     const invoice = await invoiceService.findByPaymentReference(
       payment.notes?.invoice_id,
       payment.notes?.razorpay_link_id
@@ -149,7 +129,6 @@ class PaymentProcessorService {
         emailMasked: maskEmail(payment.email),
       }, 'No matching invoice found for payment');
 
-      // Still record the payment event for audit purposes (without invoice)
       await this.recordOrphanPaymentEvent(payment, razorpayEventId, paymentDetails, webhookEvent);
 
       return {
@@ -166,8 +145,7 @@ class PaymentProcessorService {
       paymentId: payment.id,
     }, 'Successfully matched payment to invoice');
 
-    // Prepare webhook data for storage
-    const webhookData = JSON.parse(JSON.stringify({
+    const webhookData = JSON.parse(JSON.stringify({  // cast to Json-serialisable
       event_data: webhookEvent,
       payment_details: paymentDetails,
       fees: {
@@ -176,10 +154,7 @@ class PaymentProcessorService {
       },
     })) as Json;
 
-    // Use atomic transaction function
-    // Note: Type assertion needed until types are regenerated after migration 7
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabaseAdmin as any).rpc('process_payment_captured', {
+    const { data, error } = await supabaseAdmin.rpc('process_payment_captured', {
       p_invoice_id: invoice.id,
       p_payment_id: payment.id,
       p_payment_provider: 'razorpay',
@@ -200,20 +175,14 @@ class PaymentProcessorService {
         err: error,
       }, 'Atomic payment transaction failed');
 
-      // Fallback to non-atomic processing if RPC is not available
-      // This handles the case where the migration hasn't been run yet
-      if (error.code === 'PGRST202' || error.message?.includes('function')) {
-        paymentLogger.warn({
-          action: 'transaction_fallback',
-          paymentId: payment.id,
-        }, 'Falling back to non-atomic payment processing');
-        return this.processPaymentCapturedFallback(payment, razorpayEventId, webhookEvent, invoice, paymentDetails);
-      }
-
       throw new Error(`Payment processing failed: ${error.message}`);
     }
 
-    const result = data as TransactionResult;
+    if (!data) {
+      throw new Error('Payment processing returned no data');
+    }
+
+    const result: TransactionResult = data;
 
     if (result.is_duplicate) {
       paymentLogger.info({
@@ -265,80 +234,6 @@ class PaymentProcessorService {
     };
   }
 
-  /**
-   * Fallback to non-atomic processing for backwards compatibility
-   * Used when the atomic function is not available (migration not run)
-   */
-  private async processPaymentCapturedFallback(
-    payment: RazorpayPaymentEntity,
-    razorpayEventId: string | null,
-    webhookEvent: unknown,
-    invoice: { id: string; invoice_number: string },
-    paymentDetails: PaymentMethodDetails
-  ): Promise<ProcessPaymentResult> {
-    // IDEMPOTENCY CHECK - do this FIRST before any other processing
-    const eventData: PaymentEventData = {
-      paymentProvider: 'razorpay',
-      externalPaymentId: payment.id,
-      eventType: 'payment.captured',
-      razorpayEventId,
-      invoiceId: invoice.id,
-      amount: payment.amount / 100,
-      currency: payment.currency,
-      paymentMethod: paymentDetails.method,
-      webhookData: JSON.parse(JSON.stringify({
-        event_data: webhookEvent,
-        payment_details: paymentDetails,
-        fees: {
-          fee: payment.fee ? payment.fee / 100 : 0,
-          tax: payment.tax ? payment.tax / 100 : 0,
-        },
-      })) as Json,
-    };
-
-    const idempotencyCheck = await paymentEventsService.recordIfNew(eventData);
-
-    if (!idempotencyCheck.isNew) {
-      return {
-        success: true,
-        message: 'Payment already processed (duplicate webhook)',
-        paymentId: payment.id,
-        paymentMethod: paymentDetails.method,
-        amount: payment.amount / 100,
-        isDuplicate: true,
-      };
-    }
-
-    // Mark invoice as paid
-    const { invoiceService: invSvc } = await import('./invoice-service');
-    const updateSuccess = await invSvc.markAsPaid(invoice.id, {
-      razorpayPaymentId: payment.id,
-      paymentProvider: 'razorpay',
-      paidAt: new Date(),
-      autoDetected: true,
-    });
-
-    if (!updateSuccess) {
-      throw new Error('Failed to update invoice');
-    }
-
-    // Cancel all pending follow-ups for this invoice
-    const { followUpService } = await import('./follow-up-service');
-    await followUpService.cancelByInvoice(invoice.id);
-
-    return {
-      success: true,
-      message: 'Payment processed successfully (fallback)',
-      invoiceId: invoice.id,
-      paymentId: payment.id,
-      paymentMethod: paymentDetails.method,
-      amount: payment.amount / 100,
-    };
-  }
-
-  /**
-   * Record a payment event for orphan payments (no matching invoice)
-   */
   private async recordOrphanPaymentEvent(
     payment: RazorpayPaymentEntity,
     razorpayEventId: string | null,

@@ -38,18 +38,16 @@ export function SidebarNav({ items, onItemClick }: SidebarNavProps) {
             href={item.href}
             onClick={onItemClick}
             className={cn(
-              "flex items-center gap-3 px-4 py-3 sm:py-3.5 rounded-lg transition-all duration-200 group min-h-[44px] sm:min-h-[48px]",
+              "flex items-center gap-3 px-4 py-3 sm:py-3.5 rounded-none border-2 transition-all duration-150 group min-h-[44px] sm:min-h-[48px]",
               isActive
-                ? "bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300 font-semibold border-l-4 border-l-green-600 dark:border-l-green-400 shadow-sm"
-                : "text-muted-foreground hover:bg-green-50/50 dark:hover:bg-green-950/10 hover:text-foreground active:bg-green-50 dark:active:bg-green-950/20"
+                ? "bg-yellow text-ink font-bold border-ink comic-shadow-sm"
+                : "border-transparent text-muted-foreground hover:bg-gray-panel hover:text-ink hover:border-ink active:bg-yellow"
             )}
           >
             <Icon
               className={cn(
                 "h-5 w-5 sm:h-5 sm:w-5 transition-colors flex-shrink-0",
-                isActive
-                  ? "text-green-600 dark:text-green-400"
-                  : "group-hover:text-green-600 dark:group-hover:text-green-400"
+                isActive ? "text-ink" : "group-hover:text-ink"
               )}
             />
             <span className="text-sm sm:text-base flex-1">{item.title}</span>

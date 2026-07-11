@@ -1,11 +1,13 @@
-// src/lib/email/send-email.ts
-// Generic email sender utility to reduce duplication
-
 import { render } from '@react-email/render';
 import { resend, DEFAULT_FROM_EMAIL } from './resend-client';
 import { emailLogger } from '@/lib/logger';
 import { maskEmail } from '@/lib/logger/redact';
-import type { EmailResult } from './email-service';
+
+export interface EmailResult {
+  success: boolean;
+  messageId?: string;
+  error?: string;
+}
 
 export interface SendEmailOptions {
   to: string;
@@ -18,10 +20,6 @@ export interface SendEmailOptions {
   replyTo?: string;
 }
 
-/**
- * Generic email sender that handles rendering, sending, and error handling
- * This is the single implementation for all email types
- */
 export async function sendEmail(options: SendEmailOptions): Promise<EmailResult> {
   const {
     to,
@@ -37,10 +35,8 @@ export async function sendEmail(options: SendEmailOptions): Promise<EmailResult>
   const actionPrefix = emailType === 'thank_you' ? 'thank_you' : 'reminder';
 
   try {
-    // Render the email template
     const emailHtml = await render(template);
 
-    // Send email via Resend
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to,

@@ -1,18 +1,3 @@
-/**
- * Health Check Endpoint
- *
- * Provides comprehensive health status for all critical services:
- * - Database (Supabase)
- * - Email (Resend)
- * - Payments (Razorpay)
- * - Cache (Redis/Upstash)
- *
- * Status codes:
- * - healthy: All services operational
- * - degraded: Non-critical services down (email, cache)
- * - unhealthy: Critical services down (database, payments)
- */
-
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { apiLogger } from '@/lib/logger';
@@ -40,13 +25,9 @@ interface HealthResponse {
 
 const startTime = Date.now();
 
-/**
- * Check database connectivity
- */
 async function checkDatabase(): Promise<ServiceCheck> {
   const start = Date.now();
   try {
-    // Simple query to check database connectivity
     const { error } = await supabaseAdmin
       .from('profiles')
       .select('id')
@@ -73,10 +54,6 @@ async function checkDatabase(): Promise<ServiceCheck> {
   }
 }
 
-/**
- * Check email service connectivity (Resend)
- * We check if the API key is configured and valid
- */
 async function checkEmail(): Promise<ServiceCheck> {
   const start = Date.now();
   try {
@@ -89,8 +66,6 @@ async function checkEmail(): Promise<ServiceCheck> {
       };
     }
 
-    // Make a lightweight API call to check connectivity
-    // Using the domains endpoint as it's a simple read operation
     const response = await fetch('https://api.resend.com/domains', {
       method: 'GET',
       headers: {
@@ -119,9 +94,6 @@ async function checkEmail(): Promise<ServiceCheck> {
   }
 }
 
-/**
- * Check payment service connectivity (Razorpay)
- */
 async function checkPayments(): Promise<ServiceCheck> {
   const start = Date.now();
   try {
@@ -136,8 +108,6 @@ async function checkPayments(): Promise<ServiceCheck> {
       };
     }
 
-    // Make a lightweight API call to verify credentials
-    // Using the plans endpoint with count=1 as it's a simple read
     const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
     const response = await fetch('https://api.razorpay.com/v1/plans?count=1', {
       method: 'GET',
@@ -175,9 +145,6 @@ async function checkPayments(): Promise<ServiceCheck> {
   }
 }
 
-/**
- * Check cache connectivity (Redis/Upstash)
- */
 async function checkCache(): Promise<ServiceCheck> {
   const start = Date.now();
   try {
@@ -192,7 +159,6 @@ async function checkCache(): Promise<ServiceCheck> {
       };
     }
 
-    // Simple PING command to check connectivity
     const response = await fetch(`${redisUrl}/ping`, {
       method: 'GET',
       headers: {
@@ -221,25 +187,14 @@ async function checkCache(): Promise<ServiceCheck> {
   }
 }
 
-/**
- * Determine overall health status
- * - healthy: All services up
- * - degraded: Non-critical services down (email, cache)
- * - unhealthy: Critical services down (database, payments)
- */
+// unhealthy = database/payments down; degraded = email/cache down; healthy = all up
 function determineOverallStatus(checks: HealthResponse['checks']): HealthResponse['status'] {
-  // Critical services: database and payments
-  const criticalDown = checks.database.status === 'down' || checks.payments.status === 'down';
-  if (criticalDown) {
+  if (checks.database.status === 'down' || checks.payments.status === 'down') {
     return 'unhealthy';
   }
-
-  // Non-critical services: email and cache
-  const nonCriticalDown = checks.email.status === 'down' || checks.cache.status === 'down';
-  if (nonCriticalDown) {
+  if (checks.email.status === 'down' || checks.cache.status === 'down') {
     return 'degraded';
   }
-
   return 'healthy';
 }
 
@@ -247,7 +202,6 @@ export async function GET(): Promise<NextResponse> {
   const requestStart = Date.now();
 
   try {
-    // Run all health checks in parallel
     const [database, email, payments, cache] = await Promise.all([
       checkDatabase(),
       checkEmail(),
@@ -276,7 +230,6 @@ export async function GET(): Promise<NextResponse> {
       cache: cache.status,
     }, 'Health check completed');
 
-    // Return appropriate HTTP status code
     const httpStatus = status === 'unhealthy' ? 503 : 200;
 
     return NextResponse.json(response, { status: httpStatus });

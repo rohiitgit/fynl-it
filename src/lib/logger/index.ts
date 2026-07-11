@@ -40,14 +40,7 @@ export {
 export type { LogLevel, LogCategory, LogContext, ErrorContext } from './types'
 
 // Export redaction utilities (for manual use when needed)
-export {
-  maskEmail,
-  maskUPI,
-  maskPhone,
-  maskName,
-  hashValue,
-  redactSensitiveData,
-} from './redact'
+export { maskEmail } from './redact'
 
 // Export logger configuration (for testing or custom loggers)
 export { createLogger, getLoggerConfig } from './config'

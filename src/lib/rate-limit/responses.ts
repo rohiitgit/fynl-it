@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server'
  * Provides standardized responses for rate limit scenarios with proper headers.
  */
 
-export type RateLimitHeaders = {
+type RateLimitHeaders = {
   'X-RateLimit-Limit': string
   'X-RateLimit-Remaining': string
   'X-RateLimit-Reset': string
@@ -82,34 +82,6 @@ export function createRateLimitExceededResponse(
 }
 
 /**
- * Create a successful response with rate limit headers
- *
- * @param data - Response data
- * @param limit - Maximum number of requests allowed
- * @param remaining - Number of requests remaining
- * @param reset - Unix timestamp when the rate limit resets
- * @returns NextResponse with rate limit headers
- */
-export function createSuccessResponseWithRateLimit(
-  data: unknown,
-  limit: number,
-  remaining: number,
-  reset: number
-): NextResponse {
-  const headers = createRateLimitHeaders(limit, remaining, reset)
-
-  // Convert headers to Record<string, string> by filtering out undefined values
-  const headersRecord: Record<string, string> = Object.entries(headers)
-    .filter(([, value]) => value !== undefined)
-    .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {})
-
-  return NextResponse.json(data, {
-    status: 200,
-    headers: headersRecord,
-  })
-}
-
-/**
  * Format retry-after seconds into human-readable string
  *
  * @param seconds - Number of seconds
@@ -146,14 +118,3 @@ export function createAuthRequiredResponse(): NextResponse {
   )
 }
 
-/**
- * Create a rate limiting disabled response (fallback when Redis is not configured)
- *
- * @param data - Response data
- * @returns NextResponse without rate limit headers
- */
-export function createResponseWithoutRateLimit(data: unknown): NextResponse {
-  return NextResponse.json(data, {
-    status: 200,
-  })
-}

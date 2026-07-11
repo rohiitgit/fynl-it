@@ -1,9 +1,5 @@
-// src/lib/supabase.ts - Enhanced client with better persistence
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
-
-// export const runtime = 'nodejs';
-
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -18,7 +14,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, 
     autoRefreshToken: true,
     detectSessionInUrl: true,
     flowType: 'pkce',
-    storageKey: 'nudgr_auth_token', // Custom storage key for your app
+    storageKey: 'nudgr_auth_token',
     storage: typeof window !== 'undefined' ? {
       getItem: (key: string) => {
         return localStorage.getItem(key);

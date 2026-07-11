@@ -1,20 +1,16 @@
-// src/lib/payments/razorpay-upi.ts - With structured logging
 import Razorpay from 'razorpay';
 import { paymentLogger } from '@/lib/logger';
 import { maskEmail } from '@/lib/logger/redact';
 
-// Environment validation
 if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
     throw new Error('Missing Razorpay credentials. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.');
 }
 
-// Initialize Razorpay instance
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// Type definitions
 export interface UPIPaymentLinkData {
     invoiceId: string;
     clientName: string;
@@ -43,7 +39,7 @@ export interface DirectUPILinkData {
     transactionNote?: string;
 }
 
-// Define Razorpay API response types (actual API returns string for created_at)
+// Razorpay API returns created_at as string or number depending on SDK version
 interface RazorpayPaymentLinkResponse {
     id: string;
     short_url: string;
@@ -70,7 +66,6 @@ interface RazorpayError extends Error {
     };
 }
 
-// Custom error class
 export class RazorpayUPIError extends Error {
     public readonly code: string;
     public readonly statusCode?: number;
@@ -91,29 +86,25 @@ export class RazorpayUPIService {
         this.baseAppUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     }
 
-    /**
-     * Create a UPI-optimized payment link via Razorpay
-     */
     async createUPIPaymentLink(data: UPIPaymentLinkData): Promise<UPIPaymentLinkResponse> {
         try {
-            // Validate input data
             this.validatePaymentLinkData(data);
 
             const paymentLinkData = {
-                amount: Math.round(data.amount * 100), // Convert to paise and ensure integer
+                amount: Math.round(data.amount * 100), // paise
                 currency: 'INR',
                 accept_partial: false,
-                description: data.description.substring(0, 255), // Razorpay description limit
+                description: data.description.substring(0, 255), // Razorpay limit
                 customer: {
-                    name: data.clientName.substring(0, 120), // Customer name limit
+                    name: data.clientName.substring(0, 120), // Razorpay limit
                     email: data.clientEmail,
                 },
                 notify: {
-                    sms: false, // We handle notifications via Nudgr
+                    sms: false, // Nudgr handles notifications
                     email: false,
                     whatsapp: false,
                 },
-                reminder_enable: false, // We handle our own reminders
+                reminder_enable: false, // Nudgr handles reminders
                 notes: {
                     invoice_id: data.invoiceId,
                     created_by: 'nudgr',
@@ -148,12 +139,10 @@ export class RazorpayUPIService {
                 throw new RazorpayUPIError('Invalid response from Razorpay API', 'INVALID_RESPONSE');
             }
 
-            // Handle the upi_link field safely
             let upiLink: string;
             if (typeof paymentLink.upi_link === 'string' && paymentLink.upi_link.length > 0) {
                 upiLink = paymentLink.upi_link;
             } else {
-                // Fallback to short_url for UPI payments
                 upiLink = paymentLink.short_url;
             }
 
@@ -200,9 +189,6 @@ export class RazorpayUPIService {
         }
     }
 
-    /**
-     * Get payment link details
-     */
     async getPaymentLink(paymentLinkId: string): Promise<RazorpayPaymentLinkResponse> {
         try {
             if (!paymentLinkId || typeof paymentLinkId !== 'string') {
@@ -246,9 +232,6 @@ export class RazorpayUPIService {
         }
     }
 
-    /**
-     * Cancel a payment link
-     */
     async cancelPaymentLink(paymentLinkId: string): Promise<RazorpayPaymentLinkResponse> {
         try {
             if (!paymentLinkId || typeof paymentLinkId !== 'string') {
@@ -297,84 +280,53 @@ export class RazorpayUPIService {
         }
     }
 
-    /**
-     * Create a direct UPI link (NPCI compliant)
-     */
     createDirectUPILink(data: DirectUPILinkData): string {
-        try {
-            this.validateDirectUPIData(data);
+        this.validateDirectUPIData(data);
 
-            const { upiId, amount, invoiceNumber, businessName, transactionNote } = data;
+        const { upiId, amount, invoiceNumber, businessName, transactionNote } = data;
 
-            // Create UPI URL as per NPCI specification
-            const upiUrl = new URL('upi://pay');
-            upiUrl.searchParams.set('pa', upiId); // Payee address (UPI ID)
-            upiUrl.searchParams.set('pn', businessName || 'Business'); // Payee name
-            upiUrl.searchParams.set('am', amount.toFixed(2)); // Amount with 2 decimal places
-            upiUrl.searchParams.set('cu', 'INR'); // Currency
-            upiUrl.searchParams.set('tn', transactionNote || `Payment for Invoice ${invoiceNumber}`); // Transaction note
+        // Create UPI URL as per NPCI specification
+        const upiUrl = new URL('upi://pay');
+        upiUrl.searchParams.set('pa', upiId); // Payee address (UPI ID)
+        upiUrl.searchParams.set('pn', businessName || 'Business'); // Payee name
+        upiUrl.searchParams.set('am', amount.toFixed(2)); // Amount with 2 decimal places
+        upiUrl.searchParams.set('cu', 'INR'); // Currency
+        upiUrl.searchParams.set('tn', transactionNote || `Payment for Invoice ${invoiceNumber}`); // Transaction note
 
-            const upiLink = upiUrl.toString();
-            paymentLogger.debug({
-                action: 'direct_upi_link_generated',
-                invoiceNumber,
-                amount,
-            }, 'Generated direct UPI link for invoice');
+        const upiLink = upiUrl.toString();
+        paymentLogger.debug({
+            action: 'direct_upi_link_generated',
+            invoiceNumber,
+            amount,
+        }, 'Generated direct UPI link for invoice');
 
-            return upiLink;
-
-        } catch (error) {
-            paymentLogger.error({
-                action: 'direct_upi_link_error',
-                invoiceNumber: data.invoiceNumber,
-                err: error instanceof Error ? error : new Error(String(error)),
-            }, 'Error creating direct UPI link');
-            throw new RazorpayUPIError('Failed to create direct UPI link', 'DIRECT_UPI_ERROR');
-        }
+        return upiLink;
     }
 
-    /**
-     * Generate QR code URL for any UPI link
-     */
     generateQRCode(upiLink: string, size: number = this.defaultQRSize): string {
-        try {
-            if (!upiLink || typeof upiLink !== 'string') {
-                throw new RazorpayUPIError('Invalid UPI link for QR code generation', 'INVALID_UPI_LINK');
-            }
-
-            if (size < 100 || size > 500) {
-                paymentLogger.warn({
-                    action: 'qr_code_size_adjusted',
-                    requestedSize: size,
-                    defaultSize: this.defaultQRSize,
-                }, 'QR code size should be between 100-500px, using default');
-                size = this.defaultQRSize;
-            }
-
-            const encodedUpiLink = encodeURIComponent(upiLink);
-            return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodedUpiLink}&format=png&margin=10`;
-
-        } catch (error) {
-            paymentLogger.error({
-                action: 'qr_code_generation_error',
-                err: error instanceof Error ? error : new Error(String(error)),
-            }, 'Error generating QR code');
-            throw new RazorpayUPIError('Failed to generate QR code', 'QR_GENERATION_ERROR');
+        if (!upiLink || typeof upiLink !== 'string') {
+            throw new RazorpayUPIError('Invalid UPI link for QR code generation', 'INVALID_UPI_LINK');
         }
+
+        if (size < 100 || size > 500) {
+            paymentLogger.warn({
+                action: 'qr_code_size_adjusted',
+                requestedSize: size,
+                defaultSize: this.defaultQRSize,
+            }, 'QR code size should be between 100-500px, using default');
+            size = this.defaultQRSize;
+        }
+
+        const encodedUpiLink = encodeURIComponent(upiLink);
+        return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodedUpiLink}&format=png&margin=10`;
     }
 
-    /**
-     * Validate UPI ID format
-     */
     validateUPIId(upiId: string): boolean {
-        // Basic UPI ID validation: should contain @ and have valid format
+        // format per NPCI spec: localpart@psp
         const upiPattern = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
         return upiPattern.test(upiId);
     }
 
-    /**
-     * Get payment status by payment link ID
-     */
     async getPaymentStatus(paymentLinkId: string): Promise<{
         status: 'pending' | 'paid' | 'cancelled' | 'expired';
         amount_paid?: number;
@@ -383,13 +335,10 @@ export class RazorpayUPIService {
         try {
             const paymentLink = await this.getPaymentLink(paymentLinkId);
 
-            // Check if payment link is active
             if (paymentLink.status === 'cancelled') {
                 return { status: 'cancelled' };
             }
 
-            // For more detailed payment status, you would need to fetch payments
-            // This is a simplified version
             return {
                 status: paymentLink.status === 'active' ? 'pending' : 'expired'
             };
@@ -404,46 +353,24 @@ export class RazorpayUPIService {
         }
     }
 
-    /**
-     * Create a UPI payment link with advanced options
-     */
     async createAdvancedUPILink(data: UPIPaymentLinkData & {
         expiryDays?: number;
         maxPayments?: number;
         minAmount?: number;
     }): Promise<UPIPaymentLinkResponse> {
-        try {
-            // Remove unused expiryDate calculation to fix warning
-            const advancedData = {
-                ...data,
-                notes: {
-                    ...data.notes,
-                    expiry_days: data.expiryDays?.toString() || '30',
-                    max_payments: data.maxPayments?.toString() || '1',
-                    min_amount: data.minAmount?.toString() || data.amount.toString(),
-                }
-            };
-
-            return await this.createUPIPaymentLink(advancedData);
-
-        } catch (error) {
-            paymentLogger.error({
-                action: 'advanced_upi_link_error',
-                invoiceId: data.invoiceId,
-                err: error instanceof Error ? error : new Error(String(error)),
-            }, 'Error creating advanced UPI link');
-            if (error instanceof RazorpayUPIError) {
-                throw error;
+        const advancedData = {
+            ...data,
+            notes: {
+                ...data.notes,
+                expiry_days: data.expiryDays?.toString() || '30',
+                max_payments: data.maxPayments?.toString() || '1',
+                min_amount: data.minAmount?.toString() || data.amount.toString(),
             }
-            throw new RazorpayUPIError('Failed to create advanced UPI link', 'ADVANCED_CREATION_ERROR');
-        }
+        };
+
+        return this.createUPIPaymentLink(advancedData);
     }
 
-    // Private helper methods
-
-    /**
-     * Validate payment link data
-     */
     private validatePaymentLinkData(data: UPIPaymentLinkData): void {
         const errors: string[] = [];
 
@@ -476,9 +403,6 @@ export class RazorpayUPIService {
         }
     }
 
-    /**
-     * Validate direct UPI data
-     */
     private validateDirectUPIData(data: DirectUPILinkData): void {
         const errors: string[] = [];
 
@@ -499,9 +423,6 @@ export class RazorpayUPIService {
         }
     }
 
-    /**
-     * Check if error is from Razorpay
-     */
     private isRazorpayError(error: unknown): error is RazorpayError {
         return (
             error instanceof Error &&
@@ -510,24 +431,17 @@ export class RazorpayUPIService {
         );
     }
 
-    /**
-     * Validate email format
-     */
     private isValidEmail(email: string): boolean {
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailPattern.test(email);
     }
 
-    /**
-     * Get service health status
-     */
     async getServiceHealth(): Promise<{
         status: 'healthy' | 'unhealthy';
         razorpay_connected: boolean;
         timestamp: string;
     }> {
         try {
-            // Try to make a simple API call to check connectivity
             await razorpay.plans.all({ count: 1 });
 
             return {
@@ -549,14 +463,9 @@ export class RazorpayUPIService {
     }
 }
 
-// Export singleton instance
 export const razorpayUPIService = new RazorpayUPIService();
 
-// Export utility functions
 export const upiUtils = {
-    /**
-     * Format amount for display
-     */
     formatAmount: (amount: number, currency: string = 'INR'): string => {
         const formatter = new Intl.NumberFormat('en-IN', {
             style: 'currency',
@@ -567,9 +476,6 @@ export const upiUtils = {
         return formatter.format(amount);
     },
 
-    /**
-     * Parse UPI link to extract payment details
-     */
     parseUPILink: (upiLink: string): {
         payeeAddress?: string;
         payeeName?: string;
@@ -593,9 +499,6 @@ export const upiUtils = {
         }
     },
 
-    /**
-     * Check if string is a valid UPI link
-     */
     isValidUPILink: (link: string): boolean => {
         try {
             const url = new URL(link);

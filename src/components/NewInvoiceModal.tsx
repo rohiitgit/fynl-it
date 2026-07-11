@@ -255,64 +255,55 @@ export default function NewInvoiceModal({
 
         setUploadLoading(true);
 
-        try {
-            const reader = new FileReader();
-            reader.onloadend = async () => {
-                const base64 = reader.result as string;
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            const base64 = reader.result as string;
 
-                try {
-                    const response = await fetch('/api/process-invoice', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            file: base64,
-                            mimeType: file.type
-                        })
-                    });
+            try {
+                const response = await fetch('/api/process-invoice', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        file: base64,
+                        mimeType: file.type
+                    })
+                });
 
-                    if (!response.ok) throw new Error('Failed to process invoice');
+                if (!response.ok) throw new Error('Failed to process invoice');
 
-                    const data = await response.json();
+                const data = await response.json();
 
-                    setFormData({
-                        clientName: data.clientName || "",
-                        clientEmail: data.clientEmail || "",
-                        invoiceNumber: data.invoiceNumber || "",
-                        amount: data.amount || "",
-                        currency: data.currency || "INR",
-                        dueDate: data.dueDate || "",
-                        paymentLink: data.paymentLink || "",
-                        description: data.description || "",
-                        paymentProvider: "razorpay"
-                    });
+                setFormData({
+                    clientName: data.clientName || "",
+                    clientEmail: data.clientEmail || "",
+                    invoiceNumber: data.invoiceNumber || "",
+                    amount: data.amount || "",
+                    currency: data.currency || "INR",
+                    dueDate: data.dueDate || "",
+                    paymentLink: data.paymentLink || "",
+                    description: data.description || "",
+                    paymentProvider: "razorpay"
+                });
 
-                    toast({
-                        title: "Invoice processed!",
-                        description: "Please review and confirm the extracted details",
-                    });
+                toast({
+                    title: "Invoice processed!",
+                    description: "Please review and confirm the extracted details",
+                });
 
-                    setTimeout(() => {
-                        setUploadLoading(false);
-                    }, 500);
-                } catch (error) {
-                    console.error('Error processing invoice:', error);
-                    toast({
-                        title: "Processing failed",
-                        description: "Could not extract invoice details. Please fill manually.",
-                    });
+                setTimeout(() => {
                     setUploadLoading(false);
-                }
-            };
+                }, 500);
+            } catch (error) {
+                console.error('Error processing invoice:', error);
+                toast({
+                    title: "Processing failed",
+                    description: "Could not extract invoice details. Please fill manually.",
+                });
+                setUploadLoading(false);
+            }
+        };
 
-            reader.readAsDataURL(file);
-        } catch (error) {
-            console.error('Error reading file:', error);
-            setUploadLoading(false);
-            toast({
-                title: "Error reading file",
-                description: "Could not read the file. Please try again.",
-            });
-        }
+        reader.readAsDataURL(file);
     };
 
     const handleSaveAction = async (action: SaveAction) => {
@@ -524,7 +515,6 @@ export default function NewInvoiceModal({
             toast({
                 title: "Error",
                 description: errorMessage,
-                // variant: "destructive",
             });
         } finally {
             setSaving(false);
@@ -558,10 +548,10 @@ export default function NewInvoiceModal({
         <>
             {/* AI Upload Section */}
             {uploadLoading ? (
-                <div className="border rounded-lg p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+                <div className="border-2 border-ink p-4 sm:p-6 lg:p-8 bg-gray-panel">
                     <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4">
                         <div className="relative">
-                            <Loader2 className="h-8 w-8 sm:h-10 lg:h-12 w-8 sm:w-10 lg:w-12 text-green-600 animate-spin" />
+                            <Loader2 className="h-8 w-8 sm:h-10 lg:h-12 w-8 sm:w-10 lg:w-12 text-ink animate-spin" />
                             <Sparkles className="h-4 w-4 sm:h-5 lg:h-6 w-4 sm:w-5 lg:w-6 text-primary absolute -top-1 -right-1 animate-pulse" />
                         </div>
                         <div className="text-center space-y-1 sm:space-y-2">
@@ -570,15 +560,15 @@ export default function NewInvoiceModal({
                                 Extracting invoice details... This may take a few seconds.
                             </p>
                             <div className="flex items-center justify-center space-x-1 pt-2">
-                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-ink animate-bounce" style={{ animationDelay: '0s' }}></div>
+                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-ink animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-ink animate-bounce" style={{ animationDelay: '0.4s' }}></div>
                             </div>
                         </div>
                     </div>
                 </div>
             ) : (
-                <div className="border rounded-lg p-3 sm:p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+                <div className="border-2 border-ink p-3 sm:p-4 bg-gray-panel">
                     <div className="flex items-center gap-2 mb-2">
                         <Sparkles className="h-4 w-4 text-primary" />
                         <h3 className="font-medium text-sm sm:text-base">AI Invoice Scanner</h3>
@@ -587,7 +577,7 @@ export default function NewInvoiceModal({
                         Upload your invoice and let AI extract the details automatically
                     </p>
                     {/* Enhanced AI upload section */}
-                    <div className="border-2 border-dashed border-green-500/30 rounded-xl p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-green-500/5 to-green-500/10 hover:border-green-500/50 transition-all duration-300">
+                    <div className="border-2 border-dashed border-ink p-4 sm:p-6 lg:p-8 bg-paper-panel hover:bg-yellow/30 transition-colors duration-200">
                         <input
                             type="file"
                             id="modal-invoice-upload"
@@ -601,10 +591,10 @@ export default function NewInvoiceModal({
                             className="cursor-pointer"
                         >
                             <div className="flex flex-col items-center">
-                                <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-3 sm:mb-4 border-2 border-green-500/20">
-                                    <Upload className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-primary" />
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-yellow border-2 border-ink comic-shadow-sm flex items-center justify-center mb-3 sm:mb-4">
+                                    <Upload className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-ink" />
                                 </div>
-                                <p className="text-sm sm:text-base lg:text-lg font-semibold mb-1 sm:mb-2 text-primary text-center">
+                                <p className="text-sm sm:text-base lg:text-lg font-bold mb-1 sm:mb-2 text-ink text-center">
                                     Click to upload or drag and drop
                                 </p>
                                 <p className="text-xs sm:text-sm text-muted-foreground text-center">
@@ -789,7 +779,7 @@ export default function NewInvoiceModal({
 
                 <div className="space-y-3 sm:space-y-4">
                     {/* UPI + Razorpay Option */}
-                    <div className="p-3 sm:p-4 border-2 rounded-lg">
+                    <div className="p-3 sm:p-4 border-2 border-ink bg-paper-panel">
                         <div className="flex items-start space-x-3">
                             <input
                                 type="radio"
@@ -810,35 +800,17 @@ export default function NewInvoiceModal({
                                             <QrCode className="h-4 w-4 flex-shrink-0" />
                                             <span className="font-semibold text-sm sm:text-base">UPI + Cards via Razorpay</span>
                                         </div>
-                                        <span className="text-xs bg-gray-200  px-2 py-0.5 rounded-full font-medium w-fit">
+                                        <span className="comic-sticker w-fit">
                                             BETA
                                         </span>
                                     </div>
                                 </Label>
-                                {/* <div className="mt-2 space-y-1">
-                                    <div className="flex items-start gap-2 text-xs sm:text-sm text-green-700">
-                                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
-                                        <span>Instant UPI payments (PhonePe, GPay, Paytm)</span>
-                                    </div>
-                                    <div className="flex items-start gap-2 text-xs sm:text-sm text-green-700">
-                                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
-                                        <span>Auto-detection when client pays</span>
-                                    </div>
-                                    <div className="flex items-start gap-2 text-xs sm:text-sm text-green-700">
-                                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
-                                        <span>QR code + UPI link in emails</span>
-                                    </div>
-                                    <div className="flex items-start gap-2 text-xs sm:text-sm text-green-700">
-                                        <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
-                                        <span>Cards & net banking backup</span>
-                                    </div>
-                                </div> */}
                             </div>
                         </div>
                     </div>
 
                     {/* Manual Payment Option */}
-                    <div className="p-3 sm:p-4 border rounded-lg border-green-200 bg-green-50 dark:bg-green-950/20">
+                    <div className="p-3 sm:p-4 border-2 border-ink bg-yellow/30">
                         <div className="flex items-start space-x-3">
                             <input
                                 type="radio"
@@ -857,7 +829,7 @@ export default function NewInvoiceModal({
                                     <Link className="h-4 w-4 flex-shrink-0" />
                                     <span className="font-medium text-sm sm:text-base">Enter UPI (RECOMMENDED)</span>
                                 </Label>
-                                <p className="text-xs text-green-600 sm:text-sm text-muted-foreground mt-1">
+                                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                                     Add your own UPI ID, bank details, or payment link.
                                     You&apos;ll need to manually confirm payments.
                                 </p>
@@ -890,7 +862,7 @@ export default function NewInvoiceModal({
                     <Button disabled={saving} className="px-4 sm:px-6 text-sm sm:text-base w-full sm:w-auto order-1 sm:order-2">
                         {saving ? (
                             <>
-                                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2 animate-spin text-green-600" />
+                                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2 animate-spin" />
                                 <span className="hidden sm:inline">Saving...</span>
                                 <span className="sm:hidden">Saving...</span>
                             </>
@@ -956,7 +928,7 @@ export default function NewInvoiceModal({
             >
                 {saving ? (
                     <>
-                        <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2 animate-spin text-green-600" />
+                        <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2 animate-spin" />
                         <span className="hidden sm:inline">Creating...</span>
                         <span className="sm:hidden">Creating...</span>
                     </>
@@ -997,7 +969,7 @@ export default function NewInvoiceModal({
                             {loadingInvoice ? (
                                 <div className="flex items-center justify-center py-8">
                                     <div className="text-center space-y-4">
-                                        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 animate-spin mx-auto" />
+                                        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 text-ink animate-spin mx-auto" />
                                         <p className="text-muted-foreground text-sm sm:text-base">Loading invoice data...</p>
                                     </div>
                                 </div>
@@ -1005,14 +977,14 @@ export default function NewInvoiceModal({
                                 <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                                     {/* Show follow-up status banner if applicable */}
                                     {hasExistingFollowups && (
-                                        <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                                        <div className="p-3 sm:p-4 bg-[#CFE4FF] border-2 border-ink">
                                             <div className="flex items-start gap-3">
-                                                <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                                                <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-ink mt-0.5 flex-shrink-0" />
                                                 <div className="min-w-0">
-                                                    <h4 className="font-medium text-blue-900 dark:text-blue-100 text-sm sm:text-base">
+                                                    <h4 className="font-bold text-ink text-sm sm:text-base">
                                                         Follow-up Messages Active
                                                     </h4>
-                                                    <p className="text-xs sm:text-sm text-blue-800 dark:text-blue-200 mt-1">
+                                                    <p className="text-xs sm:text-sm text-ink-soft mt-1">
                                                         This invoice has automated follow-up messages set up.
                                                         You can modify them after saving by choosing &quot;Save & Edit Follow-ups&quot;.
                                                     </p>

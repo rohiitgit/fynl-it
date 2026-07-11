@@ -1,6 +1,3 @@
-// src/lib/services/invoice-service.ts
-// Service layer for invoice database operations
-
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { paymentLogger } from '@/lib/logger';
 
@@ -27,9 +24,6 @@ export interface PaymentDetails {
 }
 
 class InvoiceService {
-  /**
-   * Find invoice by payment notes (invoice_id from Razorpay metadata)
-   */
   async findByInvoiceId(invoiceId: string): Promise<Invoice | null> {
     paymentLogger.debug({
       action: 'invoice_lookup_by_id',
@@ -50,9 +44,6 @@ class InvoiceService {
     return data as Invoice;
   }
 
-  /**
-   * Find invoice by Razorpay payment link ID
-   */
   async findByRazorpayLinkId(linkId: string): Promise<Invoice | null> {
     paymentLogger.debug({
       action: 'invoice_lookup_by_link',
@@ -73,21 +64,16 @@ class InvoiceService {
     return data as Invoice;
   }
 
-  /**
-   * Find invoice using payment metadata
-   * Tries invoice_id first, then falls back to razorpay_link_id
-   */
+  // Tries invoice_id first, then falls back to razorpay_link_id
   async findByPaymentReference(
     invoiceId?: string,
     razorpayLinkId?: string
   ): Promise<Invoice | null> {
-    // Try by invoice_id first
     if (invoiceId) {
       const invoice = await this.findByInvoiceId(invoiceId);
       if (invoice) return invoice;
     }
 
-    // Fallback to razorpay_link_id
     if (razorpayLinkId) {
       const invoice = await this.findByRazorpayLinkId(razorpayLinkId);
       if (invoice) return invoice;
@@ -96,9 +82,6 @@ class InvoiceService {
     return null;
   }
 
-  /**
-   * Mark invoice as paid with payment details
-   */
   async markAsPaid(invoiceId: string, paymentDetails: PaymentDetails): Promise<boolean> {
     const { error } = await supabaseAdmin
       .from('invoices')
@@ -131,9 +114,6 @@ class InvoiceService {
     return true;
   }
 
-  /**
-   * Find any invoice by razorpay link (regardless of status)
-   */
   async findAnyByRazorpayLinkId(linkId: string): Promise<Invoice | null> {
     const { data, error } = await supabaseAdmin
       .from('invoices')
