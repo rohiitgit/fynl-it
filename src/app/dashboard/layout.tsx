@@ -69,10 +69,11 @@ export default function DashboardLayout({
       {/* Sidebar */}
       <Sidebar user={userData} onSignOut={signOut} onNewInvoice={handleNewInvoice} />
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto lg:ml-64 bg-paper">
-        {/* Mobile header spacing - accounts for hamburger menu */}
-        <div className="lg:hidden h-16" />
+      {/* Main Content — pt-16 reserves space for the mobile hamburger menu.
+          {children} must stay the sole child: Next.js 15.5 passes the segment
+          as an unkeyed lazy element, and rendering it inside a children array
+          triggers a false-positive "unique key" warning blaming this layout. */}
+      <main className="flex-1 overflow-auto lg:ml-64 bg-paper pt-16 lg:pt-0">
         {children}
       </main>
 
@@ -87,7 +88,7 @@ export default function DashboardLayout({
           <button
             ref={modalTriggerRef}
             className="pointer-events-auto"
-            aria-hidden="true"
+            tabIndex={-1}
           />
         </NewInvoiceModal>
       </div>

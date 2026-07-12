@@ -99,3 +99,12 @@
 
 ## [2026-07-12] Founder photo URL updated
 - Replaced dead twimg profile URL (404) with the current one; photo now renders in the founder card.
+
+## [2026-07-12] Fix: AI endpoints called without auth token (401)
+- The security hardening made /api/process-invoice, /api/enhance-message, /api/generate-message require a Supabase Bearer token, but their client callers never sent one — invoice scan failed with "Failed to process invoice" (server: 401).
+- NewInvoiceModal upload fetch now attaches the session token (same pattern as the existing create-link call); use-message-generation gained a getAuthHeaders() helper used by both AI fetches. Clear "signed in" error when no session.
+
+## [2026-07-12] Fix: /api/process-invoice 500 — pino worker crash under Next
+- Root cause: dev logger used pino-pretty transport, which spawns a thread-stream worker Next/Turbopack can't resolve ("the worker has exited"). Any aiLogger.error() call — including inside the catch block — crashed, turning handled errors into unhandled 500s. This broke the AI invoice scanner (after the earlier auth fix let requests reach the server).
+- Fix: src/lib/logger/config.ts detects the Next runtime (NEXT_RUNTIME) and skips the worker transport there, logging plain JSON instead. pino-pretty still used for standalone/CLI runs.
+- Verified: no "worker has exited" across repeated requests; endpoint returns clean status codes (401 without token) instead of 500.

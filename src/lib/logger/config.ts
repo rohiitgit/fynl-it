@@ -60,22 +60,36 @@ const pinoConfig: LoggerOptions = {
 }
 
 /**
- * Development-specific configuration
- * Pretty print for better readability in terminal
+ * Detect the Next.js server runtime. Pino's `pino-pretty` transport spawns a
+ * `thread-stream` worker that Next's bundler (Turbopack/webpack) cannot resolve
+ * at runtime — it throws "the worker has exited", crashing any code path that
+ * logs (including catch blocks, turning handled errors into unhandled 500s).
+ * So we only enable the worker transport when NOT running inside Next.
  */
-const devConfig: LoggerOptions = {
-  ...pinoConfig,
-  transport: {
-    target: 'pino-pretty',
-    options: {
-      colorize: true,
-      translateTime: 'HH:MM:ss.l',
-      ignore: 'pid,hostname',
-      messageFormat: '{category} [{level}] {msg}',
-      singleLine: false,
-    },
-  },
-}
+const isNextRuntime =
+  !!process.env.NEXT_RUNTIME || !!process.env.__NEXT_PRIVATE_ORIGIN
+
+/**
+ * Development-specific configuration
+ * Pretty print for better readability in terminal — but only outside Next,
+ * where the worker-thread transport is safe. Inside Next, fall back to plain
+ * JSON (no transport, no worker).
+ */
+const devConfig: LoggerOptions = isNextRuntime
+  ? { ...pinoConfig }
+  : {
+      ...pinoConfig,
+      transport: {
+        target: 'pino-pretty',
+        options: {
+          colorize: true,
+          translateTime: 'HH:MM:ss.l',
+          ignore: 'pid,hostname',
+          messageFormat: '{category} [{level}] {msg}',
+          singleLine: false,
+        },
+      },
+    }
 
 /**
  * Production-specific configuration

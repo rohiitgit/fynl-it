@@ -231,7 +231,12 @@ export async function POST(request: NextRequest) {
                                 content: followUp.content,
                             },
                             invoice: followUp.invoice,
-                            profile,
+                            profile: {
+                                first_name: profile.first_name,
+                                last_name: profile.last_name,
+                                business_name: profile.business_name,
+                                email: profile.email ?? null,
+                            },
                         });
 
                         if (result.success) {

@@ -260,9 +260,16 @@ export default function NewInvoiceModal({
             const base64 = reader.result as string;
 
             try {
+                const { data: sessionData } = await supabase.auth.getSession();
+                const accessToken = sessionData.session?.access_token;
+                if (!accessToken) throw new Error('You need to be signed in to scan invoices');
+
                 const response = await fetch('/api/process-invoice', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
                     body: JSON.stringify({
                         file: base64,
                         mimeType: file.type

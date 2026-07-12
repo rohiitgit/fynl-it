@@ -1,6 +1,18 @@
 import { useState } from 'react';
 import { MessageTemplate, MessageTone, replaceTemplateVariables } from '@/lib/message-templates';
 import { format } from 'date-fns';
+import { supabase } from '@/lib/supabase';
+
+// The AI routes require a Supabase Bearer token; resolve it per call.
+async function getAuthHeaders(): Promise<Record<string, string>> {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) throw new Error('You need to be signed in to use AI messages');
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+}
 
 interface InvoiceData {
     clientName: string;
@@ -110,7 +122,7 @@ export function useMessageGeneration() {
 
             const response = await fetch('/api/enhance-message', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: await getAuthHeaders(),
                 body: JSON.stringify({ prompt })
             });
 
@@ -173,7 +185,7 @@ export function useMessageGeneration() {
 
             const response = await fetch('/api/generate-message', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: await getAuthHeaders(),
                 body: JSON.stringify({ prompt })
             });
 

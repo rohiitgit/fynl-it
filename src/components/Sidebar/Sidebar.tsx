@@ -101,7 +101,7 @@ export function Sidebar({ user, onSignOut, onNewInvoice }: SidebarProps) {
     <>
       {/* Mobile/Tablet: Hamburger Menu - Only visible on mobile */}
       {isMobile && (
-        <Sheet open={open} onOpenChange={setOpen}>
+        <Sheet key="mobile-sidebar" open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
             <Button
               variant="outline"
@@ -132,7 +132,7 @@ export function Sidebar({ user, onSignOut, onNewInvoice }: SidebarProps) {
 
       {/* Desktop: Fixed Sidebar - Only visible on desktop */}
       {!isMobile && (
-        <aside className="fixed left-0 top-0 h-screen w-64 border-r-[2.5px] border-ink bg-card z-40">
+        <aside key="desktop-sidebar" className="fixed left-0 top-0 h-screen w-64 border-r-[2.5px] border-ink bg-card z-40">
           <SidebarContent
             user={user}
             onSignOut={onSignOut}

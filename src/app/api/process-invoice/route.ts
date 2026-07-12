@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import { groq, GROQ_VISION_MODEL } from '@/lib/ai/groq-client';
+import { pdfFirstPageToPngDataUrl } from '@/lib/ai/pdf-to-image';
 import { supabase } from '@/lib/supabase';
 import { applyRateLimit, addRateLimitHeaders } from '@/lib/rate-limit/rate-limiter';
 import { AI_RATE_LIMIT } from '@/lib/rate-limit/config';
@@ -18,8 +19,6 @@ interface InvoiceData {
     paymentLink?: string;
     description?: string;
 }
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
 export async function POST(request: NextRequest) {
     try {
@@ -52,8 +51,28 @@ export async function POST(request: NextRequest) {
 
         const { file, mimeType } = validation.data;
 
-        // Strip data URL prefix if present (e.g. "data:image/png;base64,...")
+        // Groq's vision API takes an image_url data URI. Normalize whatever the
+        // client sent (raw base64 or a full data URL) into one. PDFs aren't
+        // images, so rasterize the first page to PNG before sending.
         const base64Data = file.includes(',') ? file.split(',')[1] : file;
+        let dataUrl: string;
+        if (mimeType === 'application/pdf') {
+            try {
+                dataUrl = await pdfFirstPageToPngDataUrl(base64Data);
+            } catch (pdfError) {
+                aiLogger.error({
+                    action: 'invoice_pdf_render_error',
+                    userId: user.id,
+                    err: pdfError instanceof Error ? pdfError : new Error(String(pdfError)),
+                }, 'Failed to render PDF to image');
+                return NextResponse.json(
+                    { error: 'Could not read that PDF. Try a PNG or JPG screenshot of the invoice.' },
+                    { status: 422 }
+                );
+            }
+        } else {
+            dataUrl = `data:${mimeType};base64,${base64Data}`;
+        }
 
         const prompt = `
       Analyze this invoice image and extract the following information:
@@ -82,24 +101,21 @@ export async function POST(request: NextRequest) {
       For the due date, convert to YYYY-MM-DD format.
     `;
 
-        const response = await ai.models.generateContent({
-            model: "gemini-2.0-flash-exp",
-            contents: [
+        const completion = await groq.chat.completions.create({
+            model: GROQ_VISION_MODEL,
+            messages: [
                 {
-                    parts: [
-                        { text: prompt },
-                        {
-                            inlineData: {
-                                mimeType: mimeType,
-                                data: base64Data
-                            }
-                        }
-                    ]
-                }
-            ]
+                    role: 'user',
+                    content: [
+                        { type: 'text', text: prompt },
+                        { type: 'image_url', image_url: { url: dataUrl } },
+                    ],
+                },
+            ],
+            response_format: { type: 'json_object' },
         });
 
-        const text = response.text;
+        const text = completion.choices[0]?.message?.content;
 
         if (!text) {
             return NextResponse.json(
@@ -120,7 +136,7 @@ export async function POST(request: NextRequest) {
                 userId: user.id,
                 responsePreview: text.substring(0, 200),
                 err: parseError instanceof Error ? parseError : new Error(String(parseError)),
-            }, 'Failed to parse Gemini invoice response');
+            }, 'Failed to parse AI invoice response');
             return NextResponse.json(
                 { error: 'Failed to parse invoice data' },
                 { status: 500 }

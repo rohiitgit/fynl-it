@@ -1,6 +1,6 @@
-import { GoogleGenAI } from '@google/genai';
 import { aiLogger } from '@/lib/logger';
 import { extractJsonFromText } from '@/lib/json-parser';
+import { groq, GROQ_TEXT_MODEL } from './groq-client';
 
 interface MessageData {
   subject?: string;
@@ -12,20 +12,19 @@ export interface GeminiMessageResult {
   content: string;
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
-
-/** Call Gemini and return a parsed { subject, content } object. Falls back gracefully if JSON is absent. */
+/** Call the AI model and return a parsed { subject, content } object. Falls back gracefully if JSON is absent. */
 export async function generateGeminiMessage(
   prompt: string,
   actionId: string,
   userId: string
 ): Promise<GeminiMessageResult> {
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.0-flash-exp',
-    contents: prompt,
+  const completion = await groq.chat.completions.create({
+    model: GROQ_TEXT_MODEL,
+    messages: [{ role: 'user', content: prompt }],
+    response_format: { type: 'json_object' },
   });
 
-  const text = response.text;
+  const text = completion.choices[0]?.message?.content;
 
   if (!text) {
     throw new Error('No response from AI model');
@@ -38,7 +37,7 @@ export async function generateGeminiMessage(
       promptLength: prompt.length,
       responseLength: text.length,
     },
-    `Received Gemini response for ${actionId}`
+    `Received AI response for ${actionId}`
   );
 
   const cleanedText = text.trim();

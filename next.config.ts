@@ -3,6 +3,11 @@ import { withSentryConfig } from '@sentry/nextjs';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Load pdfjs from node_modules at runtime instead of bundling it. Next's
+  // bundler can't follow pdfjs's dynamic worker import, so bundling drops the
+  // worker chunk ("Cannot find module pdf.worker.mjs"). Externalizing keeps the
+  // package (and its worker) intact for server-side PDF rendering.
+  serverExternalPackages: ['pdf-to-img', 'pdfjs-dist'],
   images: {
     remotePatterns: [
       {

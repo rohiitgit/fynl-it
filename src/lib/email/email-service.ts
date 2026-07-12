@@ -1,7 +1,7 @@
 import React from 'react';
 import { InvoiceReminderEmail, ThankYouEmail, type EmailTemplateProps } from './templates';
 import { emailLogger } from '@/lib/logger';
-import { sendEmail } from './send-email';
+import { sendEmail, type EmailResult } from './send-email';
 import { prepareTemplateProps, type InvoiceData, type ProfileData } from './format-utils';
 
 export type { EmailResult } from './send-email';
