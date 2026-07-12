@@ -7,6 +7,9 @@ import { aiLogger } from '@/lib/logger';
 import { generateGeminiMessage } from '@/lib/ai/gemini-message';
 import { messagePromptSchema, formatValidationErrors } from '@/lib/validation/schemas';
 
+// Groq SDK needs the Node runtime; don't let Vercel default this to Edge.
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
     try {
         const authHeader = request.headers.get('authorization');

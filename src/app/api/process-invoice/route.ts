@@ -9,6 +9,12 @@ import { aiLogger } from '@/lib/logger';
 import { extractJsonFromText } from '@/lib/json-parser';
 import { processInvoiceSchema, formatValidationErrors } from '@/lib/validation/schemas';
 
+// pdfjs, Buffer, and the Groq SDK need Node APIs — force the Node runtime so
+// Vercel doesn't default this route to Edge (which 500s on those imports).
+export const runtime = 'nodejs';
+// PDF rendering can take a few seconds; give the function headroom.
+export const maxDuration = 60;
+
 interface InvoiceData {
     clientName?: string;
     clientEmail?: string;
