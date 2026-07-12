@@ -1,7 +1,7 @@
 // Comic dialogue cloud — scalloped bubble that stretches around its text.
 // Paper fill, ink border (non-scaling stroke), hard offset ink shadow,
 // optional speech tail. Used for display headings on marketing surfaces.
-import { ReactNode } from "react";
+import { CSSProperties, ReactNode } from "react";
 
 // Lobed cloud outline drawn around an ellipse in a 480x180 box;
 // preserveAspectRatio="none" stretches it to the wrapper, non-scaling
@@ -16,13 +16,15 @@ const ComicCloud = ({
   children,
   tail,
   className = "",
+  style,
 }: {
   children: ReactNode;
   tail?: "left" | "right";
   className?: string;
+  style?: CSSProperties;
 }) => {
   return (
-    <div className={`relative inline-block ${className}`}>
+    <div className={`relative inline-block ${className}`} style={style}>
       {/* Cloud body (shadow + fill) */}
       <svg
         className="absolute inset-0 w-full h-full overflow-visible"

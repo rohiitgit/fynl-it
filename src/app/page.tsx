@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
-  CheckCircle,
+  // CheckCircle, // used only by the hidden feature checklist
   Clock,
   Mail,
   TrendingUp,
@@ -60,7 +60,7 @@ const DynamicNavbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 bg-paper border-b-[2.5px] border-ink transition-shadow duration-200 ${
+      className={`hero-nav fixed top-0 left-0 right-0 z-50 bg-paper border-b-[2.5px] border-ink transition-shadow duration-200 ${
         isScrolled ? "shadow-[0_4px_0_0_var(--ink)]" : ""
       }`}
     >
@@ -122,27 +122,7 @@ export default function HomePage() {
     }
   }, [user, loading, router]);
 
-  // Show loading state while checking auth
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-paper comic-paper-bg flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-12 h-12 mx-auto border-[3px] border-ink bg-yellow animate-spin [animation-duration:1.2s]" />
-          <div>
-            <h3 className="font-display font-bold text-lg text-ink">
-              Loading...
-            </h3>
-            <p className="font-mono text-sm text-muted-foreground">
-              Checking your session
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // If user is authenticated, show loading while redirecting
-  if (user) {
+  if (!loading && user) {
     return (
       <div className="min-h-screen bg-paper comic-paper-bg flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -159,24 +139,34 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-paper overflow-hidden">
+    <div className="hero-load min-h-screen bg-white overflow-hidden">
       <DynamicNavbar />
 
       {/* ===== Hero ===== */}
-      <section className="relative comic-paper-bg pt-28 sm:pt-32 pb-16 sm:pb-20 lg:min-h-screen lg:flex lg:items-center overflow-hidden">
-        {/* Money-thrower machine + flying bills — z-0, behind all hero content */}
-        <MoneyThrower />
+      {/* Starts pure white; the theme paper color then the dots paint on. */}
+      <section className="hero-load relative bg-white pt-28 sm:pt-32 pb-16 sm:pb-20 lg:min-h-screen lg:flex lg:items-center overflow-hidden">
+        {/* Layer 1 — the theme paper color paints in diagonally over white. */}
+        <div className="hero-wash absolute inset-0 z-0" aria-hidden="true" />
+        {/* Layer 2 — dotted paper texture paints in diagonally, after the wash. */}
+        <div className="hero-bg-layer comic-paper-bg absolute inset-0 z-0" aria-hidden="true" />
+        {/* Money-thrower machine + flying bills — fades in after the paint,
+            then starts firing (bills gated by .hero-load, see MoneyThrower). */}
+        <div className="hero-machine absolute inset-0 z-0" aria-hidden="true">
+          <MoneyThrower />
+        </div>
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
           <div className="max-w-7xl mx-auto">
             {/* Mobile layout */}
             <div className="block lg:hidden space-y-10">
-              <div className="space-y-6 z-10 relative text-center">
-                <span className="comic-sticker comic-sticker--yellow tilt-l">
+              <div className="z-10 relative text-center flex flex-col items-center">
+                <span className="hero-pop comic-sticker comic-sticker--yellow tilt-l" style={{ "--pop-i": 0 } as React.CSSProperties}>
                   <Zap className="h-3 w-3" />
                   AI-Powered Payment Recovery
                 </span>
 
-                <ComicCloud tail="right" className="max-w-2xl">
+                {/* Fixed clearance below the eyebrow so the cloud's top lobes
+                    never crowd it — consistent on every screen. */}
+                <ComicCloud tail="right" className="hero-pop max-w-2xl mt-8" style={{ "--pop-i": 1 } as React.CSSProperties}>
                   <h1 className="text-ink text-[1.6rem] sm:text-[2.2rem]">
                     <span className="block whitespace-nowrap">
                       Never chase clients
@@ -191,12 +181,15 @@ export default function HomePage() {
                 </ComicCloud>
               </div>
 
-              <div className="relative z-10 px-2">
+              <div className="hero-pop relative z-10 px-2" style={{ "--pop-i": 2 } as React.CSSProperties}>
                 <HeroMoneyArt />
               </div>
 
               <div className="space-y-8 z-10 relative text-center">
-                <p className="text-lg text-ink-soft leading-relaxed px-2">
+                {/* Spacer preserves the gap the hidden subtext used to occupy */}
+                <div aria-hidden="true" className="h-8" />
+                {/* Subtext hidden per request
+                <p className="hero-pop text-lg text-ink-soft leading-relaxed px-2" style={{ "--pop-i": 3 } as React.CSSProperties}>
                   Upload your invoice →{" "}
                   <span className="font-bold text-ink">
                     AI sends professional reminders
@@ -207,8 +200,9 @@ export default function HomePage() {
                     100% free. No credit card needed.
                   </span>
                 </p>
+                */}
 
-                <div className="flex flex-col items-center justify-center gap-3">
+                <div className="hero-pop flex flex-col items-center justify-center gap-3" style={{ "--pop-i": 4 } as React.CSSProperties}>
                   <Link href="/auth">
                     <Button
                       size="lg"
@@ -226,14 +220,15 @@ export default function HomePage() {
             {/* Desktop layout */}
             <div className="hidden lg:grid lg:grid-cols-2 lg:gap-12 xl:gap-16 lg:items-center">
               <div className="space-y-8 z-10 relative">
-                <span className="comic-sticker comic-sticker--yellow tilt-l inline-flex">
+                <span className="hero-pop comic-sticker comic-sticker--yellow tilt-l inline-flex" style={{ "--pop-i": 0 } as React.CSSProperties}>
                   <Zap className="h-3 w-3" />
                   AI-Powered Payment Recovery
                 </span>
 
                 <ComicCloud
                   tail="right"
-                  className="-ml-6 lg:w-[118%] xl:w-[112%] relative z-20"
+                  className="hero-pop -ml-6 lg:w-[118%] xl:w-[112%] relative z-20"
+                  style={{ "--pop-i": 1 } as React.CSSProperties}
                 >
                   <h1 className="text-ink lg:text-[2.9rem] xl:text-[3.3rem]">
                     <span className="block whitespace-nowrap">
@@ -248,7 +243,10 @@ export default function HomePage() {
                   </h1>
                 </ComicCloud>
 
-                <p className="text-xl text-ink-soft leading-relaxed max-w-xl">
+                {/* Spacer preserves the gap the hidden subtext used to occupy */}
+                <div aria-hidden="true" className="h-16" />
+                {/* Subtext hidden per request
+                <p className="hero-pop text-xl text-ink-soft leading-relaxed max-w-xl" style={{ "--pop-i": 3 } as React.CSSProperties}>
                   Upload your invoice →{" "}
                   <span className="font-bold text-ink">
                     AI sends professional reminders
@@ -259,8 +257,9 @@ export default function HomePage() {
                     100% free. No credit card needed.
                   </span>
                 </p>
+                */}
 
-                <div className="flex flex-col gap-4">
+                <div className="hero-pop flex flex-col gap-4" style={{ "--pop-i": 4 } as React.CSSProperties}>
                   <Link href="/auth">
                     <Button
                       size="lg"
@@ -273,8 +272,8 @@ export default function HomePage() {
                   </Link>
                 </div>
 
-                {/* Feature checklist — mono, ink squares */}
-                <div className="grid grid-cols-2 gap-3 pt-4 max-w-md">
+                {/* Feature checklist hidden per request
+                <div className="hero-pop grid grid-cols-2 gap-3 pt-4 max-w-md" style={{ "--pop-i": 5 } as React.CSSProperties}>
                   {[
                     "AI Invoice Processing",
                     "UPI Payment Links",
@@ -291,9 +290,10 @@ export default function HomePage() {
                     </div>
                   ))}
                 </div>
+                */}
               </div>
 
-              <div className="relative z-10 pt-8">
+              <div className="hero-pop relative z-10 pt-8" style={{ "--pop-i": 2 } as React.CSSProperties}>
                 <HeroMoneyArt />
               </div>
             </div>
@@ -307,12 +307,14 @@ export default function HomePage() {
           <div className="max-w-6xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">
               <div className="space-y-8">
-                <div>
-                  <span className="comic-sticker mb-6 inline-flex">
+                <div className="flex flex-col items-start">
+                  <span className="comic-sticker inline-flex">
                     <Shield className="h-3 w-3" />
                     Built for Freelancers
                   </span>
-                  <ComicCloud className="mb-4 -ml-4">
+                  {/* Clearance below the sticker so the cloud's top lobes never
+                      crowd it — matches the hero's eyebrow→cloud spacing. */}
+                  <ComicCloud className="mb-4 mt-8">
                     <h2 className="text-ink">
                       Why choose{" "}
                       <span className="inline-block bg-yellow border-[3px] border-ink px-2 rotate-1">
@@ -437,12 +439,13 @@ export default function HomePage() {
       {/* ===== How it works — 3 numbered comic panels ===== */}
       <section className="py-16 sm:py-20 lg:py-24 comic-paper-bg relative">
         <div className="container mx-auto px-3 sm:px-4 lg:px-6">
-          <div className="text-center mb-12 lg:mb-16">
-            <span className="comic-sticker comic-sticker--yellow mb-6 inline-flex">
+          <div className="text-center mb-12 lg:mb-16 flex flex-col items-center">
+            <span className="comic-sticker comic-sticker--yellow inline-flex">
               <Sparkles className="h-3 w-3" />
               How It Works
             </span>
-            <ComicCloud className="mb-4">
+            {/* Clearance below the sticker so the cloud's top lobes never crowd it. */}
+            <ComicCloud className="mb-4 mt-8">
               <h2 className="text-ink">Simple. Automated. Professional.</h2>
             </ComicCloud>
             <p className="text-lg text-ink-soft max-w-2xl mx-auto px-4">
@@ -563,10 +566,14 @@ export default function HomePage() {
                     ?
                   </h2>
                 </ComicCloud>
+                {/* Spacer preserves the gap the hidden subtext used to occupy */}
+                <div aria-hidden="true" className="h-10" />
+                {/* CTA subtext hidden per request
                 <p className="text-base sm:text-lg text-ink-soft">
                   Join our early community of freelancers who are building this
                   together. Your feedback shapes the product.
                 </p>
+                */}
                 <Link href="/auth">
                   <Button
                     size="lg"

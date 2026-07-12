@@ -75,7 +75,9 @@ const MoneyThrower = () => {
               "--rot": f.rot,
               "--bscale": f.scale,
               animationDuration: `${f.dur}s`,
-              animationDelay: `${f.delay}s`,
+              // Base offset so bills only start firing after the hero load
+              // paint + pops finish (~1.3s in).
+              animationDelay: `${1.3 + f.delay}s`,
             } as React.CSSProperties
           }
         >

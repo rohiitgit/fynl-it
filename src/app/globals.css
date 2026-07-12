@@ -904,7 +904,10 @@
   }
 }
 .money-bill {
-  animation: bill-fly linear infinite;
+  /* backwards fill: hold the 0% (opacity:0) state during the start delay so a
+     bill never sits visible at the barrel before it launches. */
+  animation: bill-fly linear infinite backwards;
+  opacity: 0;
   will-change: transform, opacity;
 }
 
@@ -928,4 +931,81 @@
   .tilt-straighten:hover { transform: none; }
   .money-bill { animation: none; opacity: 0; }
   .money-machine { animation: none; }
+}
+/* ============================================================
+   HERO LOAD SEQUENCE (runs once on page load)
+   ============================================================ */
+
+/* Background: edge-frame reveal (outwards -> inwards) */
+/* Diagonal paint-on: the dotted background is wiped across the empty white
+   space from the top-left corner toward the bottom-right, like a brush stroke,
+   before any element appears. */
+@keyframes hero-bg-reveal {
+  from { clip-path: polygon(-40% 0%, 0% 0%, -40% 40%, -40% 0%); }
+  to   { clip-path: polygon(-40% 0%, 240% 0%, 240% 240%, -40% 240%); }
+}
+.hero-load .hero-bg-layer {
+  animation: hero-bg-reveal 0.6s cubic-bezier(0.45, 0, 0.35, 1) both;
+}
+
+/* Layer 1: warm yellow theme wash, same diagonal wipe, paints in FIRST. */
+.hero-load .hero-wash {
+  background: var(--paper);
+  animation: hero-bg-reveal 0.6s cubic-bezier(0.45, 0, 0.35, 1) both;
+}
+
+/* Elements: bouncy comic pop-in, staggered after the bg reveal */
+@keyframes hero-pop {
+  0%   { opacity: 0; transform: scale(0.7); }
+  60%  { opacity: 1; transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.hero-load .hero-pop {
+  opacity: 0;
+  animation: hero-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(0.7s + var(--pop-i, 0) * 0.11s);
+}
+
+/* Tilted elements pop from their resting angle */
+.hero-load .hero-pop.tilt-l { animation-name: hero-pop-l; }
+.hero-load .hero-pop.tilt-r { animation-name: hero-pop-r; }
+@keyframes hero-pop-l {
+  0%   { opacity: 0; transform: scale(0.7) rotate(-2.5deg); }
+  60%  { opacity: 1; transform: scale(1.06) rotate(-2.5deg); }
+  100% { opacity: 1; transform: scale(1) rotate(-2.5deg); }
+}
+@keyframes hero-pop-r {
+  0%   { opacity: 0; transform: scale(0.7) rotate(2.5deg); }
+  60%  { opacity: 1; transform: scale(1.06) rotate(2.5deg); }
+  100% { opacity: 1; transform: scale(1) rotate(2.5deg); }
+}
+
+/* Reduced motion: show everything instantly */
+@media (prefers-reduced-motion: reduce) {
+  .hero-load .hero-wash,
+  .hero-load .hero-bg-layer,
+  .hero-load .hero-pop { animation: none; opacity: 1; clip-path: none; }
+}
+
+/* Money machine fades in after the diagonal wipe finishes (not before). */
+@keyframes hero-machine-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.hero-load .hero-machine {
+  opacity: 0;
+  transform-origin: bottom left;
+  animation: hero-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: 0.7s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-load .hero-machine { animation: none; opacity: 1; }
+}
+
+/* Navbar paints in with the same diagonal wipe as the hero wash. */
+.hero-load .hero-nav {
+  animation: hero-bg-reveal 0.6s cubic-bezier(0.45, 0, 0.35, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-load .hero-nav { animation: none; clip-path: none; }
 }
